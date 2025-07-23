@@ -48,10 +48,16 @@ public class Friend extends BaseEntity {
     }
 
     public void approve() {
+        if (this.status != FriendStatus.PENDING && this.status != FriendStatus.REJECTED) {
+            throw new MemberException(MemberErrorCode.FRIEND_STATUS_INVALID);
+        }
         this.status = FriendStatus.APPROVED;
     }
 
     public void reject() {
+        if (this.status != FriendStatus.PENDING) {
+            throw new MemberException(MemberErrorCode.FRIEND_STATUS_INVALID);
+        }
         this.status = FriendStatus.REJECTED;
     }
 }
