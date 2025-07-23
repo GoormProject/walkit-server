@@ -3,6 +3,8 @@ package life.walkit.server.member.entity;
 import jakarta.persistence.*;
 import life.walkit.server.global.BaseEntity;
 import life.walkit.server.member.entity.enums.FriendStatus;
+import life.walkit.server.member.error.MemberException;
+import life.walkit.server.member.error.enums.MemberErrorCode;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,7 +13,11 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "friend")
+@Table(name = "friend",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"member_id", "partner_id"})
+    }
+)
 public class Friend extends BaseEntity {
 
     @Id
@@ -33,6 +39,9 @@ public class Friend extends BaseEntity {
 
     @Builder
     public Friend(Member member, Member partner) {
+        if (member.equals(partner)) {
+            throw new MemberException(MemberErrorCode.SELF_FRIEND_REQUEST);
+        }
         this.member = member;
         this.partner = partner;
         this.status = FriendStatus.PENDING;
