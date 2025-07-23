@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.List;
+
 import static life.walkit.server.member.factory.MemberTestFactory.createMember;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,6 +25,8 @@ class MemberRepositoryTest {
     @BeforeEach
     void setUp() {
         memberRepository.save(createMember("test@email.com", "테스트회원"));
+        memberRepository.save(createMember("a@email.com", "검색A"));
+        memberRepository.save(createMember("b@email.com", "검색B"));
     }
 
     @AfterEach
@@ -64,6 +68,18 @@ class MemberRepositoryTest {
         assertThat(foundMember)
                 .extracting("email", "nickname")
                 .containsExactly("test@email.com", "테스트회원");
+    }
+
+    @Test
+    @DisplayName("nickname으로 멤버 목록 검색 성공")
+    void findByNicknameContaining_success() {
+        // when
+        List<Member> foundMembers = memberRepository.findByNicknameContaining("검색");
+
+        // then
+        assertThat(foundMembers)
+                .extracting("nickname")
+                .containsExactlyInAnyOrder("검색A", "검색B");
     }
 
 }
