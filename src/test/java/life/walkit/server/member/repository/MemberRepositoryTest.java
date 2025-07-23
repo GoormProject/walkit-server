@@ -1,8 +1,6 @@
 package life.walkit.server.member.repository;
 
 import life.walkit.server.member.entity.Member;
-import life.walkit.server.member.entity.enums.MemberRole;
-import life.walkit.server.member.entity.enums.MemberStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import static life.walkit.server.member.factory.MemberTestFactory.createMember;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -67,13 +66,4 @@ class MemberRepositoryTest {
                 .containsExactly("test@email.com", "테스트회원");
     }
 
-    private Member createMember(String email, String nickname) {
-        return Member.builder()
-                .email(email)
-                .name("김실명")
-                .nickname(nickname)
-                .status(MemberStatus.OFFLINE)
-                .role(MemberRole.USER)
-                .build();
-    }
 }
