@@ -2,20 +2,28 @@ package life.walkit.server.weather.entity;
 
 public enum EupMyeonDong {
     // 일산동구
-    MAERANG_DONG("마두동"),
-    JEONGBAL_DONG("정발산동"),
-    BAEKBOK_DONG("백석동"),
-    PUNG_DONG("풍동"),
-    JANGHANG_DONG("장항동"),
-    SANGSAN_DONG("식사동"),
-    MUNBONG_DONG("문봉동"),
+    GOBONG_DONG("고봉동"),
+    MADU1_DONG("마두1동"),
+    MADU2_DONG("마두2동"),
+    BAEKSEOK1_DONG("백석1동"),
+    BAEKSEOK2_DONG("백석2동"),
+    SIKSA_DONG("식사동"),
+    JANGHANG1_DONG("장항1동"),
+    JANGHANG2_DONG("장항2동"),
+    JEONGBALSAN_DONG("정발산동"),
+    JUNGSAN_DONG("중산동"),
+    PUNGSAN_DONG("풍산동"),
 
     // 일산서구
-    ILSAN_DONG("일산동"),
-    ILSANSEO_DONG(  "대화동"),
-    JUYOP_DONG( "주엽동"),
-    TANHYUN_DONG( "탄현동"),
-    HOEGOK_DONG( "후곡동");
+    DAEHWA_DONG("대화동"),
+    SONGSAN_DONG("송산동"),
+    SONGPO_DONG("송포동"),
+    ILSAN1_DONG("일산1동"),
+    ILSAN2_DONG("일산2동"),
+    ILSAN3_DONG("일산3동"),
+    JUYEOP1_DONG("주엽1동"),
+    JUYEOP2_DONG("주엽2동"),
+    TANHYEON_DONG("탄현동");
 
     private final String dong;
 
