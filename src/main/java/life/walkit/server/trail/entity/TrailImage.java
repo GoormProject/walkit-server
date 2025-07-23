@@ -1,8 +1,10 @@
 package life.walkit.server.trail.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 @Entity
+@Getter
 @Table(name = "trail_iamge")
 public class TrailImage {
 
