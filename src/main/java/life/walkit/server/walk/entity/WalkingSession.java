@@ -1,0 +1,32 @@
+package life.walkit.server.walk.entity;
+
+import jakarta.persistence.*;
+import life.walkit.server.walk.entity.enums.EventType;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+
+import java.time.LocalDateTime;
+
+@Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class WalkingSession {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "event_id")
+    private Long eventId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "walk_id", nullable = false)
+    private Walk walk;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "event_type", nullable = false)
+    private EventType eventType;
+
+    @CreatedDate
+    @Column(name = "event_time", nullable = false)
+    private LocalDateTime eventTime;
+
+}
