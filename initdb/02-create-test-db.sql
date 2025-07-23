@@ -1,0 +1,1 @@
+CREATE DATABASE walkit_test OWNER walkit;
