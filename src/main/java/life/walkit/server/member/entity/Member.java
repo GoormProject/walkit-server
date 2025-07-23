@@ -1,0 +1,42 @@
+package life.walkit.server.member.entity;
+
+import jakarta.persistence.*;
+import life.walkit.server.global.BaseEntity;
+import life.walkit.server.member.entity.enums.MemberRole;
+import life.walkit.server.member.entity.enums.MemberStatus;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.locationtech.jts.geom.Point;
+
+@Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "member")
+public class Member extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "member_id")
+    private Long memberId;
+
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
+
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    @Column(name = "nickname", nullable = false, unique = true)
+    private String nickname;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private MemberStatus status;
+
+    @Column(name = "location", columnDefinition = "geometry(Point, 4326)")
+    private Point location;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private MemberRole role;
+}
