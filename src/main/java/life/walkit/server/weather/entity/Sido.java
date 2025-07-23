@@ -8,4 +8,8 @@ public enum Sido {
     Sido(String sido) {
         this.sido = sido;
     }
+
+    public String getSido() {
+        return sido;
+    }
 }
