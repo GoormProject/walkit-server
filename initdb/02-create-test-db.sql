@@ -1,0 +1,5 @@
+-- Only create if not exists (guard manually)
+SELECT 'CREATE DATABASE walkit_test OWNER walkit'
+    WHERE NOT EXISTS (
+  SELECT FROM pg_database WHERE datname = 'walkit_test'
+)\gexec
