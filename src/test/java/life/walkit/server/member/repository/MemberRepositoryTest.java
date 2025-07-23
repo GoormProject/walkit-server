@@ -44,7 +44,8 @@ class MemberRepositoryTest {
         Member savedMember = memberRepository.save(member);
 
         // then
-        Member foundMember = memberRepository.findById(savedMember.getMemberId()).get();
+        Member foundMember = memberRepository.findById(savedMember.getMemberId())
+                .orElseThrow(() -> new AssertionError("멤버를 찾을 수 없습니다"));
         assertThat(foundMember)
                 .extracting("email", "nickname")
                 .containsExactly("email@email.com", "닉네임");
@@ -54,7 +55,8 @@ class MemberRepositoryTest {
     @DisplayName("email로 멤버 조회 성공")
     void findByEmail_success() {
         // when & then
-        Member foundMember = memberRepository.findByEmail("test@email.com").get();
+        Member foundMember = memberRepository.findByEmail("test@email.com")
+                .orElseThrow(() -> new AssertionError("멤버를 찾을 수 없습니다"));
         assertThat(foundMember)
                 .extracting("email", "nickname")
                 .containsExactly("test@email.com", "테스트회원");
@@ -64,7 +66,8 @@ class MemberRepositoryTest {
     @DisplayName("nickname으로 멤버 조회 성공")
     void findByNickname_success() {
         // when & then
-        Member foundMember = memberRepository.findByNickname("테스트회원").get();
+        Member foundMember = memberRepository.findByNickname("테스트회원")
+                .orElseThrow(() -> new AssertionError("멤버를 찾을 수 없습니다"));
         assertThat(foundMember)
                 .extracting("email", "nickname")
                 .containsExactly("test@email.com", "테스트회원");
