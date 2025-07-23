@@ -40,7 +40,7 @@ public class Walk {
     @Column(name = "date")
     private LocalDate date;
 
-    @Column(name = "path", columnDefinition = "geometry(Point, 4326)")
+    @Column(name = "path", columnDefinition = "geometry(LineString, 4326)")
     private LineString path;
 
     @Column(name = "total_time")

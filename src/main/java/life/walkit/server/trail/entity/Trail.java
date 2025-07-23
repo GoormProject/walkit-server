@@ -1,14 +1,11 @@
 package life.walkit.server.trail.entity;
 
-import io.micrometer.core.annotation.Counted;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Cleanup;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
@@ -43,7 +40,7 @@ public class Trail {
     @Column(name = "path", nullable = false, columnDefinition = "geometry(LineString, 4326)")
     private LineString path;
 
-    @Column(name = "create_at")
-    @CreatedDate
+    // TODO: BasyEntity로 상속
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 }

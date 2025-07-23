@@ -6,7 +6,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Check;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
@@ -30,11 +29,11 @@ public class Review {
     @JoinColumn(name = "trail_id", nullable = false)
     private Trail trail;
 
-    @CreatedDate
-    @Column(name = "create_at", nullable = false)
-    private LocalDateTime createAt;
+    // TODO: BasyEntity로 상속
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
-    @Column(name = "contents")
+    @Column(name = "content")
     private String content;
 
     @Column(name = "rating", nullable = false)

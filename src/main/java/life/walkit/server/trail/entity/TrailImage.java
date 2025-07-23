@@ -3,7 +3,7 @@ package life.walkit.server.trail.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "walk_iamge")
+@Table(name = "trail_iamge")
 public class TrailImage {
 
     @Id
@@ -15,6 +15,6 @@ public class TrailImage {
     @JoinColumn(name = "trail_id", nullable = false)
     private Trail trail;
 
-    @Column(name = "route_Image", nullable = false)
+    @Column(name = "route_image", nullable = false)
     private String routeImage;
 }
