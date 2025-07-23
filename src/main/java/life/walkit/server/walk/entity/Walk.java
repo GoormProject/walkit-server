@@ -1,6 +1,7 @@
 package life.walkit.server.walk.entity;
 
 import jakarta.persistence.*;
+import life.walkit.server.member.entity.Member;
 import life.walkit.server.trail.entity.Trail;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -22,10 +23,9 @@ public class Walk {
     @Column(name = "walk_id")
     private Long walkId;
 
-    // TODO: Member 엔티티 추가시 주석 처리 해제
-    /*@ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member member;*/
+    private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trail_id", nullable = false)
