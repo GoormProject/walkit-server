@@ -1,16 +1,19 @@
 package life.walkit.server.weather.entity;
 
 import jakarta.persistence.*;
+import life.walkit.server.global.BaseEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Getter
 @Table(name = "weather")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Weather {
+public class Weather extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,15 +33,19 @@ public class Weather {
     private EupMyeonDong eupmyeondong;
 
     @Column(name = "current", columnDefinition = "jsonb", nullable = false)
+    @JdbcTypeCode(SqlTypes.JSON)
     private String current;
 
     @Column(name = "forecast", columnDefinition = "jsonb", nullable = false)
+    @JdbcTypeCode(SqlTypes.JSON)
     private String forecast;
 
     @Column(name = "tomorrow", columnDefinition = "jsonb", nullable = false)
+    @JdbcTypeCode(SqlTypes.JSON)
     private String tomorrow;
 
     @Column(name = "dayAfterTomorrow", columnDefinition = "jsonb", nullable = false)
+    @JdbcTypeCode(SqlTypes.JSON)
     private String dayAfterTomorrow;
 
     @Column(name = "temperature", nullable = false)
