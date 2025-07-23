@@ -5,6 +5,7 @@ import life.walkit.server.global.BaseEntity;
 import life.walkit.server.member.entity.enums.MemberRole;
 import life.walkit.server.member.entity.enums.MemberStatus;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.locationtech.jts.geom.Point;
@@ -39,4 +40,15 @@ public class Member extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private MemberRole role;
+
+    @Builder
+    public Member(String email, String name, String nickname, MemberStatus status, Point location, MemberRole role) {
+        this.email = email;
+        this.name = name;
+        this.nickname = nickname;
+        this.status = status;
+        this.location = location;
+        this.role = role;
+    }
+
 }
