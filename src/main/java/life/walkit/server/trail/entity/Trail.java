@@ -37,12 +37,10 @@ public class Trail {
     @Column(name = "distance", nullable = false)
     private Double distance;
 
-    // TODO: SRID 설정
-    @Column(name = "location", nullable = false)
+    @Column(name = "location", nullable = false, columnDefinition = "geometry(Point, 4326)")
     private Point location;
 
-    // TODO: SRID 설정
-    @Column(name = "path", nullable = false)
+    @Column(name = "path", nullable = false, columnDefinition = "geometry(LineString, 4326)")
     private LineString path;
 
     @Column(name = "create_at")
