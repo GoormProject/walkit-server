@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.util.Map;
+
 @Entity
 @Getter
 @Table(name = "weather")
@@ -34,7 +36,7 @@ public class Weather extends BaseEntity {
 
     @Column(name = "current", columnDefinition = "jsonb", nullable = false)
     @JdbcTypeCode(SqlTypes.JSON)
-    private String current;
+    private Map<String, Object> current;
 
     @Column(name = "forecast", columnDefinition = "jsonb", nullable = false)
     @JdbcTypeCode(SqlTypes.JSON)
@@ -56,7 +58,7 @@ public class Weather extends BaseEntity {
 
     @Builder
     public Weather(Sido sido, Sigungu sigungu, EupMyeonDong eupmyeondong,
-                   String current, String forecast, String tomorrow, String dayAfterTomorrow, double temperature, double humidity) {
+                   Map<String, Object> current, String forecast, String tomorrow, String dayAfterTomorrow, double temperature, double humidity) {
         this.sido = sido;
         this.sigungu = sigungu;
         this.eupmyeondong = eupmyeondong;
