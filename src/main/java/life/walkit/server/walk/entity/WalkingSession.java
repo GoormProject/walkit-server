@@ -3,12 +3,15 @@ package life.walkit.server.walk.entity;
 import jakarta.persistence.*;
 import life.walkit.server.walk.entity.enums.EventType;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Getter
+@Table(name = "walking_session")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class WalkingSession {
 
