@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
 @SpringBootTest
+@Transactional
 @ActiveProfiles("test")
 public class TrailRepositoryTest {
 
@@ -41,12 +43,6 @@ public class TrailRepositoryTest {
         trailRepository.save(createTrail(memberA, "인사동", "인사동 근처 산책로 입니다.", 3.2));
         trailRepository.save(createTrail(memberB, "강남구", "강남구 근처 산책로 입니다.", 2.2));
         trailRepository.save(createTrail(memberC, "도원동", "도원동 근처 산책로 입니다.", 1.2));
-    }
-
-    @AfterEach
-    void tearDown() {
-        trailRepository.deleteAll();
-        memberRepository.deleteAll();
     }
 
     @Test
