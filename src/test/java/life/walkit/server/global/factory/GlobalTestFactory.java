@@ -1,4 +1,4 @@
-package life.walkit.server.trail.factory;
+package life.walkit.server.global.factory;
 
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.entity.enums.MemberRole;
@@ -6,7 +6,7 @@ import life.walkit.server.member.entity.enums.MemberStatus;
 import life.walkit.server.trail.entity.Trail;
 import org.locationtech.jts.geom.*;
 
-public class TrailTestFactory {
+public class GlobalTestFactory {
 
     private static final GeometryFactory geometryFactory = new GeometryFactory();
 
