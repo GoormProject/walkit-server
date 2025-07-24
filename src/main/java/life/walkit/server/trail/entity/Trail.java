@@ -1,6 +1,8 @@
 package life.walkit.server.trail.entity;
 
 import jakarta.persistence.*;
+import life.walkit.server.global.BaseEntity;
+import life.walkit.server.member.entity.Member;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,17 +15,16 @@ import java.time.LocalDateTime;
 @Getter
 @Table(name = "trail")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Trail {
+public class Trail extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "trail_id")
     private Long trailId;
 
-    // TODO: Member 엔티티 추가시 주석 처리 해제
-    /*@ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member member;*/
+    private Member member;
 
     @Column(name = "title", nullable = false)
     private String title;
@@ -40,7 +41,4 @@ public class Trail {
     @Column(name = "path", nullable = false, columnDefinition = "geometry(LineString, 4326)")
     private LineString path;
 
-    // TODO: BasyEntity로 상속
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
 }
