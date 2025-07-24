@@ -46,7 +46,7 @@ class WeatherRepositoryTest {
         assertThat(found.get().getEupmyeondong()).isEqualTo(EupMyeonDong.JANGHANG1_DONG);
         assertThat(found.get().getTemperature()).isEqualTo(27.5);
     }
-
+    
     @Test
     @DisplayName("주소(시/군/구/읍면동)로 날씨 조회 성공")
     void findByLocation_success() {
@@ -58,7 +58,10 @@ class WeatherRepositoryTest {
         );
 
         // then
-        assertThat(found.get().getEupmyeondong()).isEqualTo(EupMyeonDong.JANGHANG1_DONG);
-        assertThat(found.get().getCurrent()).containsEntry("current", "맑음");
+        Weather weather = found.get();
+        assertThat(weather.getEupmyeondong()).isEqualTo(EupMyeonDong.JANGHANG1_DONG);
+        assertThat(weather.getCurrent()).containsEntry("weather", "맑음");
+        assertThat(weather.getTemperature()).isEqualTo(27.5);
+        assertThat(weather.getHumidity()).isEqualTo(65.0);
     }
 }
