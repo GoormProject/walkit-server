@@ -51,13 +51,6 @@ public class WalkRepositoryTest {
         trailRepository.save(createTrail(memberC, "도원동", "도원동 근처 산책로 입니다.", 1.2));
     }
 
-    @AfterEach
-    void tearDown() {
-        walkRepository.deleteAll();
-        trailRepository.deleteAll();
-        memberRepository.deleteAll();
-    }
-
     @Test
     @DisplayName("산책기록 저장 성공 및 조회")
     void saveWalk_success() {
