@@ -2,10 +2,12 @@ package life.walkit.server.trail.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @Table(name = "trail_iamge")
+@NoArgsConstructor
 public class TrailImage {
 
     @Id
@@ -19,4 +21,9 @@ public class TrailImage {
 
     @Column(name = "route_image", nullable = false)
     private String routeImage;
+
+    public TrailImage(Trail trail, String routeImage) {
+        this.trail = trail;
+        this.routeImage = routeImage;
+    }
 }
