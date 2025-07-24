@@ -79,7 +79,7 @@ public class TrailRepositoryTest {
     }
 
     @Test
-    @DisplayName("산책 목록 조회")
+    @DisplayName("산책로 목록 조회")
     void findTrailList_success() {
         // given
         Member member = createMember("d@email.com", "회원임");
@@ -96,8 +96,9 @@ public class TrailRepositoryTest {
                 .hasSize(2)
                 .extracting("title", "distance")
                 .containsExactly(
-                        tuple("해운대구", 3.2),
-                        tuple( "동성로", 2.2)
+                        tuple(savedTrailA.getTitle(), savedTrailA.getDistance()),
+                        tuple(savedTrailB.getTitle(), savedTrailB.getDistance())
                 );
     }
+
 }
