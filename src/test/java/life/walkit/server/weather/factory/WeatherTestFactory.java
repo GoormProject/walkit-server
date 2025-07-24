@@ -14,7 +14,7 @@ public class WeatherTestFactory {
                 .sido(Sido.GYEONGGI)
                 .sigungu(Sigungu.GOYANG_DONGGU)
                 .eupmyeondong(emd)
-                .current(Map.of("current", "맑음"))
+                .current(createCurrentWeatherMap())
                 .forecast(createJsonString("forecast", "맑음"))
                 .tomorrow(createJsonString("tomorrow", "구름 많음"))
                 .dayAfterTomorrow(createJsonString("dayAfterTomorrow", "비"))
