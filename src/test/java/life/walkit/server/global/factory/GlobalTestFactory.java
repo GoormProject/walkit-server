@@ -5,6 +5,8 @@ import life.walkit.server.member.entity.enums.MemberRole;
 import life.walkit.server.member.entity.enums.MemberStatus;
 import life.walkit.server.trail.entity.Trail;
 import life.walkit.server.walk.entity.Walk;
+import life.walkit.server.walk.entity.WalkingSession;
+import life.walkit.server.walk.entity.enums.EventType;
 import org.locationtech.jts.geom.*;
 
 import java.time.Duration;
@@ -26,7 +28,7 @@ public class GlobalTestFactory {
     }
 
     public static Trail createTrail(Member member, String title, String description, Double distance) {
-        Point location = createPoint(126.986, 37.541);  // 서울 중심부 근처 좌표
+        Point location = createPoint();  // 서울 중심부 근처 좌표
         LineString path = createLineString(new double[][]{
                 {126.986, 37.541},
                 {126.987, 37.542},
@@ -64,8 +66,15 @@ public class GlobalTestFactory {
                 .build();
     }
 
-    private static Point createPoint(double longitude, double latitude) {
-        Coordinate coordinate = new Coordinate(longitude, latitude);
+    public static WalkingSession createWalkingSession(Walk walk, EventType eventType) {
+        return WalkingSession.builder()
+                .walk(walk)
+                .eventType(eventType)
+                .build();
+    }
+
+    private static Point createPoint() {
+        Coordinate coordinate = new Coordinate(126.986, 37.541);
         return geometryFactory.createPoint(coordinate);
     }
 
