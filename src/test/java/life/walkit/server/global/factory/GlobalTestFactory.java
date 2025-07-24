@@ -4,7 +4,12 @@ import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.entity.enums.MemberRole;
 import life.walkit.server.member.entity.enums.MemberStatus;
 import life.walkit.server.trail.entity.Trail;
+import life.walkit.server.walk.entity.Walk;
 import org.locationtech.jts.geom.*;
+
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class GlobalTestFactory {
 
@@ -36,6 +41,26 @@ public class GlobalTestFactory {
                 .distance(distance)
                 .location(location)
                 .path(path)
+                .build();
+    }
+
+    public static Walk createWalk(Member member, Trail trail, LocalDateTime startedAt, LocalDateTime endedAt, LocalDate date, Duration totalTime, Double pace) {
+        LineString path = createLineString(new double[][]{
+                {126.986, 37.541},
+                {126.987, 37.542},
+                {126.988, 37.543},
+                {126.989, 37.544}
+        });
+
+        return Walk.builder()
+                .member(member)
+                .trail(trail)
+                .startedAt(startedAt)
+                .endedAt(endedAt)
+                .date(date)
+                .path(path)
+                .totalTime(totalTime)
+                .pace(pace)
                 .build();
     }
 
