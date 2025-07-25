@@ -1,9 +1,12 @@
 package life.walkit.server.member.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static life.walkit.server.global.factory.GlobalTestFactory.*;
 import life.walkit.server.friend.repository.FriendRepository;
 import life.walkit.server.friend.entity.Friend;
+import life.walkit.server.friendRequest.entity.FriendRequest;
+import life.walkit.server.friendRequest.repository.FriendRequestRepository;
 import life.walkit.server.member.entity.Member;
-import life.walkit.server.friend.entity.FriendStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,11 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
-
-import static life.walkit.server.global.factory.GlobalTestFactory.*;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -26,6 +25,8 @@ class FriendRepositoryTest {
     private MemberRepository memberRepository;
     @Autowired
     private FriendRepository friendRepository;
+    @Autowired
+    private FriendRequestRepository friendRequestRepository;
 
     @BeforeEach
     void setUp() {
@@ -36,68 +37,54 @@ class FriendRepositoryTest {
 
     @AfterEach
     void tearDown() {
-        friendRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
+        friendRequestRepository.deleteAll();
+        friendRepository.deleteAll();
+        memberRepository.deleteAll();
     }
 
     @Test
-    @DisplayName("친구 저장 성공")
-    void save_success() {
+    @Transactional
+    @DisplayName("친구 요청 후 승인 및 친구 저장 성공")
+    void saveFriendAfterApproval_success() {
         // given
         Member memberA = memberRepository.findByNickname("회원A").get();
         Member memberB = memberRepository.findByNickname("회원B").get();
 
+        // 친구 요청 생성 및 DB 저장
+        FriendRequest friendRequest = friendRequestRepository.save(createFriendRequest(memberA, memberB));
+
+        friendRequest.approve(); // 친구 요청 승인
+        friendRequest = friendRequestRepository.save(friendRequest); // 상태 변경 후 저장
+
         // when
-        Friend friendAB = friendRepository.save(createFriend(memberA, memberB));
+        Friend friend = friendRepository.save(createFriend(memberA, memberB));
 
         // then
-        Friend foundFriendAB = friendRepository.findById(friendAB.getFriendId()).get();
-        assertThat(foundFriendAB)
-                .extracting("status")
-                .isEqualTo(FriendStatus.PENDING);
+        Friend foundFriend = friendRepository.findById(friend.getFriendId())
+                .orElseThrow(() -> new IllegalArgumentException("Friend not found"));
+        assertThat(foundFriend).isNotNull();
+        assertThat(foundFriend.getMember().getNickname()).isEqualTo("회원A");
+        assertThat(foundFriend.getPartner().getNickname()).isEqualTo("회원B");
     }
 
     @Test
     @Transactional
     @DisplayName("회원의 친구 목록 조회 성공")
-    void findByMemberAndStatus_success() {
+    void findByMember_success() {
         // given
         Member memberA = memberRepository.findByNickname("회원A").get();
         Member memberB = memberRepository.findByNickname("회원B").get();
         Member memberC = memberRepository.findByNickname("회원C").get();
 
-        friendRepository.save(createFriendApproved(memberA, memberC));
-        friendRepository.save(createFriendApproved(memberC, memberA));
-        friendRepository.save(createFriendApproved(memberB, memberC));
-        friendRepository.save(createFriendApproved(memberC, memberB));
-
-        // when
-        List<Friend> approvedFriends = friendRepository.findByMemberAndStatus(memberC, FriendStatus.APPROVED);
-
-        // then
-        assertThat(approvedFriends).hasSize(2)
-                .extracting(friend -> friend.getPartner().getNickname())
-                .containsExactlyInAnyOrder("회원A", "회원B");
-    }
-
-    @Test
-    @Transactional
-    @DisplayName("수락/거절 대기 중인 친구 조회 성공")
-    void findByPartnerAndStatus_success() {
-        // given
-        Member memberA = memberRepository.findByNickname("회원A").get();
-        Member memberB = memberRepository.findByNickname("회원B").get();
-        Member memberC = memberRepository.findByNickname("회원C").get();
-
+        friendRepository.save(createFriend(memberA, memberB));
         friendRepository.save(createFriend(memberA, memberC));
-        friendRepository.save(createFriend(memberB, memberC));
 
         // when
-        List<Friend> pendingFriends = friendRepository.findByPartnerAndStatus(memberC, FriendStatus.PENDING);
+        List<Friend> friends = friendRepository.findAllByMember(memberA);
 
         // then
-        assertThat(pendingFriends).hasSize(2)
-                .extracting(friend -> friend.getMember().getNickname())
-                .containsExactlyInAnyOrder("회원A", "회원B");
+        assertThat(friends).hasSize(2)
+                .extracting(friend -> friend.getPartner().getNickname())
+                .containsExactlyInAnyOrder("회원B", "회원C");
     }
 }
