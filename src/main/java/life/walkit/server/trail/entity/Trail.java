@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import life.walkit.server.global.BaseEntity;
 import life.walkit.server.member.entity.Member;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.locationtech.jts.geom.LineString;
@@ -40,5 +41,15 @@ public class Trail extends BaseEntity {
 
     @Column(name = "path", nullable = false, columnDefinition = "geometry(LineString, 4326)")
     private LineString path;
+
+    @Builder
+    public Trail(Member member, String title, String description, Double distance, Point location, LineString path) {
+        this.member = member;
+        this.title = title;
+        this.description = description;
+        this.distance = distance;
+        this.location = location;
+        this.path = path;
+    }
 
 }

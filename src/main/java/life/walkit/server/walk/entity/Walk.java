@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.trail.entity.Trail;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.locationtech.jts.geom.LineString;
@@ -48,4 +49,16 @@ public class Walk {
 
     @Column(name = "pace")
     private Double pace;
+
+    @Builder
+    public Walk(Member member, Trail trail, LocalDateTime startedAt, LocalDateTime endedAt, LocalDate date, LineString path, Duration totalTime, Double pace) {
+        this.member = member;
+        this.trail = trail;
+        this.startedAt = startedAt;
+        this.endedAt = endedAt;
+        this.date = date;
+        this.path = path;
+        this.totalTime = totalTime;
+        this.pace = pace;
+    }
 }

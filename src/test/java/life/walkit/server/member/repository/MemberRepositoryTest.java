@@ -11,9 +11,8 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
-import static life.walkit.server.member.factory.MemberTestFactory.createMember;
+import static life.walkit.server.global.factory.GlobalTestFactory.createMember;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
