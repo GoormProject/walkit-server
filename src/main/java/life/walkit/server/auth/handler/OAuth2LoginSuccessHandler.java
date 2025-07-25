@@ -39,46 +39,52 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
-        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        try {
+            OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 
-        // 회원가입 또는 기존 회원 조회
-        Member member = memberService.createMember(
-                oAuth2User.getAttribute("email"),
-                oAuth2User.getAttribute("name"),
-                oAuth2User.getAttribute("profileImage")
-        );
+            // 회원가입 또는 기존 회원 조회
+            Member member = memberService.createMember(
+                    oAuth2User.getAttribute("email"),
+                    oAuth2User.getAttribute("name"),
+                    oAuth2User.getAttribute("profileImage")
+            );
 
-        // JWT 토큰 발급
-        JwtToken accessToken = jwtTokenIssuer.issueAccessToken(member.getMemberId());
-        JwtToken refreshToken = jwtTokenIssuer.issueRefreshToken(member.getMemberId());
+            // JWT 토큰 발급
+            JwtToken accessToken = jwtTokenIssuer.issueAccessToken(member.getMemberId());
+            JwtToken refreshToken = jwtTokenIssuer.issueRefreshToken(member.getMemberId());
 
-        // 쿠키 설정
-        response.addHeader(
-                HttpHeaders.SET_COOKIE,
-                CookieUtils.create(
-                        accessToken.type().name(),
-                        accessToken.value(),
-                        accessToken.duration(),
-                        true,
-                        true,
-                        "None",
-                        jwtTokenProperties.domain()
-                ).toString()
-        );
+            // 쿠키 설정
+            response.addHeader(
+                    HttpHeaders.SET_COOKIE,
+                    CookieUtils.create(
+                            accessToken.type().name(),
+                            accessToken.value(),
+                            accessToken.duration(),
+                            true,
+                            true,
+                            "None",
+                            jwtTokenProperties.domain()
+                    ).toString()
+            );
 
-        response.addHeader(
-                HttpHeaders.SET_COOKIE,
-                CookieUtils.create(
-                        refreshToken.type().name(),
-                        refreshToken.value(),
-                        refreshToken.duration(),
-                        true,
-                        true,
-                        "None",
-                        jwtTokenProperties.domain()
-                ).toString()
-        );
+            response.addHeader(
+                    HttpHeaders.SET_COOKIE,
+                    CookieUtils.create(
+                            refreshToken.type().name(),
+                            refreshToken.value(),
+                            refreshToken.duration(),
+                            true,
+                            true,
+                            "None",
+                            jwtTokenProperties.domain()
+                    ).toString()
+            );
 
-        response.sendRedirect(loginRedirectUrl);
+            response.sendRedirect(loginRedirectUrl);
+
+        } catch (Exception e) {
+            log.error("OAuth2 로그인 성공 핸들러 오류 발생", e);
+            response.sendRedirect(loginRedirectUrl);
+        }
     }
 }

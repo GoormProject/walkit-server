@@ -24,12 +24,6 @@ public class JwtTokenParser {
 
     private final JwtTokenProperties jwtTokenProperties;
 
-    public Header parseHeader(String token) {
-        return getJwtParser()
-                .parseSignedClaims(token)
-                .getHeader();
-    }
-
     public Claims parseClaims(String token) {
         return getJwtParser()
                 .parseSignedClaims(token)

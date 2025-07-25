@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum OAuthErrorCode implements ErrorCode {
 
-    KAKAO_OAUTH_ACCOUNT_DATA_MISSING(HttpStatus.INTERNAL_SERVER_ERROR, "카카오 OAuth 계정 정보가 없습니다.");
+    KAKAO_OAUTH_ACCOUNT_DATA_MISSING(HttpStatus.BAD_REQUEST, "카카오 OAuth 계정 정보가 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
