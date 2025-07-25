@@ -1,6 +1,10 @@
 package life.walkit.server.auth.service;
 
+import life.walkit.server.auth.dto.CurrentUserDto;
+import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.entity.enums.MemberRole;
+import life.walkit.server.member.error.MemberException;
+import life.walkit.server.member.error.enums.MemberErrorCode;
 import life.walkit.server.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -35,5 +39,13 @@ public class AuthService extends DefaultOAuth2UserService {
                 attributes,
                 "email"
         );
+    }
+
+    public CurrentUserDto getCurrentUser(String email) {
+        Member member = memberRepository.findByEmail(email).orElseThrow(
+                () -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND)
+        );
+
+        return CurrentUserDto.of(member);
     }
 }
