@@ -35,29 +35,32 @@ class WeatherRepositoryTest {
     @Test
     @DisplayName("날씨 저장 성공")
     void save_success() {
-        // given
-        Weather weather = WeatherTestFactory.createWeather(EupMyeonDong.JANGHANG1_DONG);
+        Weather additionalWeather = WeatherTestFactory.createCustomWeather(
+                Sido.GYEONGGI,
+                Sigungu.GOYANG_DONGGU,
+                EupMyeonDong.JANGHANG2_DONG,
+                30.0,
+                70.0
+        );
 
-        // when
-        Weather saved = weatherRepository.save(weather);
+        Weather saved = weatherRepository.save(additionalWeather);
 
-        // then
         Optional<Weather> found = weatherRepository.findById(saved.getWeatherId());
-        assertThat(found.get().getEupmyeondong()).isEqualTo(EupMyeonDong.JANGHANG1_DONG);
-        assertThat(found.get().getTemperature()).isEqualTo(27.5);
+        assertThat(found.isPresent()).isTrue();
+        assertThat(found.get().getEupmyeondong()).isEqualTo(EupMyeonDong.JANGHANG2_DONG);
+        assertThat(found.get().getTemperature()).isEqualTo(30.0);
+        assertThat(found.get().getHumidity()).isEqualTo(70.0);
     }
     
     @Test
     @DisplayName("주소(시/군/구/읍면동)로 날씨 조회 성공")
     void findByLocation_success() {
-        // when
         Optional<Weather> found = weatherRepository.findBySidoAndSigunguAndEupmyeondong(
                 Sido.GYEONGGI,
                 Sigungu.GOYANG_DONGGU,
                 EupMyeonDong.JANGHANG1_DONG
         );
 
-        // then
         Weather weather = found.get();
         assertThat(weather.getEupmyeondong()).isEqualTo(EupMyeonDong.JANGHANG1_DONG);
         assertThat(weather.getCurrent()).containsEntry("weather", "맑음");
