@@ -70,12 +70,14 @@ public class WalkingSessionRepositoryTest {
     void walkingSessionStateChange_success() {
         // given
         WalkingSession saveSession = walkingSessionRepository.save(createWalkingSession(walk, EventType.PAUSE));
+        Long sessionId = saveSession.getEventId();
 
         // when
         saveSession.updateWalkingSessionEventType(EventType.RESUME);
 
         // then
-        assertThat(saveSession.getEventType())
+        WalkingSession updatedSession = walkingSessionRepository.findById(sessionId).get();
+        assertThat(updatedSession.getEventType())
                 .isEqualTo(EventType.RESUME);
     }
 
