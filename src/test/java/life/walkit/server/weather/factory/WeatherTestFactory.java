@@ -48,7 +48,7 @@ public class WeatherTestFactory {
         map.put("temp", 27.5);
         map.put("humidity", 65);
         map.put("windSpeed", 3.4);
-        map.put("weather", "맑음");
+        map.put("current", "맑음");
         return map;
     }
 
