@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "trail_iamge")
+@Table(name = "trail_image")
 @NoArgsConstructor
 public class TrailImage {
 
