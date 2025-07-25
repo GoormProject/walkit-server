@@ -30,7 +30,7 @@ public class Walk {
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "trail_id", nullable = false)
+    @JoinColumn(name = "trail_id")
     private Trail trail;
 
     @Column(name = "started_at")
