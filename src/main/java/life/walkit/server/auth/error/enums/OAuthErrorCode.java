@@ -19,7 +19,7 @@ public enum OAuthErrorCode implements ErrorCode {
 
     @Override
     public String getMessage() {
-        return "[TOKEN ERROR] " + message;
+        return "[OAUTH ERROR] " + message;
     }
 
 }
