@@ -25,6 +25,7 @@ class WeatherRepositoryTest {
     @BeforeEach
     void setUp() {
         weatherRepository.save(WeatherTestFactory.createWeather(EupMyeonDong.JANGHANG1_DONG));
+        // 공통 설정이 필요한 경우에만 사용
     }
 
     @AfterEach
