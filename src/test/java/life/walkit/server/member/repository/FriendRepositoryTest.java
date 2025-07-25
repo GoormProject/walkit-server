@@ -1,8 +1,9 @@
 package life.walkit.server.member.repository;
 
-import life.walkit.server.member.entity.Friend;
+import life.walkit.server.friend.repository.FriendRepository;
+import life.walkit.server.friend.entity.Friend;
 import life.walkit.server.member.entity.Member;
-import life.walkit.server.member.entity.enums.FriendStatus;
+import life.walkit.server.friend.entity.FriendStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
