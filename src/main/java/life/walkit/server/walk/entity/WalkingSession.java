@@ -29,7 +29,6 @@ public class WalkingSession {
     @Column(name = "event_type", nullable = false)
     private EventType eventType;
 
-    @CreatedDate
     @Column(name = "event_time", nullable = false)
     private LocalDateTime eventTime;
 
