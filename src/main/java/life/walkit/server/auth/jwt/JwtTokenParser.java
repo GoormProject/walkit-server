@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import life.walkit.server.auth.entity.enums.JwtTokenType;
 import life.walkit.server.auth.error.JwtTokenException;
 import life.walkit.server.auth.error.enums.JwtTokenErrorCode;
+import life.walkit.server.global.util.CookieUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -42,17 +43,7 @@ public class JwtTokenParser {
     }
 
     public String resolveToken(HttpServletRequest request) {
-        if (request.getCookies() == null) {
-            return null;
-        }
-
-        for (Cookie cookie : request.getCookies()) {
-            if (JwtTokenType.ACCESS_TOKEN.name().equals(cookie.getName())) {
-                return cookie.getValue();
-            }
-        }
-
-        return null;
+        return CookieUtils.getCookieValue(request, JwtTokenType.ACCESS_TOKEN.name());
     }
 
 }
