@@ -42,7 +42,6 @@ class WeatherRepositoryTest {
                 30.0,
                 70.0
         );
-
         Weather saved = weatherRepository.save(additionalWeather);
 
         Optional<Weather> found = weatherRepository.findById(saved.getWeatherId());
