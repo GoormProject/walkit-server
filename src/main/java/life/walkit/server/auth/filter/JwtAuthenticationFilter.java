@@ -47,7 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 
                 // subject가 null이거나 빈 문자열인 경우 처리
                 if (subject == null || subject.trim().isEmpty()) {
-                    sendForbiddenResponse(response, "유효하지 않은 토큰입니다.");
+                    sendUnauthorizedResponse(response, "유효하지 않은 토큰입니다.");
                     return;
                 }
                 
@@ -65,8 +65,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 } else {
-                    // 사용자를 찾을 수 없는 경우 403 반환
-                    sendForbiddenResponse(response, "유효하지 않은 사용자입니다.");
+                    // 사용자를 찾을 수 없는 경우 401 반환
+                    sendUnauthorizedResponse(response, "유효하지 않은 사용자입니다.");
                     return;
                 }
             } else {
@@ -74,27 +74,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (ExpiredJwtException e) {
             log.info("JWT 토큰이 만료되었습니다: {}", e.getMessage());
-            sendForbiddenResponse(response, "토큰이 만료되었습니다.");
+            sendUnauthorizedResponse(response, "토큰이 만료되었습니다.");
             return;
         } catch (UnsupportedJwtException e) {
             log.info("지원하지 않는 JWT 토큰입니다: {}", e.getMessage());
-            sendForbiddenResponse(response, "지원하지 않는 토큰 형식입니다.");
+            sendUnauthorizedResponse(response, "지원하지 않는 토큰 형식입니다.");
             return;
         } catch (MalformedJwtException e) {
             log.info("잘못된 JWT 토큰 형식입니다: {}", e.getMessage());
-            sendForbiddenResponse(response, "잘못된 토큰 형식입니다.");
+            sendUnauthorizedResponse(response, "잘못된 토큰 형식입니다.");
             return;
         } catch (SignatureException e) {
             log.info("JWT 토큰 서명이 유효하지 않습니다: {}", e.getMessage());
-            sendForbiddenResponse(response, "토큰 서명이 유효하지 않습니다.");
+            sendUnauthorizedResponse(response, "토큰 서명이 유효하지 않습니다.");
             return;
         } catch (IllegalArgumentException e) {
             log.info("JWT 토큰이 비어있습니다: {}", e.getMessage());
-            sendForbiddenResponse(response, "토큰이 비어있습니다.");
+            sendUnauthorizedResponse(response, "토큰이 비어있습니다.");
             return;
         } catch (Exception e) {
             log.info("JWT 토큰 처리 중 예상치 못한 오류 발생: {}", e.getMessage());
-            sendForbiddenResponse(response, "토큰 처리 중 오류가 발생했습니다.");
+            sendUnauthorizedResponse(response, "토큰 처리 중 오류가 발생했습니다.");
             return;
         }
         
@@ -102,7 +102,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private void sendForbiddenResponse(HttpServletResponse response, String message) throws IOException {
+    private void sendUnauthorizedResponse(HttpServletResponse response, String message) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json;charset=UTF-8");
         

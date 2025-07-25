@@ -47,7 +47,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PERMIT_URL_ARRAY).permitAll()
                         .requestMatchers("/api/auth/**").authenticated()
-                        .anyRequest().permitAll()
+                        .anyRequest().permitAll() // TODO: 기본 인증 요구로 변경
                 )
                 .oauth2Login(oauth -> oauth
                         .userInfoEndpoint(user -> user.userService(authService))

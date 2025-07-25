@@ -1,6 +1,8 @@
 package life.walkit.server.auth.service;
 
 import life.walkit.server.auth.dto.CurrentUserDto;
+import life.walkit.server.auth.error.OAuthException;
+import life.walkit.server.auth.error.enums.OAuthErrorCode;
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.entity.enums.MemberRole;
 import life.walkit.server.member.error.MemberException;
@@ -66,6 +68,10 @@ public class AuthService extends DefaultOAuth2UserService {
         Map<String, Object> attributes = new HashMap<>();
 
         Map<String, Object> kakaoAccount = user.getAttribute("kakao_account");
+        if (kakaoAccount == null) {
+            throw new OAuthException(OAuthErrorCode.KAKAO_OAUTH_ACCOUNT_DATA_MISSING);
+        }
+
         String email = (String) kakaoAccount.get("email"); // 필수
         attributes.put("email", email);
 

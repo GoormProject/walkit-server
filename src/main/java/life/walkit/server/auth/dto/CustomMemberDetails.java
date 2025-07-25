@@ -18,12 +18,12 @@ public record CustomMemberDetails(Member member) implements UserDetails {
 
     @Override
     public String getPassword() {
-        return member.getEmail();
+        return "";
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(MemberRole.USER.name()));
+        return List.of(new SimpleGrantedAuthority(member.getRole().name()));
     }
 
     @Override
