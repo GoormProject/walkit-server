@@ -35,17 +35,17 @@ class WeatherRepositoryTest {
     @Test
     @DisplayName("날씨 저장 성공")
     void save_success() {
-        Weather weather = WeatherTestFactory.createWeather(EupMyeonDong.JANGHANG1_DONG);
+        Optional<Weather> found = weatherRepository.findBySidoAndSigunguAndEupmyeondong(
+                Sido.GYEONGGI,
+                Sigungu.GOYANG_DONGGU,
+                EupMyeonDong.JANGHANG1_DONG
+        );
 
-        Weather saved = weatherRepository.save(weather);
-
-        Optional<Weather> found = weatherRepository.findById(saved.getWeatherId());
         assertThat(found).isPresent()
-                .hasValueSatisfying(savedWeather
-                        -> {
+                .hasValueSatisfying(savedWeather -> {
                     assertThat(savedWeather.getEupmyeondong()).isEqualTo(EupMyeonDong.JANGHANG1_DONG);
                     assertThat(savedWeather.getTemperature()).isEqualTo(27.5);
-        });
+                });
     }
 
     @Test
