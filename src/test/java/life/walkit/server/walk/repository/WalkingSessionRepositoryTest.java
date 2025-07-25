@@ -43,12 +43,9 @@ public class WalkingSessionRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        memberRepository.save(createMember("a@email.com", "회원A"));
-        Member foundMember = memberRepository.findByEmail("a@email.com").get();
-        trailRepository.save(createTrail(foundMember, "해운대구", "해운대구 근처 산책로 입니다.", 3.2));
-        Trail foundTrail = trailRepository.findByMember(foundMember).get(0);
-        walkRepository.save(createWalk(foundMember, foundTrail, LocalDateTime.now(), LocalDateTime.now(), LocalDate.now(), null, null));
-        walk = walkRepository.findByMember(foundMember).get(0);
+        Member member = memberRepository.save(createMember("a@email.com", "회원A"));
+        Trail trail = trailRepository.save(createTrail(member, "해운대구", "해운대구 근처 산책로 입니다.", 3.2));
+        walk = walkRepository.save(createWalk(member, trail, LocalDateTime.now(), LocalDateTime.now(), LocalDate.now(), null, null));
     }
 
     @Test
