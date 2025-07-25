@@ -1,5 +1,6 @@
 package life.walkit.server.auth.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,7 +12,9 @@ import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.entity.enums.MemberRole;
 import life.walkit.server.member.entity.enums.MemberStatus;
 import life.walkit.server.member.repository.MemberRepository;
+import life.walkit.server.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
@@ -21,11 +24,12 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
     private final JwtTokenIssuer jwtTokenIssuer;
     private final JwtTokenProperties jwtTokenProperties;
 
@@ -36,20 +40,13 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        String email = oAuth2User.getAttribute("email");
-        
+
         // 회원가입 또는 기존 회원 조회
-        Member member = memberRepository.findByEmail(email)
-                .orElseGet(() -> {
-                    Member newMember = Member.builder()
-                            .email(email)
-                            .name("")
-                            .nickname(email)
-                            .status(MemberStatus.OFFLINE)
-                            .role(MemberRole.USER)
-                            .build();
-                    return memberRepository.save(newMember);
-                });
+        Member member = memberService.createMember(
+                oAuth2User.getAttribute("email"),
+                oAuth2User.getAttribute("name"),
+                oAuth2User.getAttribute("profileImage")
+        );
 
         // JWT 토큰 발급
         JwtToken accessToken = jwtTokenIssuer.issueAccessToken(member.getMemberId());

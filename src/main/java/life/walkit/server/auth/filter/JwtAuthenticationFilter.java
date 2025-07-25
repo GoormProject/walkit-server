@@ -70,7 +70,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     return;
                 }
             } else {
-                log.info("Authorization 헤더에 JWT 토큰이 없습니다.");
+                log.debug("Authorization 헤더에 JWT 토큰이 없습니다.");
             }
         } catch (ExpiredJwtException e) {
             log.info("JWT 토큰이 만료되었습니다: {}", e.getMessage());

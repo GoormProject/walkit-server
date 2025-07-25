@@ -16,10 +16,7 @@ public class CurrentUserDto {
         return CurrentUserDto.builder()
                 .memberId(member.getMemberId())
                 .email(member.getEmail())
-                .isProfileSet(
-                        !(member.getName().isBlank() &&
-                                member.getNickname().equals(member.getEmail()))
-                )
+                .isProfileSet(!member.getEmail().equals(member.getNickname()))
                 .build();
     }
 }
