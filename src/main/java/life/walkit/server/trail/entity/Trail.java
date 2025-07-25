@@ -3,6 +3,7 @@ package life.walkit.server.trail.entity;
 import jakarta.persistence.*;
 import life.walkit.server.global.BaseEntity;
 import life.walkit.server.member.entity.Member;
+import life.walkit.server.path.entity.Path;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,11 +40,12 @@ public class Trail extends BaseEntity {
     @Column(name = "location", nullable = false, columnDefinition = "geometry(Point, 4326)")
     private Point location;
 
-    @Column(name = "path", nullable = false, columnDefinition = "geometry(LineString, 4326)")
-    private LineString path;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "path_id", nullable = false)
+    private Path path;
 
     @Builder
-    public Trail(Member member, String title, String description, Double distance, Point location, LineString path) {
+    public Trail(Member member, String title, String description, Double distance, Point location, Path path) {
         this.member = member;
         this.title = title;
         this.description = description;

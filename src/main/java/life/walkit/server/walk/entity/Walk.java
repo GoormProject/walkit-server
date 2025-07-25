@@ -2,6 +2,7 @@ package life.walkit.server.walk.entity;
 
 import jakarta.persistence.*;
 import life.walkit.server.member.entity.Member;
+import life.walkit.server.path.entity.Path;
 import life.walkit.server.trail.entity.Trail;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -41,8 +42,9 @@ public class Walk {
     @Column(name = "date")
     private LocalDate date;
 
-    @Column(name = "path", columnDefinition = "geometry(LineString, 4326)")
-    private LineString path;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "path_id", nullable = false)
+    private Path path;
 
     @Column(name = "total_time")
     private Duration totalTime;
@@ -51,7 +53,7 @@ public class Walk {
     private Double pace;
 
     @Builder
-    public Walk(Member member, Trail trail, LocalDateTime startedAt, LocalDateTime endedAt, LocalDate date, LineString path, Duration totalTime, Double pace) {
+    public Walk(Member member, Trail trail, LocalDateTime startedAt, LocalDateTime endedAt, LocalDate date, Path path, Duration totalTime, Double pace) {
         this.member = member;
         this.trail = trail;
         this.startedAt = startedAt;
