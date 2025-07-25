@@ -40,8 +40,12 @@ class WeatherRepositoryTest {
         Weather saved = weatherRepository.save(weather);
 
         Optional<Weather> found = weatherRepository.findById(saved.getWeatherId());
-        assertThat(found.get().getEupmyeondong()).isEqualTo(EupMyeonDong.JANGHANG1_DONG);
-        assertThat(found.get().getTemperature()).isEqualTo(27.5);
+        assertThat(found).isPresent()
+                .hasValueSatisfying(savedWeather
+                        -> {
+                    assertThat(savedWeather.getEupmyeondong()).isEqualTo(EupMyeonDong.JANGHANG1_DONG);
+                    assertThat(savedWeather.getTemperature()).isEqualTo(27.5);
+        });
     }
 
     @Test
