@@ -1,6 +1,6 @@
 package life.walkit.server.global.factory;
 
-import life.walkit.server.member.entity.Friend;
+import life.walkit.server.friend.entity.Friend;
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.entity.enums.MemberRole;
 import life.walkit.server.member.entity.enums.MemberStatus;

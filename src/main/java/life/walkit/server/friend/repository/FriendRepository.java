@@ -1,8 +1,8 @@
-package life.walkit.server.member.repository;
+package life.walkit.server.friend.repository;
 
-import life.walkit.server.member.entity.Friend;
+import life.walkit.server.friend.entity.Friend;
 import life.walkit.server.member.entity.Member;
-import life.walkit.server.member.entity.enums.FriendStatus;
+import life.walkit.server.friend.entity.FriendStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
