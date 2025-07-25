@@ -40,7 +40,7 @@ public class Trail extends BaseEntity {
     @Column(name = "location", nullable = false, columnDefinition = "geometry(Point, 4326)")
     private Point location;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "path_id", nullable = false)
     private Path path;
 

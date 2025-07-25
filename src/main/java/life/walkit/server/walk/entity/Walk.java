@@ -42,7 +42,7 @@ public class Walk {
     @Column(name = "date")
     private LocalDate date;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "path_id", nullable = false)
     private Path path;
 
