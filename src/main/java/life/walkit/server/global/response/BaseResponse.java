@@ -1,12 +1,12 @@
 package life.walkit.server.global.response;
 
+import lombok.Builder;
 import lombok.Getter;
-import lombok.experimental.SuperBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @Getter
-@SuperBuilder
+@Builder
 public class BaseResponse {
 
     private final Integer httpStatus;
