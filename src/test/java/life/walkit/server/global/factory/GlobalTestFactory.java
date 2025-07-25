@@ -1,5 +1,6 @@
 package life.walkit.server.global.factory;
 
+import life.walkit.server.member.entity.Friend;
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.entity.enums.MemberRole;
 import life.walkit.server.member.entity.enums.MemberStatus;
@@ -25,6 +26,22 @@ public class GlobalTestFactory {
                 .status(MemberStatus.OFFLINE)
                 .role(MemberRole.USER)
                 .build();
+    }
+
+    public static Friend createFriend(Member member, Member partner) {
+        return Friend.builder()
+                .member(member)
+                .partner(partner)
+                .build();
+    }
+
+    public static Friend createFriendApproved(Member member, Member partner) {
+        Friend friend = Friend.builder()
+                .member(member)
+                .partner(partner)
+                .build();
+        friend.approve();
+        return friend;
     }
 
     public static Trail createTrail(Member member, String title, String description, Double distance) {

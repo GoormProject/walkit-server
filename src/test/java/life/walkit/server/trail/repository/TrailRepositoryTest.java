@@ -3,7 +3,6 @@ package life.walkit.server.trail.repository;
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.repository.MemberRepository;
 import life.walkit.server.trail.entity.Trail;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
