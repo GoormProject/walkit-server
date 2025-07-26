@@ -2,10 +2,9 @@ package life.walkit.server.walk.repository;
 
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.repository.MemberRepository;
-import life.walkit.server.trail.entity.Trail;
-import life.walkit.server.trail.repository.TrailRepository;
+import life.walkit.server.path.entity.Path;
+import life.walkit.server.path.repository.PathRepository;
 import life.walkit.server.walk.entity.Walk;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,10 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static life.walkit.server.global.factory.GlobalTestFactory.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -31,24 +30,23 @@ public class WalkRepositoryTest {
     MemberRepository memberRepository;
 
     @Autowired
-    TrailRepository trailRepository;
-
-    @Autowired
     WalkRepository walkRepository;
+    @Autowired
+    private PathRepository pathRepository;
+
+    Double[][] lineString;
 
     @BeforeEach
     void setUp() {
+        lineString = new Double[][]{
+                {126.986, 37.541},
+                {126.987, 37.542},
+                {126.988, 37.543},
+                {126.989, 37.544}
+        };
         memberRepository.save(createMember("a@email.com", "회원A"));
         memberRepository.save(createMember("b@email.com", "회원B"));
         memberRepository.save(createMember("c@email.com", "회원C"));
-
-        Member memberA = memberRepository.findByEmail("a@email.com").get();
-        Member memberB = memberRepository.findByEmail("b@email.com").get();
-        Member memberC = memberRepository.findByEmail("c@email.com").get();
-
-        trailRepository.save(createTrail(memberA, "인사동", "인사동 근처 산책로 입니다.", 3.2));
-        trailRepository.save(createTrail(memberB, "강남구", "강남구 근처 산책로 입니다.", 2.2));
-        trailRepository.save(createTrail(memberC, "도원동", "도원동 근처 산책로 입니다.", 1.2));
     }
 
     @Test
@@ -58,14 +56,24 @@ public class WalkRepositoryTest {
         Member member = createMember("d@email.com", "회원임");
         Member savedMember = memberRepository.save(member);
         Member foundMember = memberRepository.findByEmail(savedMember.getEmail()).get();
-        Trail savedTrail = trailRepository.save(createTrail(foundMember, "해운대구", "해운대구 근처 산책로 입니다.", 3.2));
-        List<Trail> trailList = trailRepository.findByMember(savedTrail.getMember());
-        Trail foundTrail = trailList.get(0);
+        Path savedPath = pathRepository.save(createPath(lineString));
+        Path foundPath = pathRepository.findById(savedPath.getPathId()).get();
 
         // when
         LocalDateTime startTime = LocalDateTime.now();
         LocalDate today = LocalDate.now();
-        walkRepository.save(createWalk(foundMember, foundTrail, startTime, null, today, null, null));
+        walkRepository.save(
+            createWalk(
+                foundMember,
+                null,
+                startTime,
+                null,
+                 today,
+                foundPath,
+                null,
+                null
+            )
+        );
 
         // then
         List<Walk> foundWalks = walkRepository.findByMember(foundMember);
@@ -73,7 +81,6 @@ public class WalkRepositoryTest {
         assertThat(foundWalks.get(0))
                 .satisfies(walk -> {
                     assertThat(walk.getMember().getEmail()).isEqualTo("d@email.com");
-                    assertThat(walk.getTrail().getTitle()).isEqualTo("해운대구");
                     assertThat(walk.getStartedAt()).isEqualTo(startTime);
                     assertThat(walk.getDate()).isEqualTo(today);
                 });
@@ -86,19 +93,46 @@ public class WalkRepositoryTest {
         Member member = createMember("d@email.com", "회원임");
         Member savedMember = memberRepository.save(member);
         Member foundMember = memberRepository.findByEmail(savedMember.getEmail()).get();
-
-        // 산책로 2개 생성
-        Trail savedTrailA = trailRepository.save(createTrail(foundMember, "해운대구", "해운대구 산책로", 3.2));
-        Trail savedTrailB = trailRepository.save(createTrail(foundMember, "광안리", "광안리 산책로", 2.5));
+        Path savePathA = pathRepository.save(createPath(lineString));
+        Path savePathB = pathRepository.save(createPath(lineString));
+        Path foundPathA = pathRepository.findById(savePathA.getPathId()).get();
+        Path foundPathB = pathRepository.findById(savePathB.getPathId()).get();
 
         // 산책 기록 2개 생성 (각각 다른 날짜와 시간)
         LocalDateTime startTimeA = LocalDateTime.of(2025, 7, 20, 10, 0);
         LocalDateTime startTimeB = LocalDateTime.of(2025, 7, 21, 15, 30);
 
-        walkRepository.save(createWalk(foundMember, savedTrailA, startTimeA, startTimeA.plusHours(1),
-                LocalDate.of(2025, 7, 20), null, null));
-        walkRepository.save(createWalk(foundMember, savedTrailB, startTimeB, startTimeB.plusMinutes(45),
-                LocalDate.of(2025, 7, 21), null, null));
+        walkRepository.save(
+            createWalk(
+                foundMember,
+                null,
+                startTimeA,
+                startTimeA.plusHours(1),
+                LocalDate.of(
+                    2025,
+                    7,
+                    20
+                ),
+                foundPathA,
+                null,
+                null
+            )
+        );
+        walkRepository.save(
+            createWalk(
+                foundMember,
+                null,
+                startTimeB,
+                startTimeB.plusMinutes(45),
+                LocalDate.of(
+                    2025,
+                    7,
+                    21),
+                foundPathB,
+                null,
+                null
+            )
+        );
 
         // when
         List<Walk> foundWalks = walkRepository.findByMember(foundMember);
@@ -106,11 +140,11 @@ public class WalkRepositoryTest {
         // then
         assertThat(foundWalks).hasSize(2);
         assertThat(foundWalks)
-                .extracting("trail.title", "date")
-                .containsExactlyInAnyOrder(
-                        tuple(savedTrailA.getTitle(), LocalDate.of(2025, 7, 20)),
-                        tuple(savedTrailB.getTitle(), LocalDate.of(2025, 7, 21))
-                );
+            .extracting("date")
+            .containsExactlyInAnyOrder(
+                LocalDate.of(2025, 7, 20),
+                LocalDate.of(2025, 7, 21)
+            );
     }
 
     @Test
@@ -120,12 +154,23 @@ public class WalkRepositoryTest {
         Member member = createMember("d@email.com", "회원임");
         Member savedMember = memberRepository.save(member);
         Member foundMember = memberRepository.findByEmail(savedMember.getEmail()).get();
-
-        Trail savedTrail = trailRepository.save(createTrail(foundMember, "해운대구", "해운대구 근처 산책로 입니다.", 3.2));
+        Path savePath = pathRepository.save(createPath(lineString));
+        Path foundPath = pathRepository.findById(savePath.getPathId()).get();
 
         LocalDateTime startTime = LocalDateTime.now();
         LocalDate today = LocalDate.now();
-        Walk savedWalk = walkRepository.save(createWalk(foundMember, savedTrail, startTime, null, today, null, null));
+        Walk savedWalk = walkRepository.save(
+            createWalk(
+                foundMember,
+                null,
+                startTime,
+                null,
+                today,
+                foundPath,
+                null,
+                null
+            )
+        );
 
         List<Walk> walksBeforeDelete = walkRepository.findByMember(foundMember);
         assertThat(walksBeforeDelete).hasSize(1);
@@ -142,30 +187,67 @@ public class WalkRepositoryTest {
     @DisplayName("여러 산책 기록 중 특정 기록만 삭제")
     void deleteSpecificWalk_success() {
         // given
-        Member member = createMember("d@email.com", "회원임");
-        Member savedMember = memberRepository.save(member);
-        Member foundMember = memberRepository.findByEmail(savedMember.getEmail()).get();
+        Member foundMember = memberRepository.findByEmail("a@email.com").get();
 
-        Trail trailA = trailRepository.save(createTrail(foundMember, "해운대구", "해운대구 산책로", 3.2));
-        Trail trailB = trailRepository.save(createTrail(foundMember, "광안리", "광안리 산책로", 2.5));
+        Path savePathA = pathRepository.save(createPath(lineString));
+        Path foundPathA = pathRepository.findById(savePathA.getPathId()).get();
+        Path savePathB = pathRepository.save(createPath(lineString));
+        Path foundPathB = pathRepository.findById(savePathB.getPathId()).get();
 
         LocalDateTime startTimeA = LocalDateTime.of(2025, 7, 20, 10, 0);
         LocalDateTime startTimeB = LocalDateTime.of(2025, 7, 21, 15, 30);
 
-        Walk walkA = walkRepository.save(createWalk(foundMember, trailA, startTimeA,
-                startTimeA.plusHours(1), LocalDate.of(2025, 7, 20), null, null));
-        Walk walkB = walkRepository.save(createWalk(foundMember, trailB, startTimeB,
-                startTimeB.plusMinutes(45), LocalDate.of(2025, 7, 21), null, null));
+        Walk walkA = walkRepository.save(
+            createWalk(
+                foundMember,
+                null,
+                startTimeA,
+                startTimeA.plusHours(1),
+                LocalDate.of(
+                    2025,
+                    7,
+                    20
+                ),
+                foundPathA,
+                null,
+                null
+            )
+        );
+        walkRepository.save(
+            createWalk(
+                foundMember,
+                null,
+                startTimeB,
+                startTimeB.plusMinutes(45),
+                LocalDate.of(
+                    2025,
+                    7,
+                    21
+                ),
+                foundPathB,
+                null,
+                null
+            )
+        );
 
         // when
         walkRepository.deleteById(walkA.getWalkId());
+        Optional<Walk> deletedWalk = walkRepository.findById(walkA.getWalkId());
 
         // then
-        List<Walk> walksAfterDelete = walkRepository.findByMember(foundMember);
-        assertThat(walksAfterDelete).hasSize(1);
-        assertThat(walksAfterDelete)
-                .extracting("trail.title")
-                .containsExactly(trailB.getTitle());
+        List<Walk> foundWalk = walkRepository.findByMember(foundMember);
+        assertThat(foundWalk).hasSize(1);
+        assertThat(foundWalk)
+                .extracting("date")
+                .containsExactly(
+                    LocalDate.of(
+                        2025,
+                        7,
+                        21
+                    )
+                );
+
+        assertThat(deletedWalk).isEmpty();
     }
 
 
