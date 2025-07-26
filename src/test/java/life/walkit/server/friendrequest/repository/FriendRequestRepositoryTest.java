@@ -65,7 +65,7 @@ public class FriendRequestRepositoryTest {
         friendRequestRepository.save(friendRequestB);
 
         // when
-        List<FriendRequest> pendingRequests = List.of(friendRequestA, friendRequestB);
+        List<FriendRequest> pendingRequests = friendRequestRepository.findByReceiverAndStatus(memberC, FriendRequestStatus.PENDING);
 
         // then
         assertThat(pendingRequests).hasSize(2)
