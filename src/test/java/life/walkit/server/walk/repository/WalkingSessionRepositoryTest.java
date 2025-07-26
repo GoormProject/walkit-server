@@ -2,7 +2,8 @@ package life.walkit.server.walk.repository;
 
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.repository.MemberRepository;
-import life.walkit.server.trail.entity.Trail;
+import life.walkit.server.path.entity.Path;
+import life.walkit.server.path.repository.PathRepository;
 import life.walkit.server.trail.repository.TrailRepository;
 import life.walkit.server.walk.entity.Walk;
 import life.walkit.server.walk.entity.WalkingSession;
@@ -19,8 +20,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static life.walkit.server.global.factory.GlobalTestFactory.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -36,16 +37,34 @@ public class WalkingSessionRepositoryTest {
     @Autowired
     MemberRepository memberRepository;
 
-    @Autowired
-    TrailRepository trailRepository;
-
     Walk walk;
+    @Autowired
+    private PathRepository pathRepository;
 
     @BeforeEach
     void setUp() {
+        Double[][] lineString = new Double[][]{
+            {126.986, 37.541},
+            {126.987, 37.542},
+            {126.988, 37.543},
+            {126.989, 37.544}
+        };
+        Path savePath = pathRepository.save(createPath(lineString));
+
         Member member = memberRepository.save(createMember("a@email.com", "회원A"));
-        Trail trail = trailRepository.save(createTrail(member, "해운대구", "해운대구 근처 산책로 입니다.", 3.2));
-        walk = walkRepository.save(createWalk(member, trail, LocalDateTime.now(), LocalDateTime.now(), LocalDate.now(), null, null));
+        walk = walkRepository.save(
+                createWalk(
+                        member,
+                        null,
+                        LocalDateTime.now(),
+                        LocalDateTime.now(),
+                        LocalDate.now(),
+                        savePath,
+                        null,
+                        null
+                )
+        );
+
     }
 
     @Test
