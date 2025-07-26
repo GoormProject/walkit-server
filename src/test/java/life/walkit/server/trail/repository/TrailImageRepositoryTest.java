@@ -48,8 +48,15 @@ public class TrailImageRepositoryTest {
 
     @BeforeEach
     void setUp() {
+        Double[][] lineString = new Double[][]{
+            {126.986, 37.541},
+            {126.987, 37.542},
+            {126.988, 37.543},
+            {126.989, 37.544}
+        };
+
         memberRepository.save(createMember("a@email.com", "회원A"));
-        Path savePath = pathRepository.save(createPath()); // Walk에 저장되야하는 Path
+        Path savePath = pathRepository.save(createPath(lineString)); // Walk에 저장되야하는 Path
         Member foundMember = memberRepository.findByEmail("a@email.com").get();
 
         walkRepository.save(
