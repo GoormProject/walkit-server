@@ -1,4 +1,4 @@
-package life.walkit.server.friendRequest.entity;
+package life.walkit.server.friendrequest.entity;
 
 import jakarta.persistence.*;
 import life.walkit.server.member.entity.Member;
