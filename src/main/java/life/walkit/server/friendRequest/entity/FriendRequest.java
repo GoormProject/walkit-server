@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class FriendRequest {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long friendRequestId;
 
     @ManyToOne
