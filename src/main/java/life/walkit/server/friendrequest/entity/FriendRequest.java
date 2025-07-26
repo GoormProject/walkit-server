@@ -1,6 +1,8 @@
 package life.walkit.server.friendrequest.entity;
 
 import jakarta.persistence.*;
+import life.walkit.server.friendrequest.enums.FriendRequestStatus;
+import life.walkit.server.global.BaseEntity;
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.error.MemberException;
 import life.walkit.server.member.error.enums.MemberErrorCode;
@@ -13,16 +15,19 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "friend_request")
-public class FriendRequest {
+public class FriendRequest extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "friend_request_id")
     private Long friendRequestId;
 
     @ManyToOne
+    @JoinColumn(name = "sender_id", nullable = false)
     private Member sender;
 
     @ManyToOne
+    @JoinColumn(name = "receiver_id", nullable = false)
     private Member receiver;
 
     @Enumerated(EnumType.STRING)
