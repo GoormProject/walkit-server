@@ -1,11 +1,18 @@
 package life.walkit.server.auth.controller;
 
+import io.jsonwebtoken.Claims;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import life.walkit.server.auth.dto.CurrentUserDto;
 import life.walkit.server.auth.dto.enums.AuthResponse;
+import life.walkit.server.auth.entity.JwtToken;
 import life.walkit.server.auth.entity.enums.JwtTokenType;
+import life.walkit.server.auth.error.JwtTokenException;
+import life.walkit.server.auth.error.enums.JwtTokenErrorCode;
+import life.walkit.server.auth.jwt.JwtTokenIssuer;
+import life.walkit.server.auth.jwt.JwtTokenParser;
 import life.walkit.server.auth.jwt.JwtTokenProperties;
 import life.walkit.server.auth.repository.JwtTokenRepository;
 import life.walkit.server.auth.service.AuthService;
@@ -34,6 +41,8 @@ public class AuthController {
     private final AuthService authService;
     private final JwtTokenProperties jwtTokenProperties;
     private final JwtTokenRepository jwtTokenRepository;
+    private final JwtTokenIssuer jwtTokenIssuer;
+    private final JwtTokenParser jwtTokenParser;
 
     @Operation(summary = "로그아웃", description = "AccessToken 및 RefreshToken 쿠키를 삭제하여 로그아웃합니다.")
     @PostMapping("/logout")
@@ -58,6 +67,51 @@ public class AuthController {
         jwtTokenRepository.deleteByKey(currentUser.getMemberId().toString());
 
         return BaseResponse.toResponseEntity(AuthResponse.LOGOUT_SUCCESS);
+    }
+
+    @PostMapping("/reissue")
+    public ResponseEntity<BaseResponse> reissueAccessToken(HttpServletRequest request, HttpServletResponse response) {
+
+        String refreshToken = jwtTokenParser.resolveRefreshToken(request);
+        if (refreshToken == null || refreshToken.isBlank())
+            throw new JwtTokenException(JwtTokenErrorCode.REFRESH_TOKEN_NOT_FOUND);
+
+        try {
+            // JWT 토큰 검증 및 Claims 파싱
+            Claims claims = jwtTokenParser.parseClaims(refreshToken);
+            String subject = claims.getSubject();
+
+            if (subject == null || subject.trim().isEmpty())
+                throw new JwtTokenException(JwtTokenErrorCode.REFRESH_TOKEN_NOT_FOUND);
+
+            Long memberId = Long.parseLong(subject);
+
+            // Redis에 저장된 리프레시 토큰 조회
+            String redisRefreshToken = jwtTokenRepository.findByKey(memberId.toString())
+                    .orElseThrow(() -> new JwtTokenException(JwtTokenErrorCode.REFRESH_TOKEN_INVALID));
+
+            // 저장된 리프레시 토큰과 일치하면 액세스 토큰 재발급
+            if (refreshToken.equals(redisRefreshToken)) {
+                JwtToken accessToken = jwtTokenIssuer.issueAccessToken(memberId);
+
+                response.addHeader(
+                        HttpHeaders.SET_COOKIE,
+                        CookieUtils.create(
+                                accessToken.type().name(),
+                                accessToken.value(),
+                                accessToken.duration(),
+                                true,
+                                true,
+                                "None",
+                                jwtTokenProperties.domain()
+                        ).toString()
+                );
+            }
+        } catch (Exception e) {
+            throw new JwtTokenException(JwtTokenErrorCode.REFRESH_TOKEN_INVALID);
+        }
+
+        return BaseResponse.toResponseEntity(AuthResponse.ACCESS_TOKEN_REISSUE_SUCCESS);
     }
 
     @Operation(summary = "본인확인", description = "현재 로그인한 사용자의 정보를 조회합니다.")
