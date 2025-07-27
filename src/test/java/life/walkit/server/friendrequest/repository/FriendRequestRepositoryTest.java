@@ -4,7 +4,7 @@ import static life.walkit.server.global.factory.GlobalTestFactory.createMember;
 import static org.assertj.core.api.Assertions.assertThat;
 import life.walkit.server.friend.repository.FriendRepository;
 import life.walkit.server.friendrequest.entity.FriendRequest;
-import life.walkit.server.friendrequest.entity.FriendRequestStatus;
+import life.walkit.server.friendrequest.entity.enums.FriendRequestStatus;
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.repository.MemberRepository;
 import org.junit.jupiter.api.AfterEach;
