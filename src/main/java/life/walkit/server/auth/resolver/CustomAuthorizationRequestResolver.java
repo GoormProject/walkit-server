@@ -31,11 +31,16 @@ public class CustomAuthorizationRequestResolver implements OAuth2AuthorizationRe
     private OAuth2AuthorizationRequest customize(OAuth2AuthorizationRequest req, HttpServletRequest request) {
         if (req == null) return null;
         String incomingState = request.getParameter("state");
-        if (incomingState != null) {
+        if (incomingState != null && isValidDeviceId(incomingState)) {
             return OAuth2AuthorizationRequest.from(req)
                     .state(incomingState)       // 내가 보낸 state 사용
                     .build();
         }
         return req;
+    }
+
+    private boolean isValidDeviceId(String deviceId) {
+        // deviceId 형식 검증 (알파벳, 숫자, 하이픈만 허용)
+        return deviceId.matches("^[a-zA-Z0-9-_]{1,50}$");
     }
 }

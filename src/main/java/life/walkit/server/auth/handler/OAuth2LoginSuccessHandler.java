@@ -42,6 +42,11 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         try {
             // state 파라미터에서 deviceId 추출
             String deviceId = request.getParameter("state");
+            if (deviceId == null || deviceId.isBlank())
+                deviceId = "no-device-id";
+            // deviceId 길이 제한 (보안상 너무 긴 값 방지)
+            if (deviceId.length() > 50)
+                deviceId = deviceId.substring(0, 50);
 
             OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 
