@@ -4,6 +4,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import life.walkit.server.auth.entity.JwtToken;
 import life.walkit.server.auth.entity.enums.JwtTokenType;
+import life.walkit.server.auth.repository.JwtTokenRepository;
 import life.walkit.server.global.util.ClockUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 public class JwtTokenIssuer {
 
     private final JwtTokenProperties jwtTokenProperties;
+    private final JwtTokenRepository jwtTokenRepository;
 
     public JwtToken issueAccessToken(Long memberId) {
         return JwtToken.of(
@@ -26,9 +28,12 @@ public class JwtTokenIssuer {
     }
 
     public JwtToken issueRefreshToken(Long memberId) {
+        String refreshToken = issueToken(JwtTokenType.REFRESH_TOKEN, memberId, jwtTokenProperties.expiration().refresh());
+        jwtTokenRepository.saveWithTTL(memberId.toString(), refreshToken, jwtTokenProperties.refreshTokenDuration());
+
         return JwtToken.of(
                 JwtTokenType.REFRESH_TOKEN,
-                issueToken(JwtTokenType.REFRESH_TOKEN, memberId, jwtTokenProperties.expiration().refresh()),
+                refreshToken,
                 jwtTokenProperties.refreshTokenDuration()
         );
     }
