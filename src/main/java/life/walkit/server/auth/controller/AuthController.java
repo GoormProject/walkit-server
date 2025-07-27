@@ -24,10 +24,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 
@@ -47,7 +44,7 @@ public class AuthController {
     @Operation(summary = "로그아웃", description = "AccessToken 및 RefreshToken 쿠키를 삭제하여 로그아웃합니다.")
     @PostMapping("/logout")
     public ResponseEntity<BaseResponse> logout(@AuthenticationPrincipal UserDetails member,
-                                               HttpServletResponse response) {
+                                               @RequestParam String deviceId, HttpServletResponse response) {
 
         // 액세스 토큰과 리프레시 토큰을 쿠키에서 제거
         Arrays.stream(JwtTokenType.values()).forEach(tokenType ->
@@ -64,14 +61,16 @@ public class AuthController {
         
         // Redis에서 리프레시 토큰 제거
         CurrentUserDto currentUser = authService.getCurrentUser(member.getUsername());
-        jwtTokenRepository.deleteByKey(currentUser.getMemberId().toString());
+        String key = currentUser.getMemberId() + ":" + deviceId;
+        jwtTokenRepository.deleteByKey(key);
 
         return BaseResponse.toResponseEntity(AuthResponse.LOGOUT_SUCCESS);
     }
 
     @Operation(summary = "액세스 토큰 재발급", description = "리프레시 토큰을 이용해 액세스 토큰을 재발급합니다.")
     @PostMapping("/reissue")
-    public ResponseEntity<BaseResponse> reissueAccessToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<BaseResponse> reissueAccessToken(@RequestParam String deviceId,
+                                                           HttpServletRequest request, HttpServletResponse response) {
 
         String refreshToken = jwtTokenParser.resolveRefreshToken(request);
         if (refreshToken == null || refreshToken.isBlank())
@@ -86,9 +85,10 @@ public class AuthController {
                 throw new JwtTokenException(JwtTokenErrorCode.REFRESH_TOKEN_NOT_FOUND);
 
             Long memberId = Long.parseLong(subject);
+            String key = memberId + ":" + deviceId;
 
             // Redis에 저장된 리프레시 토큰 조회
-            String redisRefreshToken = jwtTokenRepository.findByKey(memberId.toString())
+            String redisRefreshToken = jwtTokenRepository.findByKey(key)
                     .orElseThrow(() -> new JwtTokenException(JwtTokenErrorCode.REFRESH_TOKEN_INVALID));
 
             // 저장된 리프레시 토큰과 일치하면 액세스 토큰 재발급

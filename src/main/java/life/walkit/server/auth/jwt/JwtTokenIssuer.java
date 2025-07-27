@@ -27,9 +27,12 @@ public class JwtTokenIssuer {
         );
     }
 
-    public JwtToken issueRefreshToken(Long memberId) {
+    public JwtToken issueRefreshToken(Long memberId, String deviceId) {
         String refreshToken = issueToken(JwtTokenType.REFRESH_TOKEN, memberId, jwtTokenProperties.expiration().refresh());
-        jwtTokenRepository.saveWithTTL(memberId.toString(), refreshToken, jwtTokenProperties.refreshTokenDuration());
+
+        // Redis에 리프레시 토큰 저장
+        String key = memberId + ":" + deviceId;
+        jwtTokenRepository.saveWithTTL(key, refreshToken, jwtTokenProperties.refreshTokenDuration());
 
         return JwtToken.of(
                 JwtTokenType.REFRESH_TOKEN,
