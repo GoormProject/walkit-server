@@ -1,6 +1,7 @@
 package life.walkit.server.global.factory;
 
 import life.walkit.server.friend.entity.Friend;
+import life.walkit.server.friendrequest.entity.FriendRequest;
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.entity.enums.MemberRole;
 import life.walkit.server.member.entity.enums.MemberStatus;
@@ -10,7 +11,6 @@ import life.walkit.server.walk.entity.Walk;
 import life.walkit.server.walk.entity.WalkingSession;
 import life.walkit.server.walk.entity.enums.EventType;
 import org.locationtech.jts.geom.*;
-
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,8 +24,8 @@ public class GlobalTestFactory {
                 .email(email)
                 .name("김실명")
                 .nickname(nickname)
-                .status(MemberStatus.OFFLINE)
                 .role(MemberRole.USER)
+                .status(MemberStatus.ONLINE)
                 .build();
     }
 
@@ -36,13 +36,11 @@ public class GlobalTestFactory {
                 .build();
     }
 
-    public static Friend createFriendApproved(Member member, Member partner) {
-        Friend friend = Friend.builder()
-                .member(member)
-                .partner(partner)
+    public static FriendRequest createFriendRequest(Member sender, Member receiver) {
+        return FriendRequest.builder()
+                .sender(sender)
+                .receiver(receiver)
                 .build();
-        friend.approve();
-        return friend;
     }
 
     public static Trail createTrail(
@@ -113,6 +111,8 @@ public class GlobalTestFactory {
 
         return geometryFactory.createLineString(coordinates);
     }
+
+
 
 
 }

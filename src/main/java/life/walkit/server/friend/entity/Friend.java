@@ -33,10 +33,6 @@ public class Friend extends BaseEntity {
     @JoinColumn(name = "partner_id", nullable = false)
     private Member partner;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private FriendStatus status;
-
     @Builder
     public Friend(Member member, Member partner) {
         if (member.equals(partner)) {
@@ -44,20 +40,5 @@ public class Friend extends BaseEntity {
         }
         this.member = member;
         this.partner = partner;
-        this.status = FriendStatus.PENDING;
-    }
-
-    public void approve() {
-        if (this.status != FriendStatus.PENDING && this.status != FriendStatus.REJECTED) {
-            throw new MemberException(MemberErrorCode.FRIEND_STATUS_INVALID);
-        }
-        this.status = FriendStatus.APPROVED;
-    }
-
-    public void reject() {
-        if (this.status != FriendStatus.PENDING) {
-            throw new MemberException(MemberErrorCode.FRIEND_STATUS_INVALID);
-        }
-        this.status = FriendStatus.REJECTED;
     }
 }
