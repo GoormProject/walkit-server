@@ -107,6 +107,8 @@ public class AuthController {
                                 jwtTokenProperties.domain()
                         ).toString()
                 );
+            } else {
+                throw new JwtTokenException(JwtTokenErrorCode.REFRESH_TOKEN_INVALID);
             }
         } catch (Exception e) {
             throw new JwtTokenException(JwtTokenErrorCode.REFRESH_TOKEN_INVALID);
