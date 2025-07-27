@@ -3,9 +3,11 @@ package life.walkit.server.auth.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
+import life.walkit.server.auth.dto.CurrentUserDto;
 import life.walkit.server.auth.dto.enums.AuthResponse;
 import life.walkit.server.auth.entity.enums.JwtTokenType;
 import life.walkit.server.auth.jwt.JwtTokenProperties;
+import life.walkit.server.auth.repository.JwtTokenRepository;
 import life.walkit.server.auth.service.AuthService;
 import life.walkit.server.global.response.BaseResponse;
 import life.walkit.server.global.util.CookieUtils;
@@ -31,10 +33,12 @@ public class AuthController {
 
     private final AuthService authService;
     private final JwtTokenProperties jwtTokenProperties;
+    private final JwtTokenRepository jwtTokenRepository;
 
     @Operation(summary = "로그아웃", description = "AccessToken 및 RefreshToken 쿠키를 삭제하여 로그아웃합니다.")
     @PostMapping("/logout")
-    public ResponseEntity<BaseResponse> logout(HttpServletResponse response) {
+    public ResponseEntity<BaseResponse> logout(@AuthenticationPrincipal UserDetails member,
+                                               HttpServletResponse response) {
 
         // 액세스 토큰과 리프레시 토큰을 쿠키에서 제거
         Arrays.stream(JwtTokenType.values()).forEach(tokenType ->
@@ -48,6 +52,10 @@ public class AuthController {
                         ).toString()
                 )
         );
+        
+        // Redis에서 리프레시 토큰 제거
+        CurrentUserDto currentUser = authService.getCurrentUser(member.getUsername());
+        jwtTokenRepository.deleteByKey(currentUser.getMemberId().toString());
 
         return BaseResponse.toResponseEntity(AuthResponse.LOGOUT_SUCCESS);
     }
