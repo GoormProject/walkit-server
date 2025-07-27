@@ -1,7 +1,7 @@
 package life.walkit.server.friendrequest.repository;
 
 import life.walkit.server.friendrequest.entity.FriendRequest;
-import life.walkit.server.friendrequest.enums.FriendRequestStatus;
+import life.walkit.server.friendrequest.entity.enums.FriendRequestStatus;
 import life.walkit.server.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
