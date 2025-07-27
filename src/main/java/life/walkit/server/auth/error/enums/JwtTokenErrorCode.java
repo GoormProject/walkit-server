@@ -11,7 +11,7 @@ public enum JwtTokenErrorCode implements ErrorCode {
     TOKEN_UNTRUSTWORTHY(HttpStatus.FORBIDDEN, "신뢰할 수 없는 토큰입니다."),
     TOKEN_ISSUE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "토큰 발급을 실패했습니다."),
     TOKEN_SECRET_KEY_INVALID_LENGTH(HttpStatus.INTERNAL_SERVER_ERROR, "토큰 시크릿 키의 길이가 유효하지 않습니다."),
-    REFRESH_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "리프레시 토큰이 없습니다."),
+    REFRESH_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, "리프레시 토큰이 없습니다."),
     REFRESH_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "리프레시 토큰이 유효하지 않습니다.");
 
     private final HttpStatus httpStatus;
