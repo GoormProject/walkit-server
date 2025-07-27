@@ -3,8 +3,11 @@ package life.walkit.server.trail.repository;
 
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.repository.MemberRepository;
+import life.walkit.server.path.entity.Path;
+import life.walkit.server.path.repository.PathRepository;
 import life.walkit.server.trail.entity.Trail;
 import life.walkit.server.trail.entity.TrailImage;
+import life.walkit.server.walk.entity.Walk;
 import life.walkit.server.walk.repository.WalkRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,15 +41,53 @@ public class TrailImageRepositoryTest {
     @Autowired
     WalkRepository walkRepository;
 
+    @Autowired
+    PathRepository pathRepository;
+
     Trail foundTrail;
 
     @BeforeEach
     void setUp() {
+        Double[][] lineString = new Double[][]{
+            {126.986, 37.541},
+            {126.987, 37.542},
+            {126.988, 37.543},
+            {126.989, 37.544}
+        };
+
         memberRepository.save(createMember("a@email.com", "회원A"));
+        Path savePath = pathRepository.save(createPath(lineString)); // Walk에 저장되야하는 Path
         Member foundMember = memberRepository.findByEmail("a@email.com").get();
-        trailRepository.save(createTrail(foundMember, "해운대구", "해운대구 근처 산책로 입니다.", 3.2));
+
+        walkRepository.save(
+            createWalk(
+                    foundMember,
+                    null,
+                    LocalDateTime.now(),
+                    LocalDateTime.now(),
+                    LocalDate.now(),
+                    savePath,
+                    null,
+                    null
+            )
+        );
+
+        // 복사한 Path
+        Path trailPath = pathRepository.save(new Path(savePath.getPath()));
+
+        trailRepository.save(
+            createTrail(
+                foundMember,
+                "해운대구",
+                "해운대구 근처 산책로 입니다.",
+                3.2,
+                trailPath
+            )
+        );
+
         foundTrail = trailRepository.findByMember(foundMember).get(0);
-        walkRepository.save(createWalk(foundMember, foundTrail, LocalDateTime.now(), LocalDateTime.now(), LocalDate.now(), null, null));
+
+
     }
 
     @Test

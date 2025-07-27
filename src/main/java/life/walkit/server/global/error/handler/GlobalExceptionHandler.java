@@ -34,13 +34,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException e) {
-        log.error("RuntimeException 발생: {}", e.getMessage(), e);
+        log.debug("RuntimeException 발생: {}", e.getMessage(), e);
         return getErrorResponse(e, GlobalErrorCode.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
-        log.error("Exception 발생: {}", e.getMessage(), e);
+        log.debug("Exception 발생: {}", e.getMessage(), e);
         return getErrorResponse(e, GlobalErrorCode.INTERNAL_SERVER_ERROR);
     }
 
