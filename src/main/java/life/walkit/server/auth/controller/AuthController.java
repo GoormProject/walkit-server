@@ -69,6 +69,7 @@ public class AuthController {
         return BaseResponse.toResponseEntity(AuthResponse.LOGOUT_SUCCESS);
     }
 
+    @Operation(summary = "액세스 토큰 재발급", description = "리프레시 토큰을 이용해 액세스 토큰을 재발급합니다.")
     @PostMapping("/reissue")
     public ResponseEntity<BaseResponse> reissueAccessToken(HttpServletRequest request, HttpServletResponse response) {
 

@@ -1,6 +1,7 @@
 package life.walkit.server.global.config;
 
 import life.walkit.server.auth.filter.JwtAuthenticationFilter;
+import life.walkit.server.auth.handler.CustomAuthenticationEntryPoint;
 import life.walkit.server.auth.handler.OAuth2LoginSuccessHandler;
 import life.walkit.server.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -25,15 +26,16 @@ public class SecurityConfig {
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
-            "/api-docs/**",
             "/actuator/health",
             "/actuator/prometheus",
+            "/api/auth/reissue",
             "/login/**"
     };
 
     private final AuthService authService;
     private final OAuth2LoginSuccessHandler loginSuccessHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -48,6 +50,9 @@ public class SecurityConfig {
                         .requestMatchers(PERMIT_URL_ARRAY).permitAll()
                         .requestMatchers("/api/auth/**").authenticated()
                         .anyRequest().permitAll() // TODO: 기본 인증 요구로 변경
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(customAuthenticationEntryPoint) // 토큰 검증 실패시 401 응답
                 )
                 .oauth2Login(oauth -> oauth
                         .userInfoEndpoint(user -> user.userService(authService))
