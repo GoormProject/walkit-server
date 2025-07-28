@@ -30,7 +30,7 @@ public class FriendService {
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         if (sender.equals(receiver)) {
-            throw new MemberException(MemberErrorCode.SELF_FRIEND_REQUEST);
+            throw new MemberException(FriendErrorCode.SELF_FRIEND_REQUEST);
         }
 
         if (friendRepository.existsByMemberAndPartner(sender, receiver)) {
@@ -38,7 +38,7 @@ public class FriendService {
         }
 
         if (friendRequestRepository.existsBySenderAndReceiver(sender, receiver)) {
-            throw new MemberException(MemberErrorCode.FRIEND_REQUEST_ALREADY_EXISTS);
+            throw new MemberException(FriendErrorCode.FRIEND_REQUEST_ALREADY_EXISTS);
         }
 
         FriendRequest newRequest = friendRequestRepository.save(FriendRequest.builder()
