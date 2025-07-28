@@ -24,6 +24,21 @@ public class MemberController {
 
     private final MemberService memberService;
 
+    @Operation(summary = "내 정보 조회", description = "이름과 닉네임, 프로필 이미지, 이메일을 조회합니다.")
+    @GetMapping("/{memberId}")
+    public ResponseEntity<BaseResponse> getProfile(@PathVariable("memberId") Long memberId,
+                                                   @AuthenticationPrincipal CustomMemberDetails member) {
+
+        if (!memberId.equals(member.getMemberId())) {
+            throw new MemberException(MemberErrorCode.MEMBER_FORBIDDEN);
+        }
+
+        return BaseResponse.toResponseEntity(
+                MemberResponse.GET_PROFILE_SUCCESS,
+                memberService.getProfile(memberId)
+        );
+    }
+
     @Operation(summary = "프로필 수정", description = "이름과 닉네임, 프로필 이미지를 수정합니다.")
     @PutMapping("/{memberId}")
     public ResponseEntity<BaseResponse> updateProfile(@PathVariable Long memberId,

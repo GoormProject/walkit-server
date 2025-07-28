@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor
 public enum MemberResponse implements Response {
+    GET_PROFILE_SUCCESS(HttpStatus.OK, "내 정보 조회 성공"),
     UPDATE_PROFILE_SUCCESS(HttpStatus.OK, "프로필 수정 성공");
 
     private final HttpStatus httpStatus;
