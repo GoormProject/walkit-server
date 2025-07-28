@@ -1,4 +1,4 @@
-package life.walkit.server.friendrequest.entity;
+package life.walkit.server.friend.enums;
 
 public enum FriendRequestStatus {
     PENDING,

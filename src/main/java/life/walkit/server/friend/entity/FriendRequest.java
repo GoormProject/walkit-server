@@ -1,7 +1,7 @@
-package life.walkit.server.friendrequest.entity;
+package life.walkit.server.friend.entity;
 
 import jakarta.persistence.*;
-import life.walkit.server.friendrequest.enums.FriendRequestStatus;
+import life.walkit.server.friend.enums.FriendRequestStatus;
 import life.walkit.server.global.BaseEntity;
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.error.MemberException;
