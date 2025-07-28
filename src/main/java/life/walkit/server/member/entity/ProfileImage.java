@@ -20,6 +20,7 @@ public class ProfileImage extends BaseEntity {
     @JoinColumn(name = "member_id")
     Member member;
 
+    @Setter
     @Column(name = "profile", nullable = false)
     String profileImage;
 
