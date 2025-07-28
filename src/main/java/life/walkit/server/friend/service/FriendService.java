@@ -2,6 +2,7 @@ package life.walkit.server.friend.service;
 
 import jakarta.transaction.Transactional;
 import life.walkit.server.friend.dto.FriendRequestResponseDTO;
+import life.walkit.server.friend.dto.SentFriendResponse;
 import life.walkit.server.friend.error.FriendErrorCode;
 import life.walkit.server.friend.error.FriendException;
 import life.walkit.server.friend.repository.FriendRepository;
@@ -13,6 +14,8 @@ import life.walkit.server.member.error.enums.MemberErrorCode;
 import life.walkit.server.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @Transactional
@@ -53,6 +56,26 @@ public class FriendService {
                 newRequest.getFriendRequestId()
         );
     }
+
+    /**
+     * 내가 보낸 친구 요청 목록 조회
+     */
+    public List<SentFriendResponse> getSentFriendRequests(Long memberId) {
+        Member sender = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        // 'sender'로 보낸 친구 요청 목록을 조회
+        List<FriendRequest> requests = friendRequestRepository.findBySender(sender);
+
+        // FriendRequest -> SentFriendResponse 매핑
+        return requests.stream()
+                .map(request -> new SentFriendResponse(
+                        request.getReceiver().getNickname(), // 수신자의 닉네임
+                        request.getReceiver().getStatus()    // 수신자의 MemberStatus
+                ))
+                .toList(); // 리스트로 변환하여 반환
+    }
+
 }
 
 
