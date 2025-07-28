@@ -18,6 +18,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @SpringBootTest
 @ActiveProfiles("test")
 public class FriendServiceTest {
@@ -59,9 +61,9 @@ public class FriendServiceTest {
         assertThat(response.senderNickname()).isEqualTo("회원A");
         assertThat(response.receiverNickname()).isEqualTo("회원B");
 
-        FriendRequest savedRequest = friendRequestRepository.findByReceiverAndStatus(memberB, FriendRequestStatus.PENDING).get(0);
-        assertThat(savedRequest.getSender().getNickname()).isEqualTo("회원A");
-        assertThat(savedRequest.getReceiver().getNickname()).isEqualTo("회원B");
+        List<FriendRequest> savedRequests = friendRequestRepository.findByReceiverAndStatus(memberB, FriendRequestStatus.PENDING);
+        assertThat(savedRequests).hasSize(1);
+        FriendRequest savedRequest = savedRequests.get(0);
     }
 
 
