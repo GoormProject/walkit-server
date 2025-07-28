@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import life.walkit.server.auth.dto.CurrentUserDto;
+import life.walkit.server.auth.dto.CustomMemberDetails;
 import life.walkit.server.auth.dto.enums.AuthResponse;
 import life.walkit.server.auth.entity.JwtToken;
 import life.walkit.server.auth.entity.enums.JwtTokenType;
@@ -43,7 +44,7 @@ public class AuthController {
 
     @Operation(summary = "로그아웃", description = "AccessToken 및 RefreshToken 쿠키를 삭제하여 로그아웃합니다.")
     @PostMapping("/logout")
-    public ResponseEntity<BaseResponse> logout(@AuthenticationPrincipal UserDetails member,
+    public ResponseEntity<BaseResponse> logout(@AuthenticationPrincipal CustomMemberDetails member,
                                                @RequestParam String deviceId, HttpServletResponse response) {
 
         // 액세스 토큰과 리프레시 토큰을 쿠키에서 제거
@@ -119,7 +120,7 @@ public class AuthController {
 
     @Operation(summary = "본인확인", description = "현재 로그인한 사용자의 정보를 조회합니다.")
     @GetMapping("/me")
-    public ResponseEntity<BaseResponse> getCurrentUser(@AuthenticationPrincipal UserDetails member) {
+    public ResponseEntity<BaseResponse> getCurrentUser(@AuthenticationPrincipal CustomMemberDetails member) {
         return BaseResponse.toResponseEntity(
                 AuthResponse.GET_CURRENT_MEMBER_SUCCESS,
                 authService.getCurrentUser(member.getUsername())
