@@ -22,10 +22,8 @@ public class FriendService {
     private final FriendRepository friendRepository;
     private final MemberRepository memberRepository;
 
-    // 친구 요청 로직
-    public FriendRequestResponseDTO sendFriendRequest(Long requesterId, String targetNickname) {
-        // 1. 본인에게 친구 요청 방지
-        Member sender = memberRepository.findById(requesterId)
+    public FriendRequestResponseDTO sendFriendRequest(Long senderId, String targetNickname) {
+        Member sender = memberRepository.findById(senderId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         Member receiver = memberRepository.findByNickname(targetNickname)
@@ -35,23 +33,19 @@ public class FriendService {
             throw new MemberException(MemberErrorCode.SELF_FRIEND_REQUEST);
         }
 
-        // 2. 이미 친구 관계 확인
         if (friendRepository.existsByMemberAndPartner(sender, receiver)) {
             throw new FriendException(FriendErrorCode.ALREADY_FRIEND);
         }
 
-        // 3. 동일한 요청 중복 방지
         if (friendRequestRepository.existsBySenderAndReceiver(sender, receiver)) {
             throw new MemberException(MemberErrorCode.FRIEND_REQUEST_ALREADY_EXISTS);
         }
 
-        // 4. 새 요청 저장
         FriendRequest newRequest = friendRequestRepository.save(FriendRequest.builder()
                 .sender(sender)
                 .receiver(receiver)
                 .build());
 
-        // 5. 생성된 요청에 대한 정보를 포함한 DTO 반환
         return new FriendRequestResponseDTO(
                 newRequest.getStatus(),
                 sender.getNickname(),
@@ -59,8 +53,6 @@ public class FriendService {
                 newRequest.getFriendRequestId()
         );
     }
-
-
-
-
 }
+
+
