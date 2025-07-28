@@ -2,6 +2,7 @@ package life.walkit.server.member.service;
 
 import life.walkit.server.global.factory.GlobalTestFactory;
 import life.walkit.server.global.util.S3Utils;
+import life.walkit.server.member.dto.ProfileRequest;
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.entity.enums.MemberRole;
 import life.walkit.server.member.entity.enums.MemberStatus;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -76,12 +78,31 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("프로필을 수정합니다.")
     void updateProfile_success() {
         // given
+        Member member = memberRepository.findByEmail("user1@test.com").orElseThrow();
+
+        ProfileRequest request = ProfileRequest.builder()
+                .name("새이름")
+                .nickname("새닉네임")
+                .build();
+
+        MockMultipartFile profileImage = new MockMultipartFile(
+                "profileImage",                  // 필드 이름
+                "profile.jpg",                          // 파일 이름
+                "image/jpeg",                           // MIME 타입
+                "fake image content".getBytes()         // 파일 내용 (byte[])
+        );
 
         // when
+        memberService.updateProfile(member.getMemberId(), request, profileImage);
 
         // then
+        Member foundMember = memberRepository.findByEmail("user1@test.com").orElseThrow();
+        assertThat(foundMember)
+                .extracting("name", "nickname")
+                .containsExactly("새이름", "새닉네임");
+        assertThat(foundMember.getProfileImage()).isNotNull();
     }
 }
