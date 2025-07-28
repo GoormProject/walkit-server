@@ -8,10 +8,7 @@ import org.springframework.http.HttpStatus;
 public enum MemberErrorCode implements ErrorCode {
 
     EMAIL_NOT_VALID(HttpStatus.BAD_REQUEST, "이메일이 null 또는 빈 문자열입니다."),
-    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."),
-    FRIEND_REQUEST_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "상대방과의 친구 신청이 이미 존재합니다."),
-    SELF_FRIEND_REQUEST(HttpStatus.BAD_REQUEST, "본인에게 친구 신청할 수 없습니다."),
-    FRIEND_STATUS_INVALID(HttpStatus.BAD_REQUEST, "친구 신청 승인 또는 거절시 상태가 잘못되었습니다.");
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

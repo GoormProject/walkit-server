@@ -1,7 +1,8 @@
-package life.walkit.server.friendrequest.entity;
+package life.walkit.server.friend.entity;
 
 import jakarta.persistence.*;
-import life.walkit.server.friendrequest.entity.enums.FriendRequestStatus;
+import life.walkit.server.friend.enums.FriendRequestStatus;
+import life.walkit.server.friend.error.FriendErrorCode;
 import life.walkit.server.global.BaseEntity;
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.error.MemberException;
@@ -37,7 +38,7 @@ public class FriendRequest extends BaseEntity {
     @Builder
     public FriendRequest(Member sender, Member receiver) {
         if (sender.equals(receiver)) {
-            throw new MemberException(MemberErrorCode.SELF_FRIEND_REQUEST);
+            throw new MemberException(FriendErrorCode.SELF_FRIEND_REQUEST);
         }
         this.sender = sender;
         this.receiver = receiver;
@@ -46,21 +47,21 @@ public class FriendRequest extends BaseEntity {
 
     public void approve() {
         if (this.status != FriendRequestStatus.PENDING && this.status != FriendRequestStatus.REJECTED) {
-            throw new MemberException(MemberErrorCode.FRIEND_STATUS_INVALID);
+            throw new MemberException(FriendErrorCode.FRIEND_STATUS_INVALID);
         }
         this.status = FriendRequestStatus.APPROVED;
     }
 
     public void reject() {
         if (this.status != FriendRequestStatus.PENDING) {
-            throw new MemberException(MemberErrorCode.FRIEND_STATUS_INVALID);
+            throw new MemberException(FriendErrorCode.FRIEND_STATUS_INVALID);
         }
         this.status = FriendRequestStatus.REJECTED;
     }
 
     public void cancel() {
         if (this.status != FriendRequestStatus.PENDING) {
-            throw new MemberException(MemberErrorCode.FRIEND_STATUS_INVALID);
+            throw new MemberException(FriendErrorCode.FRIEND_STATUS_INVALID);
         }
         this.status = FriendRequestStatus.CANCELLED;
     }

@@ -10,4 +10,6 @@ import java.util.List;
 public interface FriendRepository extends JpaRepository<Friend, Long> {
     // 특정 회원(member)에 대한 친구 목록 조회
     List<Friend> findAllByMember(Member member);
+
+    boolean existsByMemberAndPartner(Member member, Member member1);
 }
