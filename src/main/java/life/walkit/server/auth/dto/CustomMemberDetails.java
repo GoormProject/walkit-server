@@ -1,7 +1,6 @@
 package life.walkit.server.auth.dto;
 
 import life.walkit.server.member.entity.Member;
-import life.walkit.server.member.entity.enums.MemberRole;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,6 +9,10 @@ import java.util.Collection;
 import java.util.List;
 
 public record CustomMemberDetails(Member member) implements UserDetails {
+
+    public Long getMemberId() {
+        return member.getMemberId();
+    }
 
     @Override
     public String getUsername() {

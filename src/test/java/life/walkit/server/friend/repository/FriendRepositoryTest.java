@@ -2,7 +2,6 @@ package life.walkit.server.friend.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static life.walkit.server.global.factory.GlobalTestFactory.*;
-
 import life.walkit.server.friend.entity.Friend;
 import life.walkit.server.friend.entity.FriendRequest;
 import life.walkit.server.friend.enums.FriendRequestStatus;

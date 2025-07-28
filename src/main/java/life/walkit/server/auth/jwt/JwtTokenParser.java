@@ -40,4 +40,8 @@ public class JwtTokenParser {
         return CookieUtils.getCookieValue(request, JwtTokenType.ACCESS_TOKEN.name());
     }
 
+    public String resolveRefreshToken(HttpServletRequest request) {
+        return CookieUtils.getCookieValue(request, JwtTokenType.REFRESH_TOKEN.name());
+    }
+
 }
