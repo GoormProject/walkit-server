@@ -6,12 +6,13 @@ import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor
 public enum FriendRequestResponse implements Response {
-    APPROVED_SUCCESS(HttpStatus.OK, "친구 요청을 수락하였습니다."),
-    REJECTED_SUCCESS(HttpStatus.OK, "친구 요청을 거절하였습니다."),
-    CANCELED_SUCCESS(HttpStatus.OK, "친구 요청을 취소하였습니다."),
-    RECEIVED_LIST_SUCCESS(HttpStatus.OK, "받은 친구 요청 목록을 조회하였습니다."),
-    SENT_LIST_SUCCESS(HttpStatus.OK, "보낸 친구 요청 목록을 조회하였습니다."),
-    LIST_SUCCESS(HttpStatus.OK, "친구 목록을 조회하였습니다.");
+    REQUEST_SUCCESS(HttpStatus.CREATED, "친구 요청 성공"),
+    APPROVED_SUCCESS(HttpStatus.OK, "친구 요청 수락 성공"),
+    REJECTED_SUCCESS(HttpStatus.OK, "친구 요청 거절 성공"),
+    CANCELED_SUCCESS(HttpStatus.OK, "친구 요청 취소 성공."),
+    RECEIVED_LIST_SUCCESS(HttpStatus.OK, "받은 친구 요청 목록 조회 성공"),
+    SENT_LIST_SUCCESS(HttpStatus.OK, "보낸 친구 요청 목록 조회 성공"),
+    LIST_SUCCESS(HttpStatus.OK, "친구 목록 조회 성공.");
 
     private final HttpStatus httpStatus;
     private final String message;
