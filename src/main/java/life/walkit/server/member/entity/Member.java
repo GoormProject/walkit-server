@@ -41,6 +41,9 @@ public class Member extends BaseEntity {
     @Column(name = "role", nullable = false)
     private MemberRole role;
 
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private ProfileImage profileImage;
+
     @Builder
     public Member(String email, String name, String nickname, MemberStatus status, Point location, MemberRole role) {
         this.email = email;
@@ -51,4 +54,8 @@ public class Member extends BaseEntity {
         this.role = role;
     }
 
+    public void setProfileImage(ProfileImage profileImage) {
+        this.profileImage = profileImage;
+        profileImage.setMember(this);
+    }
 }
