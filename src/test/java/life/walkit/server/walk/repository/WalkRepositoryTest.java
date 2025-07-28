@@ -13,13 +13,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
 import static life.walkit.server.global.factory.GlobalTestFactory.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -39,11 +40,12 @@ public class WalkRepositoryTest {
     @BeforeEach
     void setUp() {
         lineString = new Double[][]{
-                {126.986, 37.541},
-                {126.987, 37.542},
-                {126.988, 37.543},
-                {126.989, 37.544}
+            {126.986, 37.541},
+            {126.987, 37.542},
+            {126.988, 37.543},
+            {126.989, 37.544}
         };
+
         memberRepository.save(createMember("a@email.com", "회원A"));
         memberRepository.save(createMember("b@email.com", "회원B"));
         memberRepository.save(createMember("c@email.com", "회원C"));
@@ -59,19 +61,24 @@ public class WalkRepositoryTest {
         Path savedPath = pathRepository.save(createPath(lineString));
         Path foundPath = pathRepository.findById(savedPath.getPathId()).get();
 
+        LocalTime startTime = LocalTime.of(0, 0, 0); // startTIme
+        LocalTime endTime = LocalTime.of(12, 23, 56); // endTime
+
+        Duration totalTime = Duration.between(startTime, endTime); // 12 hour
+        Double totalDistance = 2.0; // 총 거리
+        Double pace = 1.2; // 평균 속도 1.2km
+
         // when
-        LocalDateTime startTime = LocalDateTime.now();
-        LocalDate today = LocalDate.now();
         walkRepository.save(
             createWalk(
                 foundMember,
                 null,
-                startTime,
-                null,
-                 today,
                 foundPath,
-                null,
-                null
+                "강남 산책로",
+                totalDistance,
+                totalTime,
+                pace,
+                false // default value
             )
         );
 
@@ -79,11 +86,11 @@ public class WalkRepositoryTest {
         List<Walk> foundWalks = walkRepository.findByMember(foundMember);
         assertThat(foundWalks).hasSize(1);
         assertThat(foundWalks.get(0))
-                .satisfies(walk -> {
-                    assertThat(walk.getMember().getEmail()).isEqualTo("d@email.com");
-                    assertThat(walk.getStartedAt()).isEqualTo(startTime);
-                    assertThat(walk.getDate()).isEqualTo(today);
-                });
+            .satisfies(walk -> {
+                assertThat(walk.getMember().getEmail()).isEqualTo("d@email.com");
+                assertThat(walk.getPace()).isEqualTo(1.2);
+                assertThat(walk.getTotalDistance()).isEqualTo(totalDistance);
+            });
     }
 
     @Test
@@ -98,39 +105,45 @@ public class WalkRepositoryTest {
         Path foundPathA = pathRepository.findById(savePathA.getPathId()).get();
         Path foundPathB = pathRepository.findById(savePathB.getPathId()).get();
 
-        // 산책 기록 2개 생성 (각각 다른 날짜와 시간)
-        LocalDateTime startTimeA = LocalDateTime.of(2025, 7, 20, 10, 0);
-        LocalDateTime startTimeB = LocalDateTime.of(2025, 7, 21, 15, 30);
+        // 시간
+        LocalTime startTime = LocalTime.of(0, 0, 0);
+        LocalTime endTimeA = LocalTime.of(12, 23, 56);
+        LocalTime endTimeB = LocalTime.of(11, 23, 56);
+
+        // 총 거리
+        Double totalDistanceA = 2.0;
+        Double totalDistanceB = 3.0;
+
+        // 시간 계산
+        Duration totalTimeA = Duration.between(startTime, endTimeA); // 12 hour
+        Duration totalTimeB = Duration.between(startTime, endTimeB); // 11 hour
+
+        // 평균 속도(km)
+        Double paceA = 1.2;
+        Double paceB = 1.5;
 
         walkRepository.save(
             createWalk(
                 foundMember,
                 null,
-                startTimeA,
-                startTimeA.plusHours(1),
-                LocalDate.of(
-                    2025,
-                    7,
-                    20
-                ),
                 foundPathA,
-                null,
-                null
+                "수원광교 산책로입니다.",
+                totalDistanceA,
+                totalTimeA,
+                paceA,
+                false
             )
         );
         walkRepository.save(
             createWalk(
                 foundMember,
                 null,
-                startTimeB,
-                startTimeB.plusMinutes(45),
-                LocalDate.of(
-                    2025,
-                    7,
-                    21),
                 foundPathB,
-                null,
-                null
+                "도원동 산책로입니다.",
+                totalDistanceB,
+                totalTimeB,
+                paceB,
+                false
             )
         );
 
@@ -140,10 +153,10 @@ public class WalkRepositoryTest {
         // then
         assertThat(foundWalks).hasSize(2);
         assertThat(foundWalks)
-            .extracting("date")
+            .extracting("totalDistance", "pace")
             .containsExactlyInAnyOrder(
-                LocalDate.of(2025, 7, 20),
-                LocalDate.of(2025, 7, 21)
+                tuple(2.0, 1.2),
+                tuple(3.0, 1.5)
             );
     }
 
@@ -157,18 +170,22 @@ public class WalkRepositoryTest {
         Path savePath = pathRepository.save(createPath(lineString));
         Path foundPath = pathRepository.findById(savePath.getPathId()).get();
 
-        LocalDateTime startTime = LocalDateTime.now();
-        LocalDate today = LocalDate.now();
+        LocalTime startTime = LocalTime.of(0, 0, 0);
+        LocalTime endTime = LocalTime.of(12, 23, 56);
+        Duration totalTime = Duration.between(startTime, endTime); // 12 hour
+        Double totalDistance = 2.0;
+        Double pace = 1.2; // 1.2km
+
         Walk savedWalk = walkRepository.save(
             createWalk(
                 foundMember,
                 null,
-                startTime,
-                null,
-                today,
                 foundPath,
-                null,
-                null
+                "Test Walk Title",
+                totalDistance,
+                totalTime,
+                pace,
+                false
             )
         );
 
@@ -194,39 +211,37 @@ public class WalkRepositoryTest {
         Path savePathB = pathRepository.save(createPath(lineString));
         Path foundPathB = pathRepository.findById(savePathB.getPathId()).get();
 
-        LocalDateTime startTimeA = LocalDateTime.of(2025, 7, 20, 10, 0);
-        LocalDateTime startTimeB = LocalDateTime.of(2025, 7, 21, 15, 30);
+        LocalTime startTime = LocalTime.of(0, 0, 0);
+        LocalTime endTimeA = LocalTime.of(12, 23, 56);
+        LocalTime endTimeB = LocalTime.of(11, 23, 56);
+        Duration totalTimeA = Duration.between(startTime, endTimeA); // 12 hour
+        Duration totalTimeB = Duration.between(startTime, endTimeB); // 11 hour
+        Double paceA = 1.2; // 1.2km 평군 속도
+        Double paceB = 1.5; // 1.2km 평군 속도
+        Double totalDistance = 3.0; // 총 3km
 
         Walk walkA = walkRepository.save(
             createWalk(
                 foundMember,
                 null,
-                startTimeA,
-                startTimeA.plusHours(1),
-                LocalDate.of(
-                    2025,
-                    7,
-                    20
-                ),
                 foundPathA,
-                null,
-                null
+                "테스트 타이틀 A",
+                totalDistance,
+                totalTimeA,
+                paceA,
+                false
             )
         );
         walkRepository.save(
             createWalk(
                 foundMember,
                 null,
-                startTimeB,
-                startTimeB.plusMinutes(45),
-                LocalDate.of(
-                    2025,
-                    7,
-                    21
-                ),
                 foundPathB,
-                null,
-                null
+                "테스트 타이틀 B",
+                totalDistance,
+                totalTimeB,
+                paceB,
+                false
             )
         );
 
@@ -238,14 +253,9 @@ public class WalkRepositoryTest {
         List<Walk> foundWalk = walkRepository.findByMember(foundMember);
         assertThat(foundWalk).hasSize(1);
         assertThat(foundWalk)
-                .extracting("date")
-                .containsExactly(
-                    LocalDate.of(
-                        2025,
-                        7,
-                        21
-                    )
-                );
+            .extracting("walkTitle")
+            .containsExactly("테스트 타이틀 B");
+
 
         assertThat(deletedWalk).isEmpty();
     }

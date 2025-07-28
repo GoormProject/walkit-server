@@ -6,7 +6,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
@@ -22,18 +21,31 @@ public class WalkingSession {
     private Long eventId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "walk_id", nullable = false)
+    @JoinColumn(
+        name = "walk_id",
+        nullable = false
+    )
     private Walk walk;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "event_type", nullable = false)
+    @Column(
+        name = "event_type",
+        nullable = false
+    )
     private EventType eventType;
 
-    @Column(name = "event_time", nullable = false)
+    @Column(
+        name = "event_time",
+        nullable = false
+    )
     private LocalDateTime eventTime;
 
     @Builder
-    public WalkingSession(Long eventId, Walk walk, EventType eventType) {
+    public WalkingSession(
+        Long eventId,
+        Walk walk,
+        EventType eventType
+    ) {
         this.eventId = eventId;
         this.walk = walk;
         this.eventType = eventType;
