@@ -1,5 +1,6 @@
 package life.walkit.server.member.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import life.walkit.server.auth.dto.CustomMemberDetails;
 import life.walkit.server.global.response.BaseResponse;
@@ -21,7 +22,8 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    @PostMapping("/{memberId}")
+    @Operation(summary = "프로필 수정", description = "이름과 닉네임, 프로필 이미지를 수정합니다.")
+    @PutMapping("/{memberId}")
     public ResponseEntity<BaseResponse> updateProfile(@PathVariable Long memberId,
                                                       @AuthenticationPrincipal CustomMemberDetails member,
                                                       @Valid @RequestPart("data") ProfileRequest request,

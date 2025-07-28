@@ -27,7 +27,7 @@ public class S3Utils {
 
     public String uploadFileAndGetUrl(String PATH, MultipartFile file) throws IOException {
         if (file.getSize() > MAX_FILE_SIZE) {
-            throw new IllegalArgumentException("파일 크기가 10MB를 초과할 수 없습니다.");
+            throw new IllegalArgumentException("[S3 ERROR] 파일 크기가 10MB를 초과할 수 없습니다.");
         }
 
         String fileName = file.getOriginalFilename();
@@ -59,7 +59,7 @@ public class S3Utils {
 
         // 허용된 확장자인지 검증
         if (!fileExtension.isEmpty() && !allowedExtensions.contains(fileExtension.toLowerCase())) {
-            throw new IllegalArgumentException("허용되지 않는 이미지 파일 확장자: " + fileExtension);
+            throw new IllegalArgumentException("[S3 ERROR] 허용되지 않는 이미지 파일 확장자: " + fileExtension);
         }
 
         return fileExtension;
@@ -67,14 +67,20 @@ public class S3Utils {
 
     public void deleteFile(String imageUrl) {
         try {
+            if (imageUrl == null || imageUrl.trim().isEmpty()) {
+                throw new IllegalArgumentException("[S3 ERROR] 삭제할 파일 URL이 유효하지 않습니다.");
+            }
+
             DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
                     .bucket(s3Config.getBucketName())
                     .key(s3Config.extractObjectKeyFromUrl(imageUrl))
                     .build();
 
             s3Client.deleteObject(deleteRequest);
+        } catch (software.amazon.awssdk.services.s3.model.S3Exception e) {
+            throw new RuntimeException("[S3 ERROR] S3 파일 삭제 실패 (" + e.statusCode() + "): " + imageUrl, e);
         } catch (Exception e) {
-            throw new RuntimeException("S3 파일 삭제 실패: " + imageUrl, e);
+            throw new RuntimeException("[S3 ERROR] S3 파일 삭제 중 예상치 못한 오류 발생: " + imageUrl, e);
         }
     }
 }

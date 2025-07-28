@@ -60,6 +60,10 @@ public class Member extends BaseEntity {
     }
 
     public void setProfileImage(ProfileImage profileImage) {
+        if (profileImage == null) {
+            this.profileImage = null;
+            return;
+        }
         this.profileImage = profileImage;
         profileImage.setMember(this);
     }

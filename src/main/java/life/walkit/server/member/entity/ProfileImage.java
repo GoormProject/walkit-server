@@ -15,18 +15,24 @@ public class ProfileImage extends BaseEntity {
     @Column(name = "profile_image_id")
     private Long profileImageId;
 
-    @Setter
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     Member member;
 
-    @Setter
     @Column(name = "profile", nullable = false)
     String profileImage;
 
     @Builder
     public ProfileImage(Member member, String profileImage) {
         this.member = member;
+        this.profileImage = profileImage;
+    }
+
+    public void setMember(Member member) {
+        this.member = member;
+    }
+
+    public void setProfileImage(String profileImage) {
         this.profileImage = profileImage;
     }
 }
