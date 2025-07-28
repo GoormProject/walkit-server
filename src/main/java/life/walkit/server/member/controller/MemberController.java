@@ -1,6 +1,7 @@
 package life.walkit.server.member.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import life.walkit.server.auth.dto.CustomMemberDetails;
 import life.walkit.server.global.response.BaseResponse;
@@ -15,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+@Tag(name = "회원", description = "회원 API")
 @RequestMapping("/api/members")
 @RestController
 @RequiredArgsConstructor
