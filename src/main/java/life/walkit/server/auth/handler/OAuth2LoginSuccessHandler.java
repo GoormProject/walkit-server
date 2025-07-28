@@ -40,6 +40,14 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
         try {
+            // state 파라미터에서 deviceId 추출
+            String deviceId = request.getParameter("state");
+            if (deviceId == null || deviceId.isBlank())
+                deviceId = "no-device-id";
+            // deviceId 길이 제한 (보안상 너무 긴 값 방지)
+            if (deviceId.length() > 50)
+                deviceId = deviceId.substring(0, 50);
+
             OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 
             // 회원가입 또는 기존 회원 조회
@@ -51,7 +59,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
             // JWT 토큰 발급
             JwtToken accessToken = jwtTokenIssuer.issueAccessToken(member.getMemberId());
-            JwtToken refreshToken = jwtTokenIssuer.issueRefreshToken(member.getMemberId());
+            JwtToken refreshToken = jwtTokenIssuer.issueRefreshToken(member.getMemberId(), deviceId);
 
             // 쿠키 설정
             response.addHeader(

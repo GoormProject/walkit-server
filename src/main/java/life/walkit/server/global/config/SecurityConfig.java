@@ -1,7 +1,9 @@
 package life.walkit.server.global.config;
 
 import life.walkit.server.auth.filter.JwtAuthenticationFilter;
+import life.walkit.server.auth.handler.CustomAuthenticationEntryPoint;
 import life.walkit.server.auth.handler.OAuth2LoginSuccessHandler;
+import life.walkit.server.auth.resolver.CustomAuthorizationRequestResolver;
 import life.walkit.server.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -25,15 +27,17 @@ public class SecurityConfig {
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
-            "/api-docs/**",
             "/actuator/health",
             "/actuator/prometheus",
+            "/api/auth/reissue",
             "/login/**"
     };
 
     private final AuthService authService;
     private final OAuth2LoginSuccessHandler loginSuccessHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAuthorizationRequestResolver customResolver;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -49,7 +53,14 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").authenticated()
                         .anyRequest().permitAll() // TODO: 기본 인증 요구로 변경
                 )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(customAuthenticationEntryPoint) // 토큰 검증 실패시 401 응답
+                )
                 .oauth2Login(oauth -> oauth
+                        .authorizationEndpoint(
+                                // state의 deviceId를 유지하도록 커스터마이징
+                                ep ->ep.authorizationRequestResolver(customResolver)
+                        )
                         .userInfoEndpoint(user -> user.userService(authService))
                         .successHandler(loginSuccessHandler)
                 )
