@@ -1,12 +1,12 @@
-package life.walkit.server.member.repository;
+package life.walkit.server.friend.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static life.walkit.server.global.factory.GlobalTestFactory.*;
-import life.walkit.server.friend.repository.FriendRepository;
 import life.walkit.server.friend.entity.Friend;
-import life.walkit.server.friendrequest.entity.FriendRequest;
-import life.walkit.server.friendrequest.repository.FriendRequestRepository;
+import life.walkit.server.friend.entity.FriendRequest;
+import life.walkit.server.friend.enums.FriendRequestStatus;
 import life.walkit.server.member.entity.Member;
+import life.walkit.server.member.repository.MemberRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -86,5 +86,37 @@ class FriendRepositoryTest {
         assertThat(friends).hasSize(2)
                 .extracting(friend -> friend.getPartner().getNickname())
                 .containsExactlyInAnyOrder("회원B", "회원C");
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("수락 대기 중인 친구 요청 조회 성공")
+    void findPendingFriendRequests_success() {
+        // given
+        Member memberA = memberRepository.findByNickname("회원A").get();
+        Member memberB = memberRepository.findByNickname("회원B").get();
+        Member memberC = memberRepository.findByNickname("회원C").get();
+
+        FriendRequest friendRequestA = FriendRequest.builder()
+                .sender(memberA)
+                .receiver(memberC)
+                .build();
+        friendRequestRepository.save(friendRequestA);
+
+        FriendRequest friendRequestB = FriendRequest.builder()
+                .sender(memberB)
+                .receiver(memberC)
+                .build();
+
+        friendRequestRepository.save(friendRequestB);
+
+        // when
+        List<FriendRequest> pendingRequests = friendRequestRepository.findByReceiverAndStatus(memberC, FriendRequestStatus.PENDING);
+
+        // then
+        assertThat(pendingRequests).hasSize(2)
+                .extracting(request -> request.getSender().getNickname())
+                .containsExactlyInAnyOrder("회원A", "회원B");
+        assertThat(pendingRequests).allMatch(request -> request.getStatus() == FriendRequestStatus.PENDING);
     }
 }

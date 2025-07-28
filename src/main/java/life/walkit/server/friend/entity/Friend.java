@@ -1,6 +1,8 @@
 package life.walkit.server.friend.entity;
 
 import jakarta.persistence.*;
+import life.walkit.server.friend.error.FriendErrorCode;
+import life.walkit.server.friend.error.FriendException;
 import life.walkit.server.global.BaseEntity;
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.error.MemberException;
@@ -36,7 +38,7 @@ public class Friend extends BaseEntity {
     @Builder
     public Friend(Member member, Member partner) {
         if (member.equals(partner)) {
-            throw new MemberException(MemberErrorCode.SELF_FRIEND_REQUEST);
+            throw new FriendException(FriendErrorCode.SELF_FRIEND_REQUEST);
         }
         this.member = member;
         this.partner = partner;

@@ -67,4 +67,9 @@ public class Member extends BaseEntity {
         this.profileImage = profileImage;
         profileImage.setMember(this);
     }
+
+    // 상태 변경 메서드 추가
+    public void updateStatus(MemberStatus status) {
+        this.status = status;
+    }
 }
