@@ -41,6 +41,9 @@ public class Member extends BaseEntity {
     @Column(name = "role", nullable = false)
     private MemberRole role;
 
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private ProfileImage profileImage;
+
     @Builder
     public Member(String email, String name, String nickname, MemberStatus status, Point location, MemberRole role) {
         this.email = email;
@@ -49,6 +52,20 @@ public class Member extends BaseEntity {
         this.status = status;
         this.location = location;
         this.role = role;
+    }
+
+    public void updateProfileText(String name, String nickname) {
+        this.name = name;
+        this.nickname = nickname;
+    }
+
+    public void setProfileImage(ProfileImage profileImage) {
+        if (profileImage == null) {
+            this.profileImage = null;
+            return;
+        }
+        this.profileImage = profileImage;
+        profileImage.setMember(this);
     }
 
     // 상태 변경 메서드 추가
