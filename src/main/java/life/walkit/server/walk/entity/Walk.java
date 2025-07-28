@@ -8,11 +8,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.locationtech.jts.geom.LineString;
 
 import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -26,41 +23,73 @@ public class Walk {
     private Long walkId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
+    @JoinColumn(
+        name = "member_id",
+        nullable = false
+    )
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trail_id")
     private Trail trail;
 
-    @Column(name = "started_at")
-    private LocalDateTime startedAt;
-
-    @Column(name = "ended_at")
-    private LocalDateTime endedAt;
-
-    @Column(name = "date")
-    private LocalDate date;
-
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "path_id", nullable = false)
+    @OneToOne(
+        fetch = FetchType.LAZY,
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    @JoinColumn(
+        name = "path_id",
+        nullable = false
+    )
     private Path path;
 
-    @Column(name = "total_time")
+    @Column(name = "walk_title")
+    private String walkTitle;
+
+    @Column(
+        name = "total_distance",
+        nullable = false
+    )
+    private Double totalDistance;
+
+    @Column(
+        name = "total_time",
+        nullable = false
+    )
     private Duration totalTime;
 
-    @Column(name = "pace")
+    @Column(
+        name = "pace",
+        nullable = false
+    )
     private Double pace;
 
+    @Column(
+        name = "is_uploaded",
+        columnDefinition = "BOOLEAN DEFAULT FALSE",
+        nullable = false
+    )
+    private Boolean isUploaded;
+
     @Builder
-    public Walk(Member member, Trail trail, LocalDateTime startedAt, LocalDateTime endedAt, LocalDate date, Path path, Duration totalTime, Double pace) {
+    public Walk(
+        Member member,
+        Trail trail,
+        Path path,
+        String walkTitle,
+        Double totalDistance,
+        Duration totalTime,
+        Double pace,
+        Boolean isUploaded
+    ) {
         this.member = member;
         this.trail = trail;
-        this.startedAt = startedAt;
-        this.endedAt = endedAt;
-        this.date = date;
         this.path = path;
+        this.walkTitle = walkTitle;
+        this.totalDistance = totalDistance;
         this.totalTime = totalTime;
         this.pace = pace;
+        this.isUploaded = isUploaded;
     }
 }

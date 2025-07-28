@@ -25,33 +25,58 @@ public class Trail extends BaseEntity {
     private Long trailId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
+    @JoinColumn(
+        name = "member_id",
+        nullable = false
+    )
     private Member member;
 
-    @Column(name = "title", nullable = false)
+    @OneToOne(
+        fetch = FetchType.LAZY,
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    @JoinColumn(
+        name = "path_id",
+        nullable = false
+    )
+    private Path path;
+
+    @Column(
+        name = "title",
+        nullable = false
+    )
     private String title;
 
     @Column(name = "description")
     private String description;
 
-    @Column(name = "distance", nullable = false)
+    @Column(
+        name = "distance",
+        nullable = false
+    )
     private Double distance;
 
-    @Column(name = "location", nullable = false, columnDefinition = "geometry(Point, 4326)")
-    private Point location;
-
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "path_id", nullable = false)
-    private Path path;
+    @Column(
+        name = "location",
+        nullable = false
+    )
+    private String location;
 
     @Builder
-    public Trail(Member member, String title, String description, Double distance, Point location, Path path) {
+    public Trail(
+        Member member,
+        Path path,
+        String title,
+        String description,
+        Double distance,
+        String location
+    ) {
         this.member = member;
+        this.path = path;
         this.title = title;
         this.description = description;
         this.distance = distance;
         this.location = location;
-        this.path = path;
     }
-
 }

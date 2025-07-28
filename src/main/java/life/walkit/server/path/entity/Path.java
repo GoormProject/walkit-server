@@ -1,9 +1,11 @@
 package life.walkit.server.path.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.Point;
 
 @Entity
 @Table(name = "path")
@@ -16,10 +18,27 @@ public class Path {
     @Column(name = "path_id")
     private Long pathId;
 
-    @Column(name = "path", nullable = false, columnDefinition = "geometry(LineString, 4326)")
+    @Column(
+        name = "path",
+        nullable = false,
+        columnDefinition = "geometry(LineString, 4326)"
+    )
     private LineString path;
 
-    public Path(LineString path) {
+    @Column(
+        name = "start_point",
+        nullable = false,
+        columnDefinition = "geometry(Point, 4326)"
+    )
+    private Point point;
+
+
+    @Builder
+    public Path(
+        LineString path,
+        Point point
+    ) {
         this.path = path;
+        this.point = point;
     }
 }
