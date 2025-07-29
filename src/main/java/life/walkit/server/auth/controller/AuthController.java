@@ -2,6 +2,7 @@ package life.walkit.server.auth.controller;
 
 import io.jsonwebtoken.Claims;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,12 +25,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 
 @Tag(name = "인증", description = "인증 API")
+@SecurityRequirement(name = "cookieAuth")
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -44,8 +45,10 @@ public class AuthController {
 
     @Operation(summary = "로그아웃", description = "AccessToken 및 RefreshToken 쿠키를 삭제하여 로그아웃합니다.")
     @PostMapping("/logout")
-    public ResponseEntity<BaseResponse> logout(@AuthenticationPrincipal CustomMemberDetails member,
-                                               @RequestParam String deviceId, HttpServletResponse response) {
+    public ResponseEntity<BaseResponse<Void>> logout(
+            @AuthenticationPrincipal CustomMemberDetails member,
+            @RequestParam String deviceId, HttpServletResponse response
+    ) {
 
         // 액세스 토큰과 리프레시 토큰을 쿠키에서 제거
         Arrays.stream(JwtTokenType.values()).forEach(tokenType ->
@@ -70,8 +73,10 @@ public class AuthController {
 
     @Operation(summary = "액세스 토큰 재발급", description = "리프레시 토큰을 이용해 액세스 토큰을 재발급합니다.")
     @PostMapping("/reissue")
-    public ResponseEntity<BaseResponse> reissueAccessToken(@RequestParam String deviceId,
-                                                           HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<BaseResponse<Void>> reissueAccessToken(
+            @RequestParam String deviceId,
+            HttpServletRequest request, HttpServletResponse response
+    ) {
 
         String refreshToken = jwtTokenParser.resolveRefreshToken(request);
         if (refreshToken == null || refreshToken.isBlank())
@@ -120,7 +125,9 @@ public class AuthController {
 
     @Operation(summary = "본인확인", description = "현재 로그인한 사용자의 정보를 조회합니다.")
     @GetMapping("/me")
-    public ResponseEntity<BaseResponse> getCurrentUser(@AuthenticationPrincipal CustomMemberDetails member) {
+    public ResponseEntity<BaseResponse<CurrentUserDto>> getCurrentUser(
+            @AuthenticationPrincipal CustomMemberDetails member
+    ) {
         return BaseResponse.toResponseEntity(
                 AuthResponse.GET_CURRENT_MEMBER_SUCCESS,
                 authService.getCurrentUser(member.getUsername())
