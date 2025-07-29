@@ -39,8 +39,7 @@ public class Walk {
         orphanRemoval = true
     )
     @JoinColumn(
-        name = "path_id",
-        nullable = false
+        name = "path_id"
     )
     private Path path;
 
@@ -48,20 +47,17 @@ public class Walk {
     private String walkTitle;
 
     @Column(
-        name = "total_distance",
-        nullable = false
+        name = "total_distance"
     )
     private Double totalDistance;
 
     @Column(
-        name = "total_time",
-        nullable = false
+        name = "total_time"
     )
     private Duration totalTime;
 
     @Column(
-        name = "pace",
-        nullable = false
+        name = "pace"
     )
     private Double pace;
 

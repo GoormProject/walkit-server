@@ -42,11 +42,9 @@ public class WalkingSession {
 
     @Builder
     public WalkingSession(
-        Long eventId,
         Walk walk,
         EventType eventType
     ) {
-        this.eventId = eventId;
         this.walk = walk;
         this.eventType = eventType;
         this.eventTime = LocalDateTime.now();
