@@ -7,7 +7,8 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum WalkResponse implements Response {
 
-    START_WALK_SUCCESS(HttpStatus.OK, "산책 기록 시작 성공");
+    START_WALK_SUCCESS(HttpStatus.OK, "산책 기록 시작 성공"),
+    PAUSE_WALK_SUCCESS(HttpStatus.OK, "산책 기록 일시정지 성공");
 
     private final HttpStatus httpStatus;
     private final String message;
