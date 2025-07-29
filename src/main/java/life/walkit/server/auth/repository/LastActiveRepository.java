@@ -9,10 +9,10 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class JwtTokenRepository implements RedisKeyValueRepository<String, String> {
+public class LastActiveRepository implements RedisKeyValueRepository<String, String> {
 
     private final StringRedisTemplate stringRedisTemplate;
-    private final String PREFIX = "refreshToken:";
+    private final String PREFIX = "lastActive:";
 
     @Override
     public void saveWithTTL(String key, String value, Duration duration) {

@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import life.walkit.server.auth.dto.CustomMemberDetails;
 import life.walkit.server.auth.jwt.JwtTokenParser;
+import life.walkit.server.auth.repository.LastActiveRepository;
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.Duration;
 
 @Slf4j
 @Component
@@ -29,6 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenParser jwtTokenParser;
     private final MemberRepository memberRepository;
+    private final LastActiveRepository lastActiveRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -64,6 +67,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    // ONLINE/OFFLINE 업데이트를 위한 마지막 요청 시간 업데이트
+                    lastActiveRepository.saveWithTTL(member.getMemberId().toString(), "", Duration.ofMinutes(3));
+
                 } else {
                     // 사용자를 찾을 수 없는 경우 401 반환
                     sendUnauthorizedResponse(response, "유효하지 않은 사용자입니다.");
