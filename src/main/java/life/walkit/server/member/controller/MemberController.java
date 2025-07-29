@@ -1,6 +1,7 @@
 package life.walkit.server.member.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import life.walkit.server.auth.dto.CustomMemberDetails;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "회원", description = "회원 API")
+@SecurityRequirement(name = "cookieAuth")
 @RequestMapping("/api/members")
 @RestController
 @RequiredArgsConstructor

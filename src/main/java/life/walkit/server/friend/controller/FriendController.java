@@ -1,6 +1,7 @@
 package life.walkit.server.friend.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import life.walkit.server.auth.dto.CustomMemberDetails;
 import life.walkit.server.friend.dto.FriendRequestResponseDTO;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @Tag(name = "친구", description = "친구 API")
+@SecurityRequirement(name = "cookieAuth")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/friends")

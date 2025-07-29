@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Arrays;
 
 @Tag(name = "인증", description = "인증 API")
+@SecurityRequirement(name = "cookieAuth")
 @Slf4j
 @RestController
 @RequiredArgsConstructor
