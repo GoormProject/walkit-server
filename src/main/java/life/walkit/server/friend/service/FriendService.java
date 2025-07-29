@@ -1,8 +1,10 @@
 package life.walkit.server.friend.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import life.walkit.server.friend.dto.FriendRequestResponseDTO;
+import life.walkit.server.friend.dto.ReceivedFriendResponse;
 import life.walkit.server.friend.dto.SentFriendResponse;
+import life.walkit.server.friend.enums.FriendRequestStatus;
 import life.walkit.server.friend.error.FriendErrorCode;
 import life.walkit.server.friend.error.FriendException;
 import life.walkit.server.friend.repository.FriendRepository;
@@ -14,7 +16,6 @@ import life.walkit.server.member.error.enums.MemberErrorCode;
 import life.walkit.server.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -57,24 +58,35 @@ public class FriendService {
         );
     }
 
-    /**
-     * 내가 보낸 친구 요청 목록 조회
-     */
+    @Transactional(readOnly = true)
     public List<SentFriendResponse> getSentFriendRequests(Long memberId) {
         Member sender = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        // 'sender'로 보낸 친구 요청 목록을 조회
         List<FriendRequest> requests = friendRequestRepository.findBySender(sender);
 
-        // FriendRequest -> SentFriendResponse 매핑
         return requests.stream()
                 .map(request -> new SentFriendResponse(
-                        request.getReceiver().getNickname(), // 수신자의 닉네임
-                        request.getReceiver().getStatus()    // 수신자의 MemberStatus
+                        request.getReceiver().getNickname(),
+                        request.getReceiver().getStatus()
                 ))
-                .toList(); // 리스트로 변환하여 반환
+                .toList();
     }
+
+    @Transactional(readOnly = true)
+    public List<ReceivedFriendResponse> getReceivedFriendRequests(Long memberId) {
+        Member receiver = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        List<FriendRequest> requests = friendRequestRepository.findByReceiverAndStatus(receiver, FriendRequestStatus.PENDING);
+
+        return requests.stream()
+                .map(request -> ReceivedFriendResponse.of(request.getSender(), request.getStatus()))
+                .toList();
+    }
+
+
+
 
 }
 
