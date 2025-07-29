@@ -3,11 +3,14 @@ package life.walkit.server.friend.service;
 import static life.walkit.server.global.factory.GlobalTestFactory.createFriendRequest;
 import static life.walkit.server.global.factory.GlobalTestFactory.createMember;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import life.walkit.server.friend.dto.FriendRequestResponseDTO;
 import life.walkit.server.friend.dto.ReceivedFriendResponse;
 import life.walkit.server.friend.dto.SentFriendResponse;
 import life.walkit.server.friend.entity.FriendRequest;
 import life.walkit.server.friend.enums.FriendRequestStatus;
+import life.walkit.server.friend.error.FriendErrorCode;
+import life.walkit.server.friend.error.FriendException;
 import life.walkit.server.friend.repository.FriendRepository;
 import life.walkit.server.friend.repository.FriendRequestRepository;
 import life.walkit.server.member.entity.Member;
@@ -108,6 +111,40 @@ public class FriendServiceTest {
     void getReceivedFriendRequests_empty_success() {
         List<ReceivedFriendResponse> responses = friendService.getReceivedFriendRequests(memberA.getMemberId());
         assertThat(responses).isEmpty();
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("친구 요청 승인 성공")
+    void approveFriendRequest_success() {
+        FriendRequest friendRequest = friendRequestRepository.save(createFriendRequest(memberB, memberA));
+
+        friendService.approveFriendRequest(friendRequest.getFriendRequestId(), memberA.getMemberId());
+
+        assertThat(friendRequest.getStatus()).isEqualTo(FriendRequestStatus.APPROVED);
+
+        assertThat(friendRepository.existsByMemberAndPartner(memberA, memberB)).isTrue();
+        assertThat(friendRepository.existsByMemberAndPartner(memberB, memberA)).isTrue();
+    }
+
+    @Test
+    @DisplayName("친구 요청 승인 실패 - 요청이 존재하지 않음")
+    void approveFriendRequest_fail_requestNotFound() {
+        Long invalidRequestId = 999L;
+
+        assertThatThrownBy(() -> friendService.approveFriendRequest(invalidRequestId, memberA.getMemberId()))
+                .isInstanceOf(FriendException.class)
+                .hasMessage(FriendErrorCode.FRIEND_REQUEST_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    @DisplayName("친구 요청 승인 실패 - 승인자가 요청의 수신자가 아님")
+    void approveFriendRequest_fail_unauthorizedApprover() {
+        FriendRequest friendRequest = friendRequestRepository.save(createFriendRequest(memberB, memberA));
+
+        assertThatThrownBy(() -> friendService.approveFriendRequest(friendRequest.getFriendRequestId(), memberB.getMemberId()))
+                .isInstanceOf(FriendException.class)
+                .hasMessage(FriendErrorCode.UNAUTHORIZED_APPROVER.getMessage());
     }
 
 

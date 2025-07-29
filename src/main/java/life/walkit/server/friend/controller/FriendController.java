@@ -34,7 +34,10 @@ public class FriendController {
             @RequestParam String targetNickname
     ) {
         FriendRequestResponseDTO response = friendService.sendFriendRequest(member.getMemberId(), targetNickname);
-        return BaseResponse.toResponseEntity(FriendRequestResponse.REQUEST_SUCCESS, response);
+        return BaseResponse.toResponseEntity(
+                FriendRequestResponse.REQUEST_SUCCESS,
+                friendService.sendFriendRequest(member.getMemberId(), targetNickname)
+        );
     }
 
     @GetMapping("/requests/sent")
@@ -42,8 +45,10 @@ public class FriendController {
     public ResponseEntity<BaseResponse<List<SentFriendResponse>>> getSentFriendRequests(
             @AuthenticationPrincipal CustomMemberDetails member
     ) {
-        List<SentFriendResponse> responses = friendService.getSentFriendRequests(member.getMemberId());
-        return BaseResponse.toResponseEntity(FriendRequestResponse.SENT_LIST_SUCCESS, responses);
+        return BaseResponse.toResponseEntity(
+                FriendRequestResponse.SENT_LIST_SUCCESS,
+                friendService.getSentFriendRequests(member.getMemberId())
+        );
     }
 
     @GetMapping("/requests/received")
@@ -51,9 +56,20 @@ public class FriendController {
     public ResponseEntity<BaseResponse<List<ReceivedFriendResponse>>> getReceivedFriendRequests(
             @AuthenticationPrincipal CustomMemberDetails member
     ) {
-        List<ReceivedFriendResponse> responses = friendService.getReceivedFriendRequests(member.getMemberId());
-        return BaseResponse.toResponseEntity(FriendRequestResponse.RECEIVED_LIST_SUCCESS, responses);
+        return BaseResponse.toResponseEntity(
+                FriendRequestResponse.RECEIVED_LIST_SUCCESS,
+                friendService.getReceivedFriendRequests(member.getMemberId())
+        );
     }
 
+    @PatchMapping("/requests/approve")
+    @Operation(summary = "친구 요청 승인", description = "친구 요청을 승인합니다.")
+    public ResponseEntity<BaseResponse<Void>> approveFriendRequest(
+            @AuthenticationPrincipal CustomMemberDetails member,
+            @RequestParam Long friendRequestId
+    ) {
+        friendService.approveFriendRequest(friendRequestId, member.getMemberId());
+        return BaseResponse.toResponseEntity(FriendRequestResponse.APPROVED_SUCCESS);
+    }
 
 }
