@@ -1,5 +1,6 @@
 package life.walkit.server.friend.service;
 
+import life.walkit.server.friend.entity.Friend;
 import org.springframework.transaction.annotation.Transactional;
 import life.walkit.server.friend.dto.FriendRequestResponseDTO;
 import life.walkit.server.friend.dto.ReceivedFriendResponse;
@@ -85,7 +86,32 @@ public class FriendService {
                 .toList();
     }
 
+    public void approveFriendRequest(Long friendRequestId, Long approverId) {
+        FriendRequest friendRequest = friendRequestRepository.findById(friendRequestId)
+                .orElseThrow(() -> new FriendException(FriendErrorCode.FRIEND_REQUEST_NOT_FOUND));
 
+        if (!friendRequest.getStatus().equals(FriendRequestStatus.PENDING)) {
+            throw new FriendException(FriendErrorCode.FRIEND_STATUS_INVALID);
+        }
+
+        if (!friendRequest.getReceiver().getMemberId().equals(approverId)) {
+            throw new FriendException(FriendErrorCode.UNAUTHORIZED_APPROVER);
+        }
+
+        friendRequest.approve();
+
+        Friend friend1 = Friend.builder()
+                .member(friendRequest.getSender())
+                .partner(friendRequest.getReceiver())
+                .build();
+        Friend friend2 = Friend.builder()
+                .member(friendRequest.getReceiver())
+                .partner(friendRequest.getSender())
+                .build();
+
+        friendRepository.save(friend1);
+        friendRepository.save(friend2);
+    }
 
 
 }
