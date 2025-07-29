@@ -4,6 +4,7 @@ import static life.walkit.server.global.factory.GlobalTestFactory.createFriendRe
 import static life.walkit.server.global.factory.GlobalTestFactory.createMember;
 import static org.assertj.core.api.Assertions.assertThat;
 import life.walkit.server.friend.dto.FriendRequestResponseDTO;
+import life.walkit.server.friend.dto.ReceivedFriendResponse;
 import life.walkit.server.friend.dto.SentFriendResponse;
 import life.walkit.server.friend.entity.FriendRequest;
 import life.walkit.server.friend.enums.FriendRequestStatus;
@@ -36,11 +37,13 @@ public class FriendServiceTest {
 
     private Member memberA;
     private Member memberB;
+    private Member memberC;
 
     @BeforeEach
     void setUp() {
         memberA = memberRepository.save(createMember("a@email.com", "회원A"));
         memberB = memberRepository.save(createMember("b@email.com", "회원B"));
+        memberC = memberRepository.save(createMember("c@email.com", "회원C"));
     }
 
     @AfterEach
@@ -81,6 +84,33 @@ public class FriendServiceTest {
         assertThat(responses).extracting("receiverNickname")
                 .containsExactlyInAnyOrder("수신자1", "수신자2");
     }
+
+    @Test
+    @Transactional
+    @DisplayName("내가 받은 친구 요청 목록 조회 성공")
+    void getReceivedFriendRequests_success() {
+        friendRequestRepository.save(createFriendRequest(memberB, memberA)); // B -> A
+        friendRequestRepository.save(createFriendRequest(memberC, memberA)); // C -> A
+
+        List<ReceivedFriendResponse> responses = friendService.getReceivedFriendRequests(memberA.getMemberId());
+
+        assertThat(responses).hasSize(2);
+        assertThat(responses).extracting("senderNickname")
+                .containsExactlyInAnyOrder("회원B", "회원C");
+
+        assertThat(responses).extracting("requestStatus")
+                .containsOnly(FriendRequestStatus.PENDING);
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("내가 받은 친구 요청 목록 조회 - 요청이 없는 경우")
+    void getReceivedFriendRequests_empty_success() {
+        List<ReceivedFriendResponse> responses = friendService.getReceivedFriendRequests(memberA.getMemberId());
+        assertThat(responses).isEmpty();
+    }
+
+
 
 
 
