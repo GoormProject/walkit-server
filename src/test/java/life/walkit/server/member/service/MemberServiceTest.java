@@ -2,6 +2,7 @@ package life.walkit.server.member.service;
 
 import life.walkit.server.global.factory.GlobalTestFactory;
 import life.walkit.server.global.util.S3Utils;
+import life.walkit.server.member.dto.LocationDto;
 import life.walkit.server.member.dto.ProfileRequest;
 import life.walkit.server.member.dto.ProfileResponse;
 import life.walkit.server.member.entity.Member;
@@ -120,5 +121,25 @@ class MemberServiceTest {
                 .extracting("name", "nickname")
                 .containsExactly("새이름", "새닉네임");
         assertThat(foundMember.getProfileImage()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("현재 위치를 갱신합니다.")
+    void updateLocation_success() {
+        // given
+        Member member = memberRepository.findByEmail("user1@test.com").orElseThrow();
+
+        LocationDto location = LocationDto.builder()
+                .lng(126.9780)
+                .lat(37.5665)
+                .build();
+
+        // when
+        memberService.updateLocation(member.getMemberId(), location);
+
+        // then
+        Member foundMember = memberRepository.findByEmail("user1@test.com").orElseThrow();
+        assertThat(foundMember.getLocation().getX()).isEqualTo(126.9780);
+        assertThat(foundMember.getLocation().getY()).isEqualTo(37.5665);
     }
 }
