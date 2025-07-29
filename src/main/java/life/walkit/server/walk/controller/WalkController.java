@@ -3,7 +3,6 @@ package life.walkit.server.walk.controller;
 import life.walkit.server.auth.dto.CustomMemberDetails;
 import life.walkit.server.global.response.BaseResponse;
 import life.walkit.server.walk.dto.enums.WalkResponse;
-import life.walkit.server.walk.repository.WalkRepository;
 import life.walkit.server.walk.service.WalkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 
+// TODO: Swagger 표시
 @Controller("/api/walks")
 @RequiredArgsConstructor
 public class WalkController {

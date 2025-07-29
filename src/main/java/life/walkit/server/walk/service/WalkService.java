@@ -83,13 +83,12 @@ public class WalkService {
         Walk walk = findByWalkId(walkId);
 
         // PAUSE 일때만 시작 가능
-        walkingSessionRepository.findByWalk(walk)
-            .stream()
-            .filter(item -> item.getEventType() != EventType.PAUSE)
-            .findFirst()
-            .ifPresent(invalidItem -> {
-                throw new WalkException(WalkErrorCode.WALK_NOT_PAUSED);
-            });
+        WalkingSession latestSession = walkingSessionRepository.findFirstByWalkOrderByEventTimeDesc(walk)
+            .orElseThrow(() -> new WalkException(WalkErrorCode.WALK_NOT_FOUND));
+
+        if (latestSession.getEventType() != EventType.PAUSE) {
+            throw new WalkException(WalkErrorCode.WALK_NOT_PAUSED);
+        }
 
         WalkingSession walkingSession = walkingSessionRepository.save(
             WalkingSession.builder()
