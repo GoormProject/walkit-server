@@ -19,7 +19,7 @@ public class OAuthSwaggerController {
 
     @Operation(
             summary = "구글 로그인",
-            description = "구글 OAuth2 로그인을 위한 리디렉션 URL입니다. [실제 로그인 URL: `/oauth2/authorization/google?state=${deviceId}`] 브라우저에서 직접 접속하세요."
+            description = "구글 OAuth2 로그인을 위한 리디렉션 URL입니다. [실제 로그인 URL: `/oauth2/authorization/google?state={deviceId}`] 브라우저에서 직접 접속하세요."
     )
     @ApiResponse(responseCode = "302", description = "구글 로그인 페이지로 리디렉션")
     @GetMapping("/google-login")
@@ -30,7 +30,7 @@ public class OAuthSwaggerController {
 
     @Operation(
             summary = "카카오 로그인",
-            description = "카카오 OAuth2 로그인을 위한 리디렉션 URL입니다. [실제 로그인 URL: /oauth2/authorization/kakao?state=${deviceId}`] 브라우저에서 직접 접속하세요."
+            description = "카카오 OAuth2 로그인을 위한 리디렉션 URL입니다. [실제 로그인 URL: /oauth2/authorization/kakao?state={deviceId}`] 브라우저에서 직접 접속하세요."
     )
     @ApiResponse(responseCode = "302", description = "카카오 로그인 페이지로 리디렉션")
     @GetMapping("/kakao-login")
