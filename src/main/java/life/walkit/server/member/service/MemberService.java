@@ -1,6 +1,7 @@
 package life.walkit.server.member.service;
 
 import life.walkit.server.global.util.GeoUtils;
+import life.walkit.server.auth.repository.LastActiveRepository;
 import life.walkit.server.global.util.S3Utils;
 import life.walkit.server.member.dto.LocationDto;
 import life.walkit.server.member.dto.ProfileRequest;
@@ -26,6 +27,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final ProfileImageRepository profileImageRepository;
+    private final LastActiveRepository lastActiveRepository;
     private final S3Utils s3Utils;
 
     private static final String IMAGE_PATH = "profile/";
@@ -55,6 +57,23 @@ public class MemberService {
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         return ProfileResponse.of(member);
+    }
+
+    @Transactional
+    public MemberStatus refreshMemberStatus(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        if (member.getStatus() == MemberStatus.WALKING)
+            return member.getStatus();
+
+        if (lastActiveRepository.findByKey(member.getMemberId().toString()).isPresent())
+            member.updateStatus(MemberStatus.ONLINE);
+        else
+            member.updateStatus(MemberStatus.OFFLINE);
+
+        memberRepository.save(member);
+        return member.getStatus();
     }
 
     @Transactional
