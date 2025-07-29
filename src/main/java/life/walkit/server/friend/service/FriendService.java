@@ -99,18 +99,20 @@ public class FriendService {
         }
 
         friendRequest.approve();
+        friendRequestRepository.save(friendRequest);
 
-        Friend friend1 = Friend.builder()
-                .member(friendRequest.getSender())
-                .partner(friendRequest.getReceiver())
-                .build();
-        Friend friend2 = Friend.builder()
-                .member(friendRequest.getReceiver())
-                .partner(friendRequest.getSender())
-                .build();
+        List<Friend> friends = List.of(
+                Friend.builder()
+                        .member(friendRequest.getSender())
+                        .partner(friendRequest.getReceiver())
+                        .build(),
+                Friend.builder()
+                        .member(friendRequest.getReceiver())
+                        .partner(friendRequest.getSender())
+                        .build()
+        );
 
-        friendRepository.save(friend1);
-        friendRepository.save(friend2);
+        friendRepository.saveAll(friends);
     }
 
 
