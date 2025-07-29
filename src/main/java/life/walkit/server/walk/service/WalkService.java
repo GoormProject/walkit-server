@@ -1,6 +1,5 @@
 package life.walkit.server.walk.service;
 
-import ch.qos.logback.classic.spi.IThrowableProxy;
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.error.MemberException;
 import life.walkit.server.member.error.enums.MemberErrorCode;
@@ -16,8 +15,6 @@ import life.walkit.server.walk.repository.WalkingSessionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -59,13 +56,12 @@ public class WalkService {
     @Transactional
     public WalkEventResponse pauseWalk(Long walkId) {
 
-        Walk walk = walkRepository.findById(walkId)
-            .orElseThrow(() -> new WalkException(WalkErrorCode.WALK_NOT_FOUND));
+        Walk walk = findByWalkId(walkId);
 
         // 이미 끝난 산책기록이면 에러 발생
         walkingSessionRepository.findByWalk(walk)
             .stream()
-            .filter(item -> item.getEventType().equals(EventType.END))
+            .filter(item -> item.getEventType() == EventType.END)
             .findFirst()
             .ifPresent(invalidItem -> {
                 throw new WalkException(WalkErrorCode.WALK_ALREADY_COMPLETED);
@@ -79,5 +75,35 @@ public class WalkService {
         );
 
         return WalkEventResponse.from(walkingSession);
+    }
+
+    @Transactional
+    public WalkEventResponse resumeWalk(Long walkId) {
+
+        Walk walk = findByWalkId(walkId);
+
+        // PAUSE 일때만 시작 가능
+        walkingSessionRepository.findByWalk(walk)
+            .stream()
+            .filter(item -> item.getEventType() != EventType.PAUSE)
+            .findFirst()
+            .ifPresent(invalidItem -> {
+                throw new WalkException(WalkErrorCode.WALK_NOT_PAUSED);
+            });
+
+        WalkingSession walkingSession = walkingSessionRepository.save(
+            WalkingSession.builder()
+                .walk(walk)
+                .eventType(EventType.RESUME)
+                .build()
+        );
+
+        return WalkEventResponse.from(walkingSession);
+    }
+
+
+    private Walk findByWalkId(Long walkId) {
+        return walkRepository.findById(walkId)
+            .orElseThrow(() -> new WalkException(WalkErrorCode.WALK_NOT_FOUND));
     }
 }

@@ -28,12 +28,21 @@ public class WalkController {
         );
     }
 
-    @PutMapping("/{walkId}/resume")
+    @PutMapping("/{walkId}/pause")
     public ResponseEntity<BaseResponse> pauseWalk(@PathVariable("walkId") Long walkId) {
 
         return BaseResponse.toResponseEntity(
             WalkResponse.PAUSE_WALK_SUCCESS,
             walkService.pauseWalk(walkId)
+        );
+    }
+
+    @PutMapping("/{walkId}/resume")
+    public ResponseEntity<BaseResponse> resumeWalk(@PathVariable("walkId") Long walkId) {
+
+        return BaseResponse.toResponseEntity(
+            WalkResponse.RESUME_WALK_SUCCESS,
+            walkService.resumeWalk(walkId)
         );
     }
 }
