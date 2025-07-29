@@ -28,24 +28,28 @@ public class FriendController {
     public ResponseEntity<BaseResponse> sendFriendRequest(
             @AuthenticationPrincipal CustomMemberDetails member,
             @RequestParam String targetNickname) {
-        FriendRequestResponseDTO response = friendService.sendFriendRequest(member.getMemberId(), targetNickname);
-        return BaseResponse.toResponseEntity(FriendRequestResponse.REQUEST_SUCCESS, response);
+        return BaseResponse.toResponseEntity(FriendRequestResponse.REQUEST_SUCCESS, friendService.sendFriendRequest(member.getMemberId(), targetNickname));
     }
 
     @GetMapping("/requests/sent")
     @Operation(summary = "친구 요청 발신 목록 조회", description = "내가 보낸 친구 요청 목록을 조회합니다.")
     public ResponseEntity<BaseResponse> getSentFriendRequests(
             @AuthenticationPrincipal CustomMemberDetails member) {
-        List<SentFriendResponse> responses = friendService.getSentFriendRequests(member.getMemberId());
-        return BaseResponse.toResponseEntity(FriendRequestResponse.SENT_LIST_SUCCESS, responses);
+        return BaseResponse.toResponseEntity(FriendRequestResponse.SENT_LIST_SUCCESS, friendService.getSentFriendRequests(member.getMemberId()));
     }
 
     @GetMapping("/requests/received")
     @Operation(summary = "친구 요청 수신 목록 조회", description = "내가 받은 친구 요청 목록을 조회합니다.")
     public ResponseEntity<BaseResponse> getReceivedFriendRequests(
             @AuthenticationPrincipal CustomMemberDetails member) {
-        List<ReceivedFriendResponse> responses = friendService.getReceivedFriendRequests(member.getMemberId());
-        return BaseResponse.toResponseEntity(FriendRequestResponse.RECEIVED_LIST_SUCCESS, responses);
+        return BaseResponse.toResponseEntity(FriendRequestResponse.RECEIVED_LIST_SUCCESS, friendService.getReceivedFriendRequests(member.getMemberId()));
+    }
+
+    @PatchMapping("/requests/approve")
+    @Operation(summary = "친구 요청 승인", description = "친구 요청을 승인합니다.")
+    public ResponseEntity<BaseResponse> approveFriendRequest(@AuthenticationPrincipal CustomMemberDetails member, @RequestParam Long friendRequestId) {
+        friendService.approveFriendRequest(friendRequestId, member.getMemberId());
+        return BaseResponse.toResponseEntity(FriendRequestResponse.APPROVED_SUCCESS);
     }
 
 
