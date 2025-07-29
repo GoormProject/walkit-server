@@ -78,7 +78,7 @@ public class WalkServiceTest {
     }
 
     @Test
-    @DisplayName("산책 기록 재개")
+    @DisplayName("산책 기록 재개 성공")
     void resumeWalk_success() {
         WalkEventResponse walkEventResponse = walkService.startWalk(member.getMemberId()); // 산책 기록 생성
         WalkEventResponse walkEventResponsePause = walkService.pauseWalk(walkEventResponse.walkId()); // 산책 기록 멈춤
@@ -90,7 +90,7 @@ public class WalkServiceTest {
     }
 
     @Test
-    @DisplayName("산책 기록 멈춘 상태가 아닐시 에러")
+    @DisplayName("산책 기록이 멈춘 상태가 아닐시 에러")
     void resumeWalk_notPausedState_throwsException() {
         // given
         WalkEventResponse walkEventResponse = walkService.startWalk(member.getMemberId()); // 산책 기록 생성
@@ -104,5 +104,33 @@ public class WalkServiceTest {
         assertThat(walkException.getErrorCode()).isEqualTo(WalkErrorCode.WALK_NOT_PAUSED);
     }
 
+    @Test
+    @DisplayName("산책 기록 종료 성공")
+    void endWalk_success() {
+        // given
+        WalkEventResponse walkEventResponse = walkService.startWalk(member.getMemberId());
+        WalkEventResponse walkEventResponseEnd = walkService.endWalk(walkEventResponse.walkId());
+
+        // when & then
+        assertThat(walkEventResponseEnd.eventType()).isEqualTo(EventType.END);
+        assertThat(walkEventResponseEnd.eventId()).isNotNull();
+        assertThat(walkEventResponseEnd.walkId()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("산책 기록이 이미 멈춤 상태일시 에러")
+    void resumeWalk_alreadyPaused_throwsException() {
+        // given
+        WalkEventResponse walkEventResponse = walkService.startWalk(member.getMemberId()); // 산책 기록 생성
+        WalkEventResponse walkEventResponseEnd = walkService.endWalk(walkEventResponse.walkId());
+
+        // when
+        WalkException walkException = assertThrows(WalkException.class, () ->
+            walkService.endWalk(walkEventResponseEnd.walkId())
+        );
+
+        // then
+        assertThat(walkException.getErrorCode()).isEqualTo(WalkErrorCode.WALK_ALREADY_COMPLETED);
+    }
 
 }
