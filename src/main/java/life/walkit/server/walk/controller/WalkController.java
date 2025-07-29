@@ -45,4 +45,13 @@ public class WalkController {
             walkService.resumeWalk(walkId)
         );
     }
+
+    @PutMapping("/{walkId}/end")
+    public ResponseEntity<BaseResponse> endWalk(@PathVariable("walkId") Long walkId) {
+
+        return BaseResponse.toResponseEntity(
+            WalkResponse.RESUME_WALK_SUCCESS,
+            walkService.endWalk(walkId)
+        );
+    }
 }

@@ -26,7 +26,6 @@ public class WalkService {
 
     @Transactional
     public WalkEventResponse startWalk(Long memberId) {
-
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
@@ -55,17 +54,11 @@ public class WalkService {
 
     @Transactional
     public WalkEventResponse pauseWalk(Long walkId) {
-
         Walk walk = findByWalkId(walkId);
+        WalkingSession latestSession = findLatestSessionByWalk(walk);
 
         // 이미 끝난 산책기록이면 에러 발생
-        walkingSessionRepository.findByWalk(walk)
-            .stream()
-            .filter(item -> item.getEventType() == EventType.END)
-            .findFirst()
-            .ifPresent(invalidItem -> {
-                throw new WalkException(WalkErrorCode.WALK_ALREADY_COMPLETED);
-            });
+        validateNotCompleted(latestSession);
 
         WalkingSession walkingSession = walkingSessionRepository.save(
             WalkingSession.builder()
@@ -79,13 +72,10 @@ public class WalkService {
 
     @Transactional
     public WalkEventResponse resumeWalk(Long walkId) {
-
         Walk walk = findByWalkId(walkId);
+        WalkingSession latestSession = findLatestSessionByWalk(walk);
 
         // PAUSE 일때만 시작 가능
-        WalkingSession latestSession = walkingSessionRepository.findFirstByWalkOrderByEventTimeDesc(walk)
-            .orElseThrow(() -> new WalkException(WalkErrorCode.WALK_NOT_FOUND));
-
         if (latestSession.getEventType() != EventType.PAUSE) {
             throw new WalkException(WalkErrorCode.WALK_NOT_PAUSED);
         }
@@ -100,9 +90,37 @@ public class WalkService {
         return WalkEventResponse.from(walkingSession);
     }
 
+    @Transactional
+    public WalkEventResponse endWalk(Long walkId) {
+        Walk walk = findByWalkId(walkId);
+        WalkingSession latestSession = findLatestSessionByWalk(walk);
+
+        // 이미 끝난 산책기록이면 에러 발생
+        validateNotCompleted(latestSession);
+
+        WalkingSession walkingSession = walkingSessionRepository.save(
+            WalkingSession.builder()
+                .walk(walk)
+                .eventType(EventType.END)
+                .build()
+        );
+
+        return WalkEventResponse.from(walkingSession);
+    }
 
     private Walk findByWalkId(Long walkId) {
         return walkRepository.findById(walkId)
             .orElseThrow(() -> new WalkException(WalkErrorCode.WALK_NOT_FOUND));
+    }
+
+    private WalkingSession findLatestSessionByWalk(Walk walk) {
+        return walkingSessionRepository.findFirstByWalkOrderByEventTimeDesc(walk)
+            .orElseThrow(() -> new WalkException(WalkErrorCode.WALK_NOT_FOUND));
+    }
+
+    private void validateNotCompleted(WalkingSession latestSession) {
+        if (latestSession.getEventType() == EventType.END) {
+            throw new WalkException(WalkErrorCode.WALK_ALREADY_COMPLETED);
+        }
     }
 }
