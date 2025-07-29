@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import life.walkit.server.auth.dto.CustomMemberDetails;
 import life.walkit.server.global.response.BaseResponse;
+import life.walkit.server.member.dto.LocationDto;
 import life.walkit.server.member.dto.ProfileRequest;
 import life.walkit.server.member.dto.enums.MemberResponse;
 import life.walkit.server.member.error.MemberException;
@@ -53,6 +54,22 @@ public class MemberController {
         return BaseResponse.toResponseEntity(
                 MemberResponse.UPDATE_PROFILE_SUCCESS,
                 memberService.updateProfile(memberId, request, profileImage)
+        );
+    }
+
+    @Operation(summary = "현재 위치 갱신", description = "자신의 현재 위치를 갱신합니다.")
+    @PutMapping("/{memberId}/location")
+    public ResponseEntity<BaseResponse> updateLocation(@PathVariable Long memberId,
+                                                      @AuthenticationPrincipal CustomMemberDetails member,
+                                                      @Valid @RequestBody LocationDto location) {
+
+        if (!memberId.equals(member.getMemberId())) {
+            throw new MemberException(MemberErrorCode.MEMBER_FORBIDDEN);
+        }
+
+        return BaseResponse.toResponseEntity(
+                MemberResponse.UPDATE_LOCATION_SUCCESS,
+                memberService.updateLocation(memberId, location)
         );
     }
 }
