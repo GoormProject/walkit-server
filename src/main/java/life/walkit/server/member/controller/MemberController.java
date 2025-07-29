@@ -59,7 +59,7 @@ public class MemberController {
 
     @Operation(summary = "현재 위치 갱신", description = "자신의 현재 위치를 갱신합니다.")
     @PutMapping("/{memberId}/location")
-    public ResponseEntity<BaseResponse> updateProfile(@PathVariable Long memberId,
+    public ResponseEntity<BaseResponse> updateLocation(@PathVariable Long memberId,
                                                       @AuthenticationPrincipal CustomMemberDetails member,
                                                       @Valid @RequestBody LocationDto location) {
 
