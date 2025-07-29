@@ -4,7 +4,6 @@ import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.repository.MemberRepository;
 import life.walkit.server.path.entity.Path;
 import life.walkit.server.path.repository.PathRepository;
-import life.walkit.server.trail.repository.TrailRepository;
 import life.walkit.server.walk.entity.Walk;
 import life.walkit.server.walk.entity.WalkingSession;
 import life.walkit.server.walk.entity.enums.EventType;
@@ -16,8 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.List;
 
 import static life.walkit.server.global.factory.GlobalTestFactory.*;
@@ -49,20 +48,28 @@ public class WalkingSessionRepositoryTest {
             {126.988, 37.543},
             {126.989, 37.544}
         };
-        Path savePath = pathRepository.save(createPath(lineString));
 
+
+        LocalTime startTime = LocalTime.of(0, 0, 0); // startTIme
+        LocalTime endTime = LocalTime.of(12, 23, 56); // endTime
+
+        Duration totalTime = Duration.between(startTime, endTime); // 12 hour
+        Double totalDistance = 2.0; // 총 거리
+        Double pace = 1.2; // 평균 속도 1.2km
+
+        Path savePath = pathRepository.save(createPath(lineString));
         Member member = memberRepository.save(createMember("a@email.com", "회원A"));
         walk = walkRepository.save(
-                createWalk(
-                        member,
-                        null,
-                        LocalDateTime.now(),
-                        LocalDateTime.now(),
-                        LocalDate.now(),
-                        savePath,
-                        null,
-                        null
-                )
+            createWalk(
+                member,
+                null,
+                savePath,
+                "테스트 타이틀",
+                totalDistance,
+                totalTime,
+                pace,
+                false
+            )
         );
 
     }
@@ -78,9 +85,9 @@ public class WalkingSessionRepositoryTest {
 
         // then
         assertThat(foundWalkList)
-                .hasSize(1)
-                .extracting("eventType")
-                .containsExactly(EventType.PAUSE);
+            .hasSize(1)
+            .extracting("eventType")
+            .containsExactly(EventType.PAUSE);
 
     }
 
@@ -97,7 +104,7 @@ public class WalkingSessionRepositoryTest {
         // then
         WalkingSession updatedSession = walkingSessionRepository.findById(sessionId).get();
         assertThat(updatedSession.getEventType())
-                .isEqualTo(EventType.RESUME);
+            .isEqualTo(EventType.RESUME);
     }
 
 

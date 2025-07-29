@@ -35,16 +35,25 @@ public class TrailRepositoryTest {
     @BeforeEach
     void setUp() {
         Double[][] lineString = new Double[][]{
-                {126.986, 37.541},
-                {126.987, 37.542},
-                {126.988, 37.543},
-                {126.989, 37.544}
+            {126.986, 37.541},
+            {126.987, 37.542},
+            {126.988, 37.543},
+            {126.989, 37.544}
         };
         memberRepository.save(createMember("c@email.com", "회원C"));
         Member memberC = memberRepository.findByEmail("c@email.com").get();
         Path savePath = pathRepository.save(createPath(lineString));
 
-        trailRepository.save(createTrail(memberC, "도원동", "도원동 근처 산책로 입니다.", 1.2, savePath));
+        trailRepository.save(
+            createTrail(
+                memberC,
+                "도원동",
+                "도원동 근처 산책로 입니다.",
+                1.2,
+                "무슨구",
+                savePath
+            )
+        );
     }
 
     @Test
@@ -52,10 +61,10 @@ public class TrailRepositoryTest {
     void save_success() {
         // given
         Double[][] lineString = new Double[][]{
-                {126.986, 37.541},
-                {126.987, 37.542},
-                {126.988, 37.543},
-                {126.989, 37.544}
+            {126.986, 37.541},
+            {126.987, 37.542},
+            {126.988, 37.543},
+            {126.989, 37.544}
         };
         Member member = createMember("d@email.com", "회원임");
         Member savedMember = memberRepository.save(member);
@@ -69,6 +78,7 @@ public class TrailRepositoryTest {
                 "해운대구",
                 "해운대구 근처 산책로 입니다.",
                 3.2,
+                "부산 해운대구",
                 path
             )
         );
@@ -76,8 +86,8 @@ public class TrailRepositoryTest {
         // then
         List<Trail> foundTrail = trailRepository.findByMember(savedTrail.getMember());
         assertThat(foundTrail)
-                .extracting("title")
-                .containsExactly("해운대구");
+            .extracting("title")
+            .containsExactly("해운대구");
 
     }
 
@@ -87,8 +97,8 @@ public class TrailRepositoryTest {
         // when & then
         List<Trail> foundTrail = trailRepository.findByTitle("도원동");
         assertThat(foundTrail)
-                .extracting("title", "distance")
-                .containsExactly(tuple("도원동", 1.2));
+            .extracting("title", "distance")
+            .containsExactly(tuple("도원동", 1.2));
     }
 
     @Test
@@ -96,16 +106,16 @@ public class TrailRepositoryTest {
     void findTrailList_success() {
         // given
         Double[][] lineStringA = new Double[][]{
-                {126.986, 37.541},
-                {126.987, 37.542},
-                {126.988, 37.543},
-                {126.989, 37.544}
+            {126.986, 37.541},
+            {126.987, 37.542},
+            {126.988, 37.543},
+            {126.989, 37.544}
         };
         Double[][] lineStringB = new Double[][]{
-                {126.986, 37.541},
-                {126.987, 37.542},
-                {126.988, 37.543},
-                {126.989, 37.544}
+            {126.986, 37.541},
+            {126.987, 37.542},
+            {126.988, 37.543},
+            {126.989, 37.544}
         };
 
         Path pathA = pathRepository.save(createPath(lineStringA));
@@ -122,6 +132,7 @@ public class TrailRepositoryTest {
                 "해운대구",
                 "해운대구 근처 산책로 입니다.",
                 3.2,
+                "부산 해운대구",
                 foundPathA
             )
         );
@@ -131,6 +142,7 @@ public class TrailRepositoryTest {
                 "동성로",
                 "동성로 근처 산책로 입니다.",
                 2.2,
+                "대구 동성로",
                 foundPathB
             )
         );
@@ -140,12 +152,12 @@ public class TrailRepositoryTest {
 
         // then
         assertThat(trailList)
-                .hasSize(2)
-                .extracting("title", "distance")
-                .containsExactly(
-                        tuple(savedTrailA.getTitle(), savedTrailA.getDistance()),
-                        tuple(savedTrailB.getTitle(), savedTrailB.getDistance())
-                );
+            .hasSize(2)
+            .extracting("title", "distance")
+            .containsExactly(
+                tuple(savedTrailA.getTitle(), savedTrailA.getDistance()),
+                tuple(savedTrailB.getTitle(), savedTrailB.getDistance())
+            );
     }
 
 }
