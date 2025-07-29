@@ -6,6 +6,8 @@ import life.walkit.server.walk.dto.enums.WalkResponse;
 import life.walkit.server.walk.dto.response.WalkEventResponse;
 import life.walkit.server.walk.entity.Walk;
 import life.walkit.server.walk.entity.enums.EventType;
+import life.walkit.server.walk.error.enums.WalkErrorCode;
+import life.walkit.server.walk.error.enums.WalkException;
 import life.walkit.server.walk.repository.WalkRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static life.walkit.server.global.factory.GlobalTestFactory.createMember;
 import static life.walkit.server.global.factory.GlobalTestFactory.createWalk;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -65,13 +68,40 @@ public class WalkServiceTest {
 
     @Test
     @DisplayName("산책 기록 멈춤 성공")
-    void paseWalk_success() {
+    void pauseWalk_success() {
         WalkEventResponse walkEventResponse = walkService.startWalk(member.getMemberId()); // 산책 기록 생성
         WalkEventResponse walkEventResponsePause = walkService.pauseWalk(walkEventResponse.walkId());
 
         assertThat(walkEventResponsePause.eventType()).isEqualTo(EventType.PAUSE);
         assertThat(walkEventResponsePause.eventId()).isNotNull();
         assertThat(walkEventResponsePause.walkId()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("산책 기록 재개")
+    void resumeWalk_success() {
+        WalkEventResponse walkEventResponse = walkService.startWalk(member.getMemberId()); // 산책 기록 생성
+        WalkEventResponse walkEventResponsePause = walkService.pauseWalk(walkEventResponse.walkId()); // 산책 기록 멈춤
+        WalkEventResponse walkEventResponseResume = walkService.resumeWalk(walkEventResponsePause.walkId()); // 산책 기록 재개
+
+        assertThat(walkEventResponseResume.eventType()).isEqualTo(EventType.RESUME);
+        assertThat(walkEventResponseResume.eventId()).isNotNull();
+        assertThat(walkEventResponseResume.walkId()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("산책 기록 멈춘 상태가 아닐시 에러")
+    void resumeWalk_notPausedState_throwsException() {
+        // given
+        WalkEventResponse walkEventResponse = walkService.startWalk(member.getMemberId()); // 산책 기록 생성
+
+        // when
+        WalkException walkException = assertThrows(WalkException.class, () ->
+            walkService.resumeWalk(walkEventResponse.walkId())
+        );
+
+        // then
+        assertThat(walkException.getErrorCode()).isEqualTo(WalkErrorCode.WALK_NOT_PAUSED);
     }
 
 
