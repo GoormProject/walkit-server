@@ -33,7 +33,6 @@ public class FriendController {
             @AuthenticationPrincipal CustomMemberDetails member,
             @RequestParam String targetNickname
     ) {
-        FriendRequestResponseDTO response = friendService.sendFriendRequest(member.getMemberId(), targetNickname);
         return BaseResponse.toResponseEntity(
                 FriendRequestResponse.REQUEST_SUCCESS,
                 friendService.sendFriendRequest(member.getMemberId(), targetNickname)
