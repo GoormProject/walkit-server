@@ -15,7 +15,7 @@ public class TrailWalkImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "trai_walk_image_id")
+    @Column(name = "trail_walk_image_id")
     private Long trailImageId;
 
     @OneToOne(fetch = FetchType.LAZY)
