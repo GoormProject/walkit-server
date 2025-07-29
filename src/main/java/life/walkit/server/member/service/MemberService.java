@@ -47,6 +47,14 @@ public class MemberService {
                 });
     }
 
+    @Transactional(readOnly = true)
+    public ProfileResponse getProfile(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        return ProfileResponse.of(member);
+    }
+
     @Transactional
     public ProfileResponse updateProfile(Long memberId, ProfileRequest request, MultipartFile image) {
         Member member = memberRepository.findById(memberId)

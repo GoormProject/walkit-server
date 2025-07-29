@@ -3,6 +3,7 @@ package life.walkit.server.member.service;
 import life.walkit.server.global.factory.GlobalTestFactory;
 import life.walkit.server.global.util.S3Utils;
 import life.walkit.server.member.dto.ProfileRequest;
+import life.walkit.server.member.dto.ProfileResponse;
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.entity.enums.MemberRole;
 import life.walkit.server.member.entity.enums.MemberStatus;
@@ -75,6 +76,21 @@ class MemberServiceTest {
         assertThat(foundMember)
                 .extracting("email", "nickname")
                 .contains("user1@test.com", "김유저");
+    }
+
+    @Test
+    @DisplayName("내 프로필을 조회합니다.")
+    void getProfile() {
+        // given
+        Member member = memberRepository.findByEmail("user1@test.com").orElseThrow();
+
+        // when
+        ProfileResponse response = memberService.getProfile(member.getMemberId());
+
+        // then
+        assertThat(response)
+                .extracting("email", "nickname")
+                .containsExactly("user1@test.com", "김유저");
     }
 
     @Test
