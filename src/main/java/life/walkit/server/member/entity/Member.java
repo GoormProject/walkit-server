@@ -72,4 +72,8 @@ public class Member extends BaseEntity {
     public void updateStatus(MemberStatus status) {
         this.status = status;
     }
+
+    public void updateLocation(Point location) {
+        this.location = location;
+    }
 }

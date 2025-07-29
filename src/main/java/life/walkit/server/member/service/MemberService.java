@@ -1,6 +1,8 @@
 package life.walkit.server.member.service;
 
+import life.walkit.server.global.util.GeoUtils;
 import life.walkit.server.global.util.S3Utils;
+import life.walkit.server.member.dto.LocationDto;
 import life.walkit.server.member.dto.ProfileRequest;
 import life.walkit.server.member.dto.ProfileResponse;
 import life.walkit.server.member.entity.Member;
@@ -92,5 +94,15 @@ public class MemberService {
         }
 
         return ProfileResponse.of(member);
+    }
+
+    @Transactional
+    public LocationDto updateLocation(Long memberId, LocationDto location) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        member.updateLocation(GeoUtils.toPoint(location.getLng(), location.getLat()));
+        memberRepository.save(member);
+        return location;
     }
 }
