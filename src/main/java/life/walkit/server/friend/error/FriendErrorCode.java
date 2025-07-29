@@ -17,6 +17,7 @@ public enum FriendErrorCode implements ErrorCode {
     INVALID_REQUEST_STATUS(HttpStatus.BAD_REQUEST, "친구 요청 상태가 유효하지 않습니다."),
     FRIEND_REQUEST_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "상대방과의 친구 신청이 이미 존재합니다."),
     SELF_FRIEND_REQUEST(HttpStatus.BAD_REQUEST, "본인에게 친구 신청할 수 없습니다."),
+    UNAUTHORIZED_APPROVER(HttpStatus.FORBIDDEN, "해당 친구 요청을 승인할 권한이 없습니다."),
     FRIEND_STATUS_INVALID(HttpStatus.BAD_REQUEST, "친구 신청 승인 또는 거절시 상태가 잘못되었습니다.");
 
     private final HttpStatus httpStatus;
