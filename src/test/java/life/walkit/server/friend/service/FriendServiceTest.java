@@ -236,14 +236,19 @@ public class FriendServiceTest {
     @Transactional
     @DisplayName("친구 삭제 성공")
     void deleteFriend_success() {
-        Friend friend = friendRepository.save(Friend.builder()
+        Friend friendAtoB = friendRepository.save(Friend.builder()
                 .member(memberA)
                 .partner(memberB)
+                .build());
+        Friend friendBtoA = friendRepository.save(Friend.builder()
+                .member(memberB)
+                .partner(memberA)
                 .build());
 
         friendService.deleteFriend(memberA.getMemberId(), memberB.getMemberId());
 
-        assertThat(friendRepository.findById(friend.getFriendId())).isEmpty();
+        assertThat(friendRepository.findById(friendAtoB.getFriendId())).isEmpty();
+        assertThat(friendRepository.findById(friendBtoA.getFriendId())).isEmpty();
     }
 
 
