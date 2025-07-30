@@ -1,6 +1,8 @@
 package life.walkit.server.friend.service;
 
+import life.walkit.server.friend.dto.FriendResponseDTO;
 import life.walkit.server.friend.entity.Friend;
+import life.walkit.server.member.dto.LocationDto;
 import org.springframework.transaction.annotation.Transactional;
 import life.walkit.server.friend.dto.FriendRequestResponseDTO;
 import life.walkit.server.friend.dto.ReceivedFriendResponse;
@@ -114,6 +116,36 @@ public class FriendService {
 
         friendRepository.saveAll(friends);
     }
+
+    @Transactional(readOnly = true)
+    public List<FriendResponseDTO> getFriends(Long memberId) {
+        // 주어진 memberId로 회원(Member) 정보 조회, 존재하지 않을 경우 예외 발생
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        // 회원과 연관된 친구 관계를 조회
+        List<Friend> friends = friendRepository.findAllByMember(member);
+
+        // FriendResponseDTO.of()를 활용하여 변환
+        return friends.stream().map(friend -> {
+            // 현재 회원이 속한 친구 관계에서 친구(파트너) 정보 추출
+            Member friendMember = friend.getPartner();
+
+            // 친구의 LocationDto 생성
+            LocationDto locationDto = friendMember.getLocation() != null
+                    ? LocationDto.builder()
+                    .lat(friendMember.getLocation().getY()) // 위도 추출
+                    .lng(friendMember.getLocation().getX()) // 경도 추출
+                    .build()
+                    : null;
+
+            // FriendResponseDTO.of() 메서드 활용
+            return FriendResponseDTO.of(friendMember, locationDto);
+        }).toList();
+    }
+
+
+
 
 
 }
