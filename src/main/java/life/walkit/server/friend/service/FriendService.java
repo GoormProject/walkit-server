@@ -86,7 +86,7 @@ public class FriendService {
                 .toList();
     }
 
-    public void approveFriendRequest(Long friendRequestId, Long approverId) {
+    public void approveFriendRequest(Long friendRequestId, Long memberId) {
         FriendRequest friendRequest = friendRequestRepository.findById(friendRequestId)
                 .orElseThrow(() -> new FriendException(FriendErrorCode.FRIEND_REQUEST_NOT_FOUND));
 
@@ -94,7 +94,7 @@ public class FriendService {
             throw new FriendException(FriendErrorCode.FRIEND_STATUS_INVALID);
         }
 
-        if (!friendRequest.getReceiver().getMemberId().equals(approverId)) {
+        if (!friendRequest.getReceiver().getMemberId().equals(memberId)) {
             throw new FriendException(FriendErrorCode.UNAUTHORIZED_APPROVER);
         }
 
@@ -115,7 +115,21 @@ public class FriendService {
         friendRepository.saveAll(friends);
     }
 
+    public void rejectFriendRequest(Long friendRequestId, Long memberId) {
 
+        FriendRequest request = friendRequestRepository.findById(friendRequestId)
+                .orElseThrow(() -> new FriendException(FriendErrorCode.FRIEND_REQUEST_NOT_FOUND));
+
+        if (!request.getStatus().equals(FriendRequestStatus.PENDING)) {
+            throw new FriendException(FriendErrorCode.FRIEND_STATUS_INVALID);
+        }
+
+        if (!request.getReceiver().getMemberId().equals(memberId)) {
+            throw new FriendException(FriendErrorCode.UNAUTHORIZED_APPROVER);
+        }
+
+        friendRequestRepository.delete(request);
+    }
 }
 
 
