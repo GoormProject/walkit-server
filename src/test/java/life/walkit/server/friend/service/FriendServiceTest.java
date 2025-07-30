@@ -168,6 +168,28 @@ public class FriendServiceTest {
                 .hasMessage(FriendErrorCode.FRIEND_REQUEST_NOT_FOUND.getMessage());
     }
 
+    @Test
+    @DisplayName("친구 요청 거절 실패 - 거절자가 요청의 수신자가 아님")
+    void rejectFriendRequest_fail_unauthorizedRejecter() {
+        FriendRequest friendRequest = friendRequestRepository.save(createFriendRequest(memberB, memberA));
+
+        assertThatThrownBy(() -> friendService.rejectFriendRequest(friendRequest.getFriendRequestId(), memberB.getMemberId()))
+                .isInstanceOf(FriendException.class)
+                .hasMessage(FriendErrorCode.UNAUTHORIZED_APPROVER.getMessage());
+    }
+
+    @Test
+    @DisplayName("친구 요청 거절 실패 - 이미 승인된 요청")
+    void rejectFriendRequest_fail_alreadyApproved() {
+        FriendRequest friendRequest = friendRequestRepository.save(createFriendRequest(memberB, memberA));
+        friendRequest.approve();
+        friendRequestRepository.save(friendRequest);
+
+        assertThatThrownBy(() -> friendService.rejectFriendRequest(friendRequest.getFriendRequestId(), memberA.getMemberId()))
+                .isInstanceOf(FriendException.class)
+                .hasMessage(FriendErrorCode.FRIEND_STATUS_INVALID.getMessage());
+    }
+
 
 
 
