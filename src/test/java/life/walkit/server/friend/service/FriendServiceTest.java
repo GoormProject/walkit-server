@@ -18,10 +18,7 @@ import life.walkit.server.friend.error.FriendException;
 import life.walkit.server.friend.repository.FriendRepository;
 import life.walkit.server.friend.repository.FriendRequestRepository;
 import life.walkit.server.global.util.GeoUtils;
-import life.walkit.server.member.dto.LocationDto;
 import life.walkit.server.member.entity.Member;
-import life.walkit.server.member.error.MemberException;
-import life.walkit.server.member.error.enums.MemberErrorCode;
 import life.walkit.server.member.repository.MemberRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -207,8 +204,8 @@ public class FriendServiceTest {
         Member memberB = memberRepository.save(createMember("user02@gmail.com", "User02"));
         Member memberC = memberRepository.save(createMember("user03@gmail.com", "User03"));
 
-        memberB.updateLocation(GeoUtils.toPoint(126.9780, 37.5665)); // 서울
-        memberC.updateLocation(GeoUtils.toPoint(129.0756, 35.1796)); // 부산
+        memberB.updateLocation(GeoUtils.toPoint(126.9780, 37.5665));
+        memberC.updateLocation(GeoUtils.toPoint(129.0756, 35.1796));
 
         memberRepository.save(memberB);
         memberRepository.save(memberC);
@@ -236,23 +233,6 @@ public class FriendServiceTest {
         assertThat(friendC.getLastLocation().getLat()).isEqualTo(35.1796);
         assertThat(friendC.getLastLocation().getLng()).isEqualTo(129.0756);
     }
-
-//    @Test
-//    @DisplayName("친구 목록 조회 테스트")
-//    void getFriends_success() {
-//        // given
-//        Member member = memberRepository.findByEmail("test@test.com")
-//                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
-//
-//        // when
-//        List<FriendResponseDTO> friends = friendService.getFriends(member.getMemberId());
-//
-//        // then
-//        assertNotNull(friends);
-//        assertFalse(friends.isEmpty()); // 친구가 비어있지 않은지 확인
-//        assertEquals("친구 닉네임", friends.get(0).getNickname());
-//    }
-
 
 
 
