@@ -4,10 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import life.walkit.server.auth.dto.CustomMemberDetails;
-import life.walkit.server.friend.dto.FriendRequestResponseDTO;
-import life.walkit.server.friend.dto.FriendResponseDTO;
-import life.walkit.server.friend.dto.ReceivedFriendResponse;
-import life.walkit.server.friend.dto.SentFriendResponse;
+import life.walkit.server.friend.dto.*;
 import life.walkit.server.friend.enums.FriendRequestResponse;
 import life.walkit.server.friend.enums.FriendResponse;
 import life.walkit.server.friend.service.FriendService;
@@ -61,14 +58,15 @@ public class FriendController {
         );
     }
 
-    @PatchMapping("/request/{friendRequestId}")
+    @PutMapping("/request/{friendRequestId}")
     @Operation(summary = "친구 요청 승인", description = "친구 요청을 승인합니다.")
-    public ResponseEntity<BaseResponse<Void>> approveFriendRequest(
+    public ResponseEntity<BaseResponse<FriendRequestApprovedResponse>> approveFriendRequest(
             @AuthenticationPrincipal CustomMemberDetails member,
             @PathVariable Long friendRequestId
     ) {
-        friendService.approveFriendRequest(friendRequestId, member.getMemberId());
-        return BaseResponse.toResponseEntity(FriendRequestResponse.APPROVED_SUCCESS);
+        return BaseResponse.toResponseEntity(
+                FriendRequestResponse.APPROVED_SUCCESS,
+                friendService.approveFriendRequest(friendRequestId, member.getMemberId()));
     }
 
     @DeleteMapping("/request/{friendRequestId}")
@@ -92,3 +90,5 @@ public class FriendController {
     }
 
 }
+
+
