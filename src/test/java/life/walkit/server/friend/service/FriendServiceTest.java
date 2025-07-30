@@ -4,16 +4,24 @@ import static life.walkit.server.global.factory.GlobalTestFactory.createFriendRe
 import static life.walkit.server.global.factory.GlobalTestFactory.createMember;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
+
 import life.walkit.server.friend.dto.FriendRequestResponseDTO;
+import life.walkit.server.friend.dto.FriendResponseDTO;
 import life.walkit.server.friend.dto.ReceivedFriendResponse;
 import life.walkit.server.friend.dto.SentFriendResponse;
+import life.walkit.server.friend.entity.Friend;
 import life.walkit.server.friend.entity.FriendRequest;
 import life.walkit.server.friend.enums.FriendRequestStatus;
 import life.walkit.server.friend.error.FriendErrorCode;
 import life.walkit.server.friend.error.FriendException;
 import life.walkit.server.friend.repository.FriendRepository;
 import life.walkit.server.friend.repository.FriendRequestRepository;
+import life.walkit.server.global.util.GeoUtils;
+import life.walkit.server.member.dto.LocationDto;
 import life.walkit.server.member.entity.Member;
+import life.walkit.server.member.error.MemberException;
+import life.walkit.server.member.error.enums.MemberErrorCode;
 import life.walkit.server.member.repository.MemberRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,9 +52,9 @@ public class FriendServiceTest {
 
     @BeforeEach
     void setUp() {
-        memberA = memberRepository.save(createMember("a@email.com", "회원A"));
-        memberB = memberRepository.save(createMember("b@email.com", "회원B"));
-        memberC = memberRepository.save(createMember("c@email.com", "회원C"));
+        memberA = memberRepository.save(createMember("a@gmail.com", "회원A"));
+        memberB = memberRepository.save(createMember("b@gmail.com", "회원B"));
+        memberC = memberRepository.save(createMember("c@gmail.com", "회원C"));
     }
 
     @AfterEach
@@ -146,6 +154,61 @@ public class FriendServiceTest {
                 .isInstanceOf(FriendException.class)
                 .hasMessage(FriendErrorCode.UNAUTHORIZED_APPROVER.getMessage());
     }
+
+    @Test
+    @DisplayName("친구 목록 조회 성공")
+    void getFriendList_success() {
+        // Arrange - 테스트 데이터 생성 및 저장
+        Member memberA = memberRepository.save(createMember("user01@gmail.com", "User01"));
+        Member memberB = memberRepository.save(createMember("user02@gmail.com", "User02"));
+        Member memberC = memberRepository.save(createMember("user03@gmail.com", "User03"));
+
+        memberB.updateLocation(GeoUtils.toPoint(126.9780, 37.5665)); // 서울
+        memberC.updateLocation(GeoUtils.toPoint(129.0756, 35.1796)); // 부산
+
+        memberRepository.save(memberB);
+        memberRepository.save(memberC);
+
+        friendRepository.save(Friend.builder().member(memberA).partner(memberB).build());
+        friendRepository.save(Friend.builder().member(memberA).partner(memberC).build());
+
+        List<FriendResponseDTO> friends = friendService.getFriends(memberA.getMemberId());
+
+        assertThat(friends).hasSize(2);
+
+        // 친구 User02 검증
+        FriendResponseDTO friendB = friends.stream()
+                .filter(f -> f.getNickname().equals("User02"))
+                .findFirst()
+                .orElseThrow();
+        assertThat(friendB.getLastLocation().getLat()).isEqualTo(37.5665);
+        assertThat(friendB.getLastLocation().getLng()).isEqualTo(126.9780);
+
+        // 친구 User03 검증
+        FriendResponseDTO friendC = friends.stream()
+                .filter(f -> f.getNickname().equals("User03"))
+                .findFirst()
+                .orElseThrow();
+        assertThat(friendC.getLastLocation().getLat()).isEqualTo(35.1796);
+        assertThat(friendC.getLastLocation().getLng()).isEqualTo(129.0756);
+    }
+
+//    @Test
+//    @DisplayName("친구 목록 조회 테스트")
+//    void getFriends_success() {
+//        // given
+//        Member member = memberRepository.findByEmail("test@test.com")
+//                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+//
+//        // when
+//        List<FriendResponseDTO> friends = friendService.getFriends(member.getMemberId());
+//
+//        // then
+//        assertNotNull(friends);
+//        assertFalse(friends.isEmpty()); // 친구가 비어있지 않은지 확인
+//        assertEquals("친구 닉네임", friends.get(0).getNickname());
+//    }
+
 
 
 
