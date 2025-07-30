@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 
 @Tag(name = "친구", description = "친구 API")
@@ -69,6 +71,16 @@ public class FriendController {
     ) {
         friendService.approveFriendRequest(friendRequestId, member.getMemberId());
         return BaseResponse.toResponseEntity(FriendRequestResponse.APPROVED_SUCCESS);
+    }
+
+    @DeleteMapping("/requests/{friendRequestId}")
+    @Operation(summary = "친구 요청 거절", description = "친구 요청을 거절합니다.")
+    public ResponseEntity<BaseResponse<Void>> rejectFriendRequest(
+            @AuthenticationPrincipal CustomMemberDetails member,
+            @PathVariable Long friendRequestId
+    ) {
+        friendService.rejectFriendRequest(friendRequestId, member.getMemberId());
+        return BaseResponse.toResponseEntity(FriendRequestResponse.REJECTED_SUCCESS);
     }
 
     @GetMapping

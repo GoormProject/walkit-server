@@ -14,6 +14,7 @@ import life.walkit.server.member.error.MemberException;
 import life.walkit.server.member.error.enums.MemberErrorCode;
 import life.walkit.server.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -46,7 +47,7 @@ public class MemberController {
     }
 
     @Operation(summary = "프로필 수정", description = "이름과 닉네임, 프로필 이미지를 수정합니다.")
-    @PutMapping("/{memberId}")
+    @PutMapping(value = "/{memberId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BaseResponse<ProfileResponse>> updateProfile(
             @PathVariable Long memberId,
             @AuthenticationPrincipal CustomMemberDetails member,
