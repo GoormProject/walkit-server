@@ -71,7 +71,7 @@ public class FriendController {
         return BaseResponse.toResponseEntity(FriendRequestResponse.APPROVED_SUCCESS);
     }
 
-    @DeleteMapping("/requests/{friendRequestId}")
+    @DeleteMapping("/request/{friendRequestId}")
     @Operation(summary = "친구 요청 거절", description = "친구 요청을 거절합니다.")
     public ResponseEntity<BaseResponse<Void>> rejectFriendRequest(
             @AuthenticationPrincipal CustomMemberDetails member,
