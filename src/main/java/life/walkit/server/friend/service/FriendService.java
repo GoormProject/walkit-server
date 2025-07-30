@@ -1,10 +1,9 @@
 package life.walkit.server.friend.service;
 
+import life.walkit.server.friend.dto.*;
 import life.walkit.server.friend.entity.Friend;
+import life.walkit.server.member.dto.LocationDto;
 import org.springframework.transaction.annotation.Transactional;
-import life.walkit.server.friend.dto.FriendRequestResponseDTO;
-import life.walkit.server.friend.dto.ReceivedFriendResponse;
-import life.walkit.server.friend.dto.SentFriendResponse;
 import life.walkit.server.friend.enums.FriendRequestStatus;
 import life.walkit.server.friend.error.FriendErrorCode;
 import life.walkit.server.friend.error.FriendException;
@@ -86,7 +85,7 @@ public class FriendService {
                 .toList();
     }
 
-    public void approveFriendRequest(Long friendRequestId, Long memberId) {
+    public FriendRequestApprovedResponse approveFriendRequest(Long friendRequestId, Long memberId) {
         FriendRequest friendRequest = friendRequestRepository.findById(friendRequestId)
                 .orElseThrow(() -> new FriendException(FriendErrorCode.FRIEND_REQUEST_NOT_FOUND));
 
@@ -113,6 +112,9 @@ public class FriendService {
         );
 
         friendRepository.saveAll(friends);
+        Member approvedFriend = friendRequest.getSender();
+
+        return new FriendRequestApprovedResponse(approvedFriend.getMemberId());
     }
 
     public void rejectFriendRequest(Long friendRequestId, Long memberId) {
@@ -130,6 +132,30 @@ public class FriendService {
 
         friendRequestRepository.delete(request);
     }
+
+    @Transactional(readOnly = true)
+    public List<FriendResponseDTO> getFriends(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        List<Friend> friends = friendRepository.findAllByMember(member);
+
+        return friends.stream().map(friend -> {
+            Member friendMember = friend.getPartner();
+
+            LocationDto locationDto = friendMember.getLocation() != null
+                    ? LocationDto.builder()
+                    .lat(friendMember.getLocation().getY()) // 위도 추출
+                    .lng(friendMember.getLocation().getX()) // 경도 추출
+                    .build()
+                    : null;
+
+            return FriendResponseDTO.of(friendMember, locationDto);
+        }).toList();
+    }
+
+
+
 }
 
 
