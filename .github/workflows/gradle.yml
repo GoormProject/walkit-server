@@ -83,7 +83,7 @@ jobs:
         if: ${{ always() }}
         with:
           files: build/test-results/**/*.xml
-          comment_mode: replace
+          comment_mode: changes
 
   dependency-submission:
     if: github.event_name == 'pull_request'
