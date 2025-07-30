@@ -90,12 +90,12 @@ public class FriendController {
     }
 
     @Operation(summary = "친구 삭제하기", description = "친구 관계를 삭제합니다.")
-    @DeleteMapping("/{friendId}")
+    @DeleteMapping("/{friendMemberId}")
     public ResponseEntity<BaseResponse<Void>> deleteFriend(
             @AuthenticationPrincipal CustomMemberDetails memberDetails,
-            @PathVariable Long userId
+            @PathVariable Long friendMemberId
     ) {
-        friendService.deleteFriend(memberDetails.getMemberId(), userId);
+        friendService.deleteFriend(memberDetails.getMemberId(), friendMemberId);
         return BaseResponse.toResponseEntity(FriendResponse.DELETE_SUCCESS);
     }
 
