@@ -230,14 +230,14 @@ public class WalkService {
         return geometryFactory.createLineString(coordinates);
     }
 
-    private Point createPath(List<Double> pathPoint) {
+    private Point createPath(List<Double> coordinates) {
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
-        if (pathPoint == null || pathPoint.size() < 2) {
+        if (coordinates == null || coordinates.size() < 2) {
             throw new IllegalArgumentException("좌표 데이터는 최소 2개(경도, 위도)가 필요합니다.");
         }
 
-        Coordinate coordinate = new Coordinate(pathPoint.get(0), pathPoint.get(1));
+        Coordinate coordinate = new Coordinate(coordinates.get(0), coordinates.get(1));
         return geometryFactory.createPoint(coordinate);
     }
 
