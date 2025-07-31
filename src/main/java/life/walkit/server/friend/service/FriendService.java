@@ -154,6 +154,21 @@ public class FriendService {
         }).toList();
     }
 
+    public void deleteFriend(Long requesterId, Long recipientId) {
+        Member requester = memberRepository.findById(requesterId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+        Member recipient = memberRepository.findById(recipientId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        Friend friendRequestToRecipient = friendRepository.findByMemberAndPartner(requester, recipient)
+                .orElseThrow(() -> new FriendException(FriendErrorCode.FRIEND_NOT_FOUND));
+        Friend friendRecipientToRequest = friendRepository.findByMemberAndPartner(recipient, requester)
+                .orElseThrow(() -> new FriendException(FriendErrorCode.FRIEND_NOT_FOUND));
+
+        friendRepository.deleteAll(List.of(friendRequestToRecipient, friendRecipientToRequest));
+    }
+
+
 
 
 }
