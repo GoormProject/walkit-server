@@ -8,11 +8,11 @@ import life.walkit.server.walk.service.WalkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 // TODO: Swagger 표시
-@Controller("/api/walks")
+@RestController
+@RequestMapping("/api/walks")
 @RequiredArgsConstructor
 public class WalkController {
 
