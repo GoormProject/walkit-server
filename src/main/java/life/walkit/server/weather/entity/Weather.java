@@ -22,7 +22,7 @@ public class Weather extends BaseEntity {
     @Column(name = "weather_id")
     private Long weatherId;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "admin_area_id", nullable = false)
     private AdminArea adminArea;
 
