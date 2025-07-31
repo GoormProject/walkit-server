@@ -3,6 +3,7 @@ package life.walkit.server.walk.controller;
 import life.walkit.server.auth.dto.CustomMemberDetails;
 import life.walkit.server.global.response.BaseResponse;
 import life.walkit.server.walk.dto.enums.WalkResponse;
+import life.walkit.server.walk.dto.request.WalkRequest;
 import life.walkit.server.walk.service.WalkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 // TODO: Swagger 표시
 @Controller("/api/walks")
@@ -52,6 +54,15 @@ public class WalkController {
         return BaseResponse.toResponseEntity(
             WalkResponse.RESUME_WALK_SUCCESS,
             walkService.endWalk(walkId)
+        );
+    }
+
+    @PostMapping("/new")
+    public ResponseEntity<BaseResponse> createWalk(@RequestBody WalkRequest walkRequest) {
+
+        return BaseResponse.toResponseEntity(
+            WalkResponse.CREATE_WALK_SUCCESS,
+            walkService.createWalk(walkRequest)
         );
     }
 }

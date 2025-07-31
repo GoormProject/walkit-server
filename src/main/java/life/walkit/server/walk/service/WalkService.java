@@ -4,6 +4,11 @@ import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.error.MemberException;
 import life.walkit.server.member.error.enums.MemberErrorCode;
 import life.walkit.server.member.repository.MemberRepository;
+import life.walkit.server.path.entity.Path;
+import life.walkit.server.trailwalkimage.entity.TrailWalkImage;
+import life.walkit.server.trailwalkimage.repository.TrailWalkImageRepository;
+import life.walkit.server.walk.dto.request.WalkRequest;
+import life.walkit.server.walk.dto.response.WalkCreateResponse;
 import life.walkit.server.walk.dto.response.WalkEventResponse;
 import life.walkit.server.walk.entity.Walk;
 import life.walkit.server.walk.entity.WalkingSession;
@@ -13,8 +18,13 @@ import life.walkit.server.walk.error.enums.WalkException;
 import life.walkit.server.walk.repository.WalkRepository;
 import life.walkit.server.walk.repository.WalkingSessionRepository;
 import lombok.RequiredArgsConstructor;
+import org.locationtech.jts.geom.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Duration;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +33,7 @@ public class WalkService {
     private final MemberRepository memberRepository;
     private final WalkRepository walkRepository;
     private final WalkingSessionRepository walkingSessionRepository;
+    private final TrailWalkImageRepository trailWalkImageRepository;
 
     @Transactional
     public WalkEventResponse startWalk(Long memberId) {
@@ -106,6 +117,74 @@ public class WalkService {
         );
 
         return WalkEventResponse.from(walkingSession);
+    }
+
+    @Transactional
+    public WalkCreateResponse createWalk(WalkRequest walkRequest) {
+        Walk walk = findByWalkId(walkRequest.walkId());
+
+        WalkingSession latestSessionByWalk = findLatestSessionByWalk(walk);
+
+        // 중간 세션이 끝난 상태가 아닐시 끝낸다.
+        if (latestSessionByWalk.getEventType() != EventType.END) {
+            if (walkRequest.eventType().equals("END")) {
+                latestSessionByWalk.updateWalkingSessionEventType(EventType.END);
+            }
+        }
+
+        LineString lineString = createLineString(walkRequest.path());
+        Point point = createPath(walkRequest.startPoint());
+
+        Path newPath = Path.builder()
+            .path(lineString)
+            .point(point)
+            .build();
+
+        Duration totalDuration = Duration.ofSeconds(walkRequest.totalTime());
+
+        walk.updateWalkDetails(
+            walkRequest.walkTitle(),
+            newPath,
+            walkRequest.totalDistance(),
+            totalDuration,
+            walkRequest.pace()
+        );
+
+        trailWalkImageRepository.save(
+            TrailWalkImage.builder()
+                .trail(null)
+                .routeImage(walkRequest.routeUrl())
+                .walk(walk)
+                .build()
+        );
+        Walk savedWalk = walkRepository.save(walk);
+
+        return new WalkCreateResponse(savedWalk.getWalkId());
+    }
+
+    private LineString createLineString(List<List<Double>> pathPoints) {
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+
+        if (pathPoints == null || pathPoints.isEmpty()) {
+            return geometryFactory.createLineString();
+        }
+
+        Coordinate[] coordinates = pathPoints.stream()
+            .map(point -> new Coordinate(point.get(0), point.get(1))) // 각 List<Double>을 Coordinate 객체로 변환
+            .toArray(Coordinate[]::new); // Coordinate 배열로 최종 변환
+
+        return geometryFactory.createLineString(coordinates);
+    }
+
+    private Point createPath(List<Double> pathPoint) {
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+
+        if (pathPoint == null || pathPoint.size() < 2) {
+            throw new IllegalArgumentException("좌표 데이터는 최소 2개(경도, 위도)가 필요합니다.");
+        }
+
+        Coordinate coordinate = new Coordinate(pathPoint.get(0), pathPoint.get(1));
+        return geometryFactory.createPoint(coordinate);
     }
 
     private Walk findByWalkId(Long walkId) {
