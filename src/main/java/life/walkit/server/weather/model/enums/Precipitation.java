@@ -8,7 +8,10 @@ public enum Precipitation {
 
     @JsonCreator
     public static Precipitation of(String value) {
-        if (value == null || value.isBlank()) return NONE;
-        return Precipitation.valueOf(value.toUpperCase());
+        try {
+            return Precipitation.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return NONE;
+        }
     }
 }

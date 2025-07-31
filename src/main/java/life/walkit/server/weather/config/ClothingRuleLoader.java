@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,15 +17,17 @@ import java.util.Map;
 @Component
 public class ClothingRuleLoader {
 
-    private static final String JSON_PATH = "src/main/resources/static/clothing_rules.json";
+    private static final String JSON_PATH = "/static/clothing_rules.json";
 
     private Map<String, List<ClothingRule>> clothingRules = new HashMap<>();
 
     public static Map<String, List<ClothingRule>> loadRules() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(
-                new File(JSON_PATH),
-                new TypeReference<Map<String, List<ClothingRule>>>() {}
-        );
+        try (InputStream inputStream = ClothingRuleLoader.class.getResourceAsStream(JSON_PATH)) {
+            if (inputStream == null) {
+                throw new IOException("Cannot find resource: " + JSON_PATH);
+            }
+            return mapper.readValue(inputStream, new TypeReference<Map<String, List<ClothingRule>>>() {});
+        }
     }
 }

@@ -7,6 +7,8 @@ import life.walkit.server.weather.model.enums.Wind;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @Getter
 @Setter
 public class ClothingRule {
@@ -18,10 +20,10 @@ public class ClothingRule {
     private int max;                // 최고 온도(섭씨) : 범위 안이면 해당 옷차림 표시
 
     public boolean matches(Wind wind, Clouds clouds, Precipitation precip, Night night, int temp) {
-        return (this.wind.equals(wind)) &&
-                (this.clouds.equals(clouds)) &&
-                (this.precip.equals(precip)) &&
-                (this.night.equals(night)) &&
+        return Objects.equals(this.wind, wind) &&
+                Objects.equals(this.clouds, clouds) &&
+                Objects.equals(this.precip, precip) &&
+                Objects.equals(this.night, night) &&
                 (temp >= this.min && temp <= this.max);
     }
 }

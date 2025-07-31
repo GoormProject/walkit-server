@@ -17,16 +17,16 @@ import java.util.Map;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class ClothingService {
 
-    private final static Map<String, List<ClothingRule>> clothingRules;
+    private final Map<String, List<ClothingRule>> clothingRules;
 
-    static {
+    public ClothingService() {
         try {
             clothingRules = ClothingRuleLoader.loadRules();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            log.error("Failed to load clothing rules", e);
+            throw new RuntimeException("Failed to initialize ClothingService", e);
         }
     }
 

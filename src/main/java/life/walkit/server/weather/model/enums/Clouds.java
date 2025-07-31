@@ -7,7 +7,10 @@ public enum Clouds {
 
     @JsonCreator
     public static Clouds of(String value) {
-        if (value == null || value.isBlank()) return CLEAR;
-        return Clouds.valueOf(value.toUpperCase());
+        try {
+            return Clouds.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return CLEAR;
+        }
     }
 }

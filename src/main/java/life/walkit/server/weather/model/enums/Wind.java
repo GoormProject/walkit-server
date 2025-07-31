@@ -7,7 +7,10 @@ public enum Wind {
 
     @JsonCreator
     public static Wind of(String value) {
-        if (value == null || value.isBlank()) return CALM;
-        return Wind.valueOf(value.toUpperCase());
+        try {
+            return Wind.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return CALM;
+        }
     }
 }
