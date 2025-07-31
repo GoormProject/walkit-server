@@ -2,9 +2,15 @@ package life.walkit.server.walk.service;
 
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.repository.MemberRepository;
+import life.walkit.server.trail.entity.Trail;
+import life.walkit.server.path.entity.Path;
 import life.walkit.server.path.repository.PathRepository;
+import life.walkit.server.trail.repository.TrailRepository;
+import life.walkit.server.trailwalkimage.entity.TrailWalkImage;
+import life.walkit.server.trailwalkimage.repository.TrailWalkImageRepository;
 import life.walkit.server.walk.dto.request.WalkRequest;
 import life.walkit.server.walk.dto.response.WalkEventResponse;
+import life.walkit.server.walk.dto.response.WalkListResponse;
 import life.walkit.server.walk.entity.Walk;
 import life.walkit.server.walk.entity.WalkingSession;
 import life.walkit.server.walk.entity.enums.EventType;
@@ -15,21 +21,15 @@ import life.walkit.server.walk.repository.WalkingSessionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 import static life.walkit.server.global.factory.GlobalTestFactory.createMember;
-import static life.walkit.server.global.factory.GlobalTestFactory.createWalk;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -48,28 +48,22 @@ public class WalkServiceTest {
     WalkService walkService;
 
     @Autowired
-    PathRepository pathRepository;
+    private WalkingSessionRepository walkingSessionRepository;
+
+    @Autowired
+    private TrailRepository trailRepository;
+
+    @Autowired
+    private TrailWalkImageRepository trailWalkImageRepository;
+
+    @Autowired
+    private PathRepository pathRepository;
 
     Member member;
-    Walk walk;
-    @Autowired
-    private WalkingSessionRepository walkingSessionRepository;
 
     @BeforeEach
     void setUp() {
         member = memberRepository.save(createMember("a@email.com", "회원A"));
-        Walk walk = walkRepository.save(
-            createWalk(
-                member,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                false
-            )
-        );
     }
 
     @Test
@@ -201,6 +195,75 @@ public class WalkServiceTest {
         assertThat(foundWalk.getPath().getPath()).isEqualTo(lineString);
         assertThat(foundWalk.getPath().getPoint()).isEqualTo(point);
         assertThat(foundWalk.getWalkTitle()).isEqualTo("2025-07-28의 산책기록");
+    }
+
+    @Test
+    @DisplayName("산책 기록 목록 조회 성공 - 여러 종류의 데이터")
+    void getWalkList_withMultipleData_success() {
+        // given
+        // 1. 등록된 산책로(Trail)를 걸은 기록 생성
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+        Path path = new Path(geometryFactory.createLineString(), geometryFactory.createPoint(new Coordinate(0, 0)));
+        pathRepository.save(path);
+
+        Trail trail = Trail.builder()
+            .member(member)
+            .path(path)
+            .title("일산호수공원 산책")
+            .description("호수공원 한바퀴")
+            .distance(5.0)
+            .location("경기도 고양시")
+            .build();
+        trailRepository.save(trail);
+
+        Walk walkWithTrail = walkRepository.save(Walk.builder().member(member).trail(trail).walkTitle("일산호수공원 산책").isUploaded(false).build());
+        walkingSessionRepository.save(WalkingSession.builder().walk(walkWithTrail).eventType(EventType.END).build());
+        trailWalkImageRepository.save(TrailWalkImage.builder().walk(walkWithTrail).routeImage("imageUrl1").build());
+
+        // 2. 자유로운 산책 기록 생성
+        Walk freeWalk = walkRepository.save(Walk.builder().member(member).trail(null).walkTitle("2025-07-20의 산책 기록").isUploaded(false).build());
+        walkingSessionRepository.save(WalkingSession.builder().walk(freeWalk).eventType(EventType.END).build());
+        trailWalkImageRepository.save(TrailWalkImage.builder().walk(freeWalk).routeImage("imageUrl2").build());
+
+        // 3. 내가 업로드한 산책 기록 생성
+        Walk uploadedWalk = walkRepository.save(Walk.builder().member(member).trail(null).walkTitle("내가 업로드한 산책기록").isUploaded(true).build());
+        walkingSessionRepository.save(WalkingSession.builder().walk(uploadedWalk).eventType(EventType.END).build());
+        trailWalkImageRepository.save(TrailWalkImage.builder().walk(uploadedWalk).routeImage("imageUrl3").build());
+
+        // when
+        List<WalkListResponse> walkList = walkService.getWalkList(member.getMemberId());
+
+        // then
+        assertThat(walkList).hasSize(3);
+
+        WalkListResponse response1 = walkList.stream().filter(w -> w.walkId().equals(walkWithTrail.getWalkId())).findFirst().get();
+        assertThat(response1.trailId()).isEqualTo(trail.getTrailId());
+        assertThat(response1.title()).isEqualTo(trail.getTitle());
+        assertThat(response1.isUploaded()).isFalse();
+
+        WalkListResponse response2 = walkList.stream().filter(w -> w.walkId().equals(freeWalk.getWalkId())).findFirst().get();
+        assertThat(response2.trailId()).isNull();
+        assertThat(response2.title()).isEqualTo(freeWalk.getWalkTitle());
+        assertThat(response2.isUploaded()).isFalse();
+
+        WalkListResponse response3 = walkList.stream().filter(w -> w.walkId().equals(uploadedWalk.getWalkId())).findFirst().get();
+        assertThat(response3.trailId()).isNull();
+        assertThat(response3.title()).isEqualTo(uploadedWalk.getWalkTitle());
+        assertThat(response3.isUploaded()).isTrue();
+    }
+
+    @Test
+    @DisplayName("산책 기록 목록이 없을 경우 빈 리스트 반환")
+    void getWalkList_empty_success() {
+        // given
+        Member newMember = memberRepository.save(createMember("b@email.com", "회원B"));
+
+        // when
+        List<WalkListResponse> walkList = walkService.getWalkList(newMember.getMemberId());
+
+        // then
+        assertThat(walkList).isNotNull();
+        assertThat(walkList).isEmpty();
     }
 
 }
