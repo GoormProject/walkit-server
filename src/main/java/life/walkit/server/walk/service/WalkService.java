@@ -9,6 +9,7 @@ import life.walkit.server.trailwalkimage.entity.TrailWalkImage;
 import life.walkit.server.trailwalkimage.repository.TrailWalkImageRepository;
 import life.walkit.server.walk.dto.request.WalkRequest;
 import life.walkit.server.walk.dto.response.WalkCreateResponse;
+import life.walkit.server.walk.dto.response.WalkDeleteResponse;
 import life.walkit.server.walk.dto.response.WalkEventResponse;
 import life.walkit.server.walk.dto.response.WalkListResponse;
 import life.walkit.server.walk.entity.Walk;
@@ -19,6 +20,7 @@ import life.walkit.server.walk.error.enums.WalkException;
 import life.walkit.server.walk.repository.WalkRepository;
 import life.walkit.server.walk.repository.WalkingSessionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import org.locationtech.jts.geom.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -173,6 +175,16 @@ public class WalkService {
             .toList();
     }
 
+    @Transactional
+    public WalkDeleteResponse deleteWalk(Long walkId) {
+        Walk foundWalk = findByWalkId(walkId);
+        walkRepository.delete(foundWalk);
+        Long foundWalkId = foundWalk.getWalkId();
+        Long memberId = foundWalk.getMember().getMemberId();
+
+        return new WalkDeleteResponse(foundWalkId, memberId);
+    }
+
     private WalkListResponse mapToWalkListResponse(Walk walk) {
         WalkingSession latestSession = findLatestSessionByWalk(walk);
         List<TrailWalkImage> trailWalkImages = trailWalkImageRepository.findByWalk(walk);
@@ -186,17 +198,17 @@ public class WalkService {
         }
 
         return new WalkListResponse(
-                walk.getWalkId(),
-                walk.getTrail() != null ? walk.getTrail().getTrailId() : null,
-                latestSession.getEventId(),
-                latestSession.getEventTime().toString(),
-                imageId,
-                imageUrl,
-                walk.getTotalDistance(),
-                walk.getTotalTime() != null ? walk.getTotalTime().toString() : null,
-                walk.getPace() != null ? walk.getPace().toString() : null,
-                walk.getWalkTitle(),
-                walk.getIsUploaded()
+            walk.getWalkId(),
+            walk.getTrail() != null ? walk.getTrail().getTrailId() : null,
+            latestSession.getEventId(),
+            latestSession.getEventTime().toString(),
+            imageId,
+            imageUrl,
+            walk.getTotalDistance(),
+            walk.getTotalTime() != null ? walk.getTotalTime().toString() : null,
+            walk.getPace() != null ? walk.getPace().toString() : null,
+            walk.getWalkTitle(),
+            walk.getIsUploaded()
         );
     }
 

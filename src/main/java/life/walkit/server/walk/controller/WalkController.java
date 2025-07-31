@@ -72,4 +72,12 @@ public class WalkController {
         );
     }
 
+    @DeleteMapping("/{walkId}")
+    public ResponseEntity<BaseResponse> deleteWalk(@PathVariable("walkId") Long walkId) {
+
+        return BaseResponse.toResponseEntity(
+            WalkResponse.DELETE_WALK_SUCCESS,
+            walkService.deleteWalk(walkId)
+        );
+    }
 }

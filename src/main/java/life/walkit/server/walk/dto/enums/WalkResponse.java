@@ -11,7 +11,8 @@ public enum WalkResponse implements Response {
     PAUSE_WALK_SUCCESS(HttpStatus.OK, "산책 기록 일시정지 성공"),
     RESUME_WALK_SUCCESS(HttpStatus.OK, "산책 기록 재개"),
     CREATE_WALK_SUCCESS(HttpStatus.OK, "산책 기록 등록 생성 성공"),
-    GET_WALK_LIST_SUCCESS(HttpStatus.OK, "산책 기록 리스트 조회 성공");
+    GET_WALK_LIST_SUCCESS(HttpStatus.OK, "산책 기록 리스트 조회 성공"),
+    DELETE_WALK_SUCCESS(HttpStatus.OK, "산책 기록 삭제 성공");
 
     private final HttpStatus httpStatus;
     private final String message;
