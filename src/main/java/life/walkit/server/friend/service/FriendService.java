@@ -164,18 +164,14 @@ public class FriendService {
 
     @Transactional(readOnly = true)
     public List<FriendResponseDTO> getFriendsByStatus(Long memberId, MemberStatus status) {
-        // 현재 사용자가 존재하는지 확인
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        // 친구 관계 조회
-        List<Friend> friends = friendRepository.findAllByMember(member);
+        List<Friend> friends = friendRepository.findAllByMemberAndPartnerStatus(member, status);
 
-        // 상태별 필터링 및 변환
         return friends.stream()
-                .map(Friend::getPartner) // Partner 추출
-                .filter(partner -> partner.getStatus() == status) // 상태 필터링
-                .map(FriendResponseDTO::of) // DTO로 변환
+                .map(Friend::getPartner)
+                .map(FriendResponseDTO::of)
                 .toList();
     }
 
