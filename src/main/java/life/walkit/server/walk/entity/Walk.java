@@ -5,7 +5,6 @@ import life.walkit.server.member.entity.Member;
 import life.walkit.server.path.entity.Path;
 import life.walkit.server.trail.entity.Trail;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +14,6 @@ import java.time.Duration;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @Table(name = "walk")
 public class Walk {
 
