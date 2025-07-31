@@ -18,6 +18,10 @@ public class AdminAreaDto {
     private Integer y;
 
     public AdminArea toEntity() {
+        if (lng == null || lat == null) {
+            throw new IllegalArgumentException("경도와 위도 값이 없습니다.");
+        }
+
         return AdminArea.builder()
                 .adminAreaId(adminAreaId)
                 .sido(sido)

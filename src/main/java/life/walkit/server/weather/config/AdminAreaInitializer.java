@@ -23,7 +23,7 @@ public class AdminAreaInitializer  implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (adminAreaRepository.existsBy()) {
+        if (adminAreaRepository.existsAny()) {
             return;
         }
 

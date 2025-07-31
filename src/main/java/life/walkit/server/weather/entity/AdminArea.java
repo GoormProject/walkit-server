@@ -30,10 +30,10 @@ public class AdminArea {
     private Point location;
 
     @Column(name = "x", nullable = false)
-    private Integer X;
+    private Integer x;
 
     @Column(name = "y", nullable = false)
-    private Integer Y;
+    private Integer y;
 
     @Builder
     public AdminArea(Long adminAreaId, String sido, String sigungu, String eupmyeondong, Point location, Integer x,
@@ -43,7 +43,7 @@ public class AdminArea {
         this.sigungu = sigungu;
         this.eupmyeondong = eupmyeondong;
         this.location = location;
-        X = x;
-        Y = y;
+        this.x = x;
+        this.y = y;
     }
 }
