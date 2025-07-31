@@ -27,9 +27,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import static life.walkit.server.global.factory.GlobalTestFactory.createMember;
+import static life.walkit.server.global.factory.GlobalTestFactory.createWalk;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -266,4 +270,18 @@ public class WalkServiceTest {
         assertThat(walkList).isEmpty();
     }
 
+    @Test
+    @DisplayName("산책 기록 삭제 성공")
+    void deleteWalk_success() {
+        // given
+        Walk savedWalk = walkRepository.save(Walk.builder().member(member).isUploaded(false).build());
+        Long walkId = savedWalk.getWalkId();
+
+        // when
+        walkService.deleteWalk(walkId);
+
+        // then
+        Optional<Walk> foundWalkOptional = walkRepository.findById(walkId);
+        assertThat(foundWalkOptional).isEmpty();
+    }
 }
