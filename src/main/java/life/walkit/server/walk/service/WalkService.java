@@ -209,11 +209,18 @@ public class WalkService {
             imageId,
             imageUrl,
             walk.getTotalDistance(),
-            walk.getTotalTime() != null ? walk.getTotalTime().toString() : null,
-            walk.getPace() != null ? walk.getPace().toString() : null,
+            walk.getTotalTime() != null ? formatDuration(walk.getTotalTime()) : null,
+            walk.getPace() != null ? String.format("%.2f", walk.getPace()) : null,
             walk.getWalkTitle(),
             walk.getIsUploaded()
         );
+    }
+
+    private String formatDuration(Duration duration) {
+        long hours = duration.toHours();
+        long minutes = duration.toMinutesPart();
+        long seconds = duration.toSecondsPart();
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
 
     private LineString createLineString(List<List<Double>> pathPoints) {
