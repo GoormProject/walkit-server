@@ -10,6 +10,7 @@ import life.walkit.server.trailwalkimage.repository.TrailWalkImageRepository;
 import life.walkit.server.walk.dto.request.WalkRequest;
 import life.walkit.server.walk.dto.response.WalkCreateResponse;
 import life.walkit.server.walk.dto.response.WalkEventResponse;
+import life.walkit.server.walk.dto.response.WalkListResponse;
 import life.walkit.server.walk.entity.Walk;
 import life.walkit.server.walk.entity.WalkingSession;
 import life.walkit.server.walk.entity.enums.EventType;
@@ -37,8 +38,8 @@ public class WalkService {
 
     @Transactional
     public WalkEventResponse startWalk(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        Member member = findByMemberId(memberId);
 
         Walk walk = walkRepository.save(
             Walk.builder()
@@ -162,6 +163,43 @@ public class WalkService {
         return new WalkCreateResponse(savedWalk.getWalkId());
     }
 
+    @Transactional(readOnly = true)
+    public List<WalkListResponse> getWalkList(Long memberId) {
+        Member member = findByMemberId(memberId);
+        List<Walk> walkList = walkRepository.findByMember(member);
+
+        return walkList.stream()
+            .map(this::mapToWalkListResponse)
+            .toList();
+    }
+
+    private WalkListResponse mapToWalkListResponse(Walk walk) {
+        WalkingSession latestSession = findLatestSessionByWalk(walk);
+        List<TrailWalkImage> trailWalkImages = trailWalkImageRepository.findByWalk(walk);
+
+        Long imageId = null;
+        String imageUrl = null;
+        if (!trailWalkImages.isEmpty()) {
+            TrailWalkImage firstImage = trailWalkImages.get(0);
+            imageId = firstImage.getTrailImageId();
+            imageUrl = firstImage.getRouteImage();
+        }
+
+        return new WalkListResponse(
+                walk.getWalkId(),
+                walk.getTrail() != null ? walk.getTrail().getTrailId() : null,
+                latestSession.getEventId(),
+                latestSession.getEventTime().toString(),
+                imageId,
+                imageUrl,
+                walk.getTotalDistance(),
+                walk.getTotalTime() != null ? walk.getTotalTime().toString() : null,
+                walk.getPace() != null ? walk.getPace().toString() : null,
+                walk.getWalkTitle(),
+                walk.getIsUploaded()
+        );
+    }
+
     private LineString createLineString(List<List<Double>> pathPoints) {
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
@@ -185,6 +223,11 @@ public class WalkService {
 
         Coordinate coordinate = new Coordinate(pathPoint.get(0), pathPoint.get(1));
         return geometryFactory.createPoint(coordinate);
+    }
+
+    private Member findByMemberId(Long memberId) {
+        return memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
     }
 
     private Walk findByWalkId(Long walkId) {

@@ -9,10 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 // TODO: Swagger 표시
 @Controller("/api/walks")
@@ -65,4 +62,14 @@ public class WalkController {
             walkService.createWalk(walkRequest)
         );
     }
+
+    @GetMapping("/walks")
+    public ResponseEntity<BaseResponse> getWalkList(@AuthenticationPrincipal CustomMemberDetails member) {
+
+        return BaseResponse.toResponseEntity(
+            WalkResponse.GET_WALK_LIST_SUCCESS,
+            walkService.getWalkList(member.getMemberId())
+        );
+    }
+
 }
