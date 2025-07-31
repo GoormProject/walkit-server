@@ -2,6 +2,7 @@ package life.walkit.server.weather.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.locationtech.jts.geom.Point;
@@ -13,7 +14,6 @@ import org.locationtech.jts.geom.Point;
 public class AdminArea {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "admin_area_id")
     private Long adminAreaId;
 
@@ -34,4 +34,16 @@ public class AdminArea {
 
     @Column(name = "y", nullable = false)
     private Integer Y;
+
+    @Builder
+    public AdminArea(Long adminAreaId, String sido, String sigungu, String eupmyeondong, Point location, Integer x,
+                     Integer y) {
+        this.adminAreaId = adminAreaId;
+        this.sido = sido;
+        this.sigungu = sigungu;
+        this.eupmyeondong = eupmyeondong;
+        this.location = location;
+        X = x;
+        Y = y;
+    }
 }
