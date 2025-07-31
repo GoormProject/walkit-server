@@ -133,7 +133,7 @@ public class WalkServiceTest {
 
     @Test
     @DisplayName("산책 기록이 이미 멈춤 상태일시 에러")
-    void resumeWalk_alreadyPaused_throwsException() {
+    void endWalk_alreadyCompleted_throwsException() {
         // given
         WalkEventResponse walkEventResponse = walkService.startWalk(member.getMemberId()); // 산책 기록 생성
         WalkEventResponse walkEventResponseEnd = walkService.endWalk(walkEventResponse.walkId());
