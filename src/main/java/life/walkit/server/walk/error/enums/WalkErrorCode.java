@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor
 public enum WalkErrorCode implements ErrorCode {
+    INVALID_WALK_SESSION(HttpStatus.BAD_REQUEST, "유효하지 않은 산책 세션입니다."),
     WALK_START_FAILED(HttpStatus.BAD_REQUEST, "산책 기록 시작에 실패했습니다"),
     WALK_PAUSE_FAILED(HttpStatus.BAD_REQUEST, "산책 기록 일시정지에 실패했습니다"),
     WALK_RESUME_FAILED(HttpStatus.BAD_REQUEST, "산책 기록 재개에 실패했습니다"),

@@ -4,7 +4,6 @@ import life.walkit.server.auth.dto.CustomMemberDetails;
 import life.walkit.server.global.response.BaseResponse;
 import life.walkit.server.walk.dto.enums.WalkResponse;
 import life.walkit.server.walk.dto.request.WalkRequest;
-import life.walkit.server.walk.dto.response.WalkEventResponse;
 import life.walkit.server.walk.service.WalkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

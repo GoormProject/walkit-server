@@ -20,14 +20,13 @@ import life.walkit.server.walk.error.enums.WalkException;
 import life.walkit.server.walk.repository.WalkRepository;
 import life.walkit.server.walk.repository.WalkingSessionRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import org.locationtech.jts.geom.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -127,6 +126,11 @@ public class WalkService {
         Walk walk = findByWalkId(walkRequest.walkId());
 
         WalkingSession latestSessionByWalk = findLatestSessionByWalk(walk);
+
+        // 마지막 eventId가 일치하지 않을 경우 에러 생성
+        if (!Objects.equals(latestSessionByWalk.getEventId(), walkRequest.eventId())) {
+            throw new WalkException(WalkErrorCode.INVALID_WALK_SESSION);
+        }
 
         // 중간 세션이 끝난 상태가 아닐시 끝낸다.
         if (latestSessionByWalk.getEventType() != EventType.END) {
