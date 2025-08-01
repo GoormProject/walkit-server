@@ -82,6 +82,14 @@ public class Walk {
         this.pace = pace;
     }
 
+    public void updateTrail(Trail trail) {
+        this.trail = trail;
+    }
+
+    public void updateIsUploaded(boolean isUploaded) {
+        this.isUploaded = isUploaded;
+    }
+
     @Builder
     public Walk(
         Member member,
@@ -102,4 +110,5 @@ public class Walk {
         this.pace = pace;
         this.isUploaded = isUploaded;
     }
+
 }
