@@ -17,15 +17,23 @@ public class FriendResponseDTO {
     private MemberStatus memberStatus;
     private LocationDto lastLocation;
 
-    public static FriendResponseDTO of(Member member, LocationDto lastLocation) {
+    public static FriendResponseDTO of(Member member) {
+        // LocationDto 생성 로직을 내부로 이동
+        LocationDto locationDto = Optional.ofNullable(member.getLocation())
+                .map(location -> LocationDto.builder()
+                        .lat(location.getY()) // 위도
+                        .lng(location.getX()) // 경도
+                        .build())
+                .orElse(null);
+
         return FriendResponseDTO.builder()
                 .friendId(member.getMemberId())
                 .nickname(member.getNickname())
                 .profile(Optional.ofNullable(member.getProfileImage())
                         .map(ProfileImage::getProfileImage)
-                        .orElse(""))
+                        .orElse("")) // null-safe 프로필 처리
                 .memberStatus(member.getStatus())
-                .lastLocation(lastLocation)
+                .lastLocation(locationDto)
                 .build();
     }
 }

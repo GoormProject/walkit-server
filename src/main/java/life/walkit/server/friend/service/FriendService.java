@@ -3,6 +3,7 @@ package life.walkit.server.friend.service;
 import life.walkit.server.friend.dto.*;
 import life.walkit.server.friend.entity.Friend;
 import life.walkit.server.member.dto.LocationDto;
+import life.walkit.server.member.entity.enums.MemberStatus;
 import org.springframework.transaction.annotation.Transactional;
 import life.walkit.server.friend.enums.FriendRequestStatus;
 import life.walkit.server.friend.error.FriendErrorCode;
@@ -17,6 +18,7 @@ import life.walkit.server.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -140,18 +142,9 @@ public class FriendService {
 
         List<Friend> friends = friendRepository.findAllByMember(member);
 
-        return friends.stream().map(friend -> {
-            Member friendMember = friend.getPartner();
-
-            LocationDto locationDto = friendMember.getLocation() != null
-                    ? LocationDto.builder()
-                    .lat(friendMember.getLocation().getY()) // 위도 추출
-                    .lng(friendMember.getLocation().getX()) // 경도 추출
-                    .build()
-                    : null;
-
-            return FriendResponseDTO.of(friendMember, locationDto);
-        }).toList();
+        return friends.stream()
+                .map(friend -> FriendResponseDTO.of(friend.getPartner())) // Partner를 DTO로 변환
+                .toList();
     }
 
     public void deleteFriend(Long requesterId, Long recipientId) {
@@ -169,7 +162,18 @@ public class FriendService {
     }
 
 
+    @Transactional(readOnly = true)
+    public List<FriendResponseDTO> getFriendsByStatus(Long memberId, MemberStatus status) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
+        List<Friend> friends = friendRepository.findAllByMemberAndPartnerStatus(member, status);
+
+        return friends.stream()
+                .map(Friend::getPartner)
+                .map(FriendResponseDTO::of)
+                .toList();
+    }
 
 }
 
