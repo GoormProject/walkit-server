@@ -1,19 +1,15 @@
 package life.walkit.server.weather.factory;
 
-import life.walkit.server.weather.entity.EupMyeonDong;
-import life.walkit.server.weather.entity.Sido;
-import life.walkit.server.weather.entity.Sigungu;
-import life.walkit.server.weather.entity.Weather;
+import life.walkit.server.weather.entity.*;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class WeatherTestFactory {
 
-    public static Weather createWeather(EupMyeonDong emd) {
+    public static Weather createWeather(AdminArea area) {
         return Weather.builder()
-                .sido(Sido.GYEONGGI)
-                .sigungu(Sigungu.GOYANG_DONGGU)
-                .eupmyeondong(emd)
+                .adminArea(area)
                 .current(createCurrentWeatherMap())
                 .forecast(createJsonString("forecast", "맑음"))
                 .tomorrow(createJsonString("tomorrow", "구름 많음"))
@@ -24,16 +20,12 @@ public class WeatherTestFactory {
     }
 
     public static Weather createCustomWeather(
-            Sido sido,
-            Sigungu sigungu,
-            EupMyeonDong emd,
+            AdminArea area,
             double temp,
             double humidity
     ) {
         return Weather.builder()
-                .sido(sido)
-                .sigungu(sigungu)
-                .eupmyeondong(emd)
+                .adminArea(area)
                 .current(createCurrentWeatherMap())
                 .forecast(createJsonString("forecast", "흐림"))
                 .tomorrow(createJsonString("tomorrow", "맑음"))

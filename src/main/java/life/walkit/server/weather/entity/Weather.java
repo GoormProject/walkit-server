@@ -22,17 +22,9 @@ public class Weather extends BaseEntity {
     @Column(name = "weather_id")
     private Long weatherId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "sido", nullable = false)
-    private Sido sido;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "sigungu", nullable = false)
-    private Sigungu sigungu;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "eupmyeondong", nullable = false)
-    private EupMyeonDong eupmyeondong;
+    @OneToOne
+    @JoinColumn(name = "admin_area_id", nullable = false)
+    private AdminArea adminArea;
 
     @Column(name = "current", columnDefinition = "jsonb", nullable = false)
     @JdbcTypeCode(SqlTypes.JSON)
@@ -57,11 +49,9 @@ public class Weather extends BaseEntity {
     private double humidity;
 
     @Builder
-    public Weather(Sido sido, Sigungu sigungu, EupMyeonDong eupmyeondong,
-                   Map<String, Object> current, String forecast, String tomorrow, String dayAfterTomorrow, double temperature, double humidity) {
-        this.sido = sido;
-        this.sigungu = sigungu;
-        this.eupmyeondong = eupmyeondong;
+    public Weather(AdminArea adminArea, Map<String, Object> current, String forecast, String tomorrow,
+                   String dayAfterTomorrow, double temperature, double humidity) {
+        this.adminArea = adminArea;
         this.current = current;
         this.forecast = forecast;
         this.tomorrow = tomorrow;
