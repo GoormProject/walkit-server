@@ -274,7 +274,7 @@ public class WalkServiceTest {
     @DisplayName("산책 기록 삭제 성공")
     void deleteWalk_success() {
         // given
-        Walk savedWalk = walkRepository.save(Walk.builder().member(member).isUploaded(false).build());
+        Walk savedWalk = walkRepository.save(Walk.builder().member(member).build());
         Long walkId = savedWalk.getWalkId();
 
         // when

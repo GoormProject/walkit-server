@@ -7,6 +7,7 @@ import life.walkit.server.path.repository.PathRepository;
 import life.walkit.server.trail.dto.request.GeoPoint;
 import life.walkit.server.trail.dto.request.TrailCreateRequest;
 import life.walkit.server.trail.dto.response.TrailCreateResponse;
+import life.walkit.server.trail.dto.response.TrailListResponse;
 import life.walkit.server.trail.entity.Trail;
 import life.walkit.server.trail.repository.TrailRepository;
 import life.walkit.server.walk.entity.Walk;
@@ -19,6 +20,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -145,5 +147,53 @@ public class TrailServiceTest {
         assertThat(response.startPoint()).containsExactly(coordinates[0].getX(), coordinates[0].getY());
         assertThat(response.path().get(0)).containsExactly(coordinates[0].getX(), coordinates[0].getY());
         assertThat(response.path().get(1)).containsExactly(coordinates[1].getX(), coordinates[1].getY());
+    }
+
+    @Test
+    @DisplayName("산책로 목록 조회 성공")
+    void getTrailList_success() {
+        // given
+        // 여러 개의 Trail 데이터 생성
+        for (int i = 0; i < 15; i++) {
+            GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+            Coordinate[] coordinates = new Coordinate[]{
+                new Coordinate(127.0 + i * 0.01, 37.5 + i * 0.01),
+                new Coordinate(127.01 + i * 0.01, 37.51 + i * 0.01)
+            };
+            Path path = pathRepository.save(Path.builder()
+                .point(geometryFactory.createPoint(coordinates[0]))
+                .path(geometryFactory.createLineString(coordinates))
+                .build());
+
+            trailRepository.save(Trail.builder()
+                .member(member)
+                .path(path)
+                .title("테스트 산책로 " + i)
+                .description("목록 조회 테스트용입니다. " + i)
+                .distance(5.0 + i * 0.1)
+                .location("서울시 테스트구 " + i)
+                .build());
+        }
+
+        // when
+        Page<TrailListResponse> trailListPage = trailService.getTrailList(0); // 첫 번째 페이지 조회
+
+        // then
+        assertThat(trailListPage).isNotNull();
+        assertThat(trailListPage.getContent()).hasSize(10); // 한 페이지에 10개
+        assertThat(trailListPage.getTotalElements()).isEqualTo(15); // 총 15개
+        assertThat(trailListPage.getTotalPages()).isEqualTo(2); // 총 2페이지
+        assertThat(trailListPage.getNumber()).isEqualTo(0); // 현재 페이지 0
+
+        // 첫 번째 요소 검증 (가장 최근에 생성된 것이 마지막에 저장되므로, 역순으로 정렬되지 않았다면 첫 번째 페이지의 마지막 요소가 될 수 있음)
+        TrailListResponse firstTrail = trailListPage.getContent().get(0);
+        assertThat(firstTrail.title()).startsWith("테스트 산책로");
+        assertThat(firstTrail.reviewCount()).isEqualTo(0);
+        assertThat(firstTrail.rating()).isEqualTo(0.0);
+
+        // 두 번째 페이지 조회
+        Page<TrailListResponse> secondTrailListPage = trailService.getTrailList(1);
+        assertThat(secondTrailListPage.getContent()).hasSize(5); // 두 번째 페이지에는 5개
+        assertThat(secondTrailListPage.getNumber()).isEqualTo(1); // 현재 페이지 1
     }
 }
