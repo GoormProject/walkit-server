@@ -200,6 +200,13 @@ public class WalkService {
     @Transactional
     public WalkDeleteResponse deleteWalk(Long walkId) {
         Walk foundWalk = findByWalkId(walkId);
+        
+        // TrailWalkImage 먼저 삭제 (외래키 제약조건 해결)
+        List<TrailWalkImage> trailWalkImages = trailWalkImageRepository.findByWalk(foundWalk);
+        if (!trailWalkImages.isEmpty()) {
+            trailWalkImageRepository.deleteAll(trailWalkImages);
+        }
+        
         walkRepository.delete(foundWalk);
         Long foundWalkId = foundWalk.getWalkId();
         Long memberId = foundWalk.getMember().getMemberId();
