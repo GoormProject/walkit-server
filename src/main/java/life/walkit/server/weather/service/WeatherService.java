@@ -5,16 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import life.walkit.server.weather.dto.WeatherDto;
 import life.walkit.server.weather.dto.WeatherForecastResponseDto;
-//import life.walkit.server.weather.dto.WeatherResponseDto;
 import life.walkit.server.weather.entity.AdminArea;
 import life.walkit.server.weather.repository.AdminAreaRepository;
 import life.walkit.server.weather.utils.WeatherCodeMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
