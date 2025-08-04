@@ -141,10 +141,11 @@ public class WalkService {
 
         WalkingSession latestSessionByWalk = findLatestSessionByWalk(walk);
 
+        // TODO: 프론트엔드에서 올바른 eventId 전송 시 활성화
         // 마지막 eventId가 일치하지 않을 경우 에러 생성
-        if (!Objects.equals(latestSessionByWalk.getEventId(), walkRequest.eventId())) {
-            throw new WalkException(WalkErrorCode.INVALID_WALK_SESSION);
-        }
+        // if (!Objects.equals(latestSessionByWalk.getEventId(), walkRequest.eventId())) {
+        //     throw new WalkException(WalkErrorCode.INVALID_WALK_SESSION);
+        // }
 
         // 중간 세션이 끝난 상태가 아닐시 끝낸다.
         if (latestSessionByWalk.getEventType() != EventType.END) {
@@ -171,13 +172,16 @@ public class WalkService {
             walkRequest.pace()
         );
 
-        trailWalkImageRepository.save(
-            TrailWalkImage.builder()
-                .trail(null)
-                .routeImage(walkRequest.routeUrl())
-                .walk(walk)
-                .build()
-        );
+        // routeUrl이 null이 아니고 255자를 초과하지 않을 때만 저장
+        if (walkRequest.routeUrl() != null && walkRequest.routeUrl().length() <= 255) {
+            trailWalkImageRepository.save(
+                TrailWalkImage.builder()
+                    .trail(null)
+                    .routeImage(walkRequest.routeUrl())
+                    .walk(walk)
+                    .build()
+            );
+        }
         Walk savedWalk = walkRepository.save(walk);
 
         return new WalkCreateResponse(savedWalk.getWalkId());
@@ -196,6 +200,13 @@ public class WalkService {
     @Transactional
     public WalkDeleteResponse deleteWalk(Long walkId) {
         Walk foundWalk = findByWalkId(walkId);
+        
+        // TrailWalkImage 먼저 삭제 (외래키 제약조건 해결)
+        List<TrailWalkImage> trailWalkImages = trailWalkImageRepository.findByWalk(foundWalk);
+        if (!trailWalkImages.isEmpty()) {
+            trailWalkImageRepository.deleteAll(trailWalkImages);
+        }
+        
         walkRepository.delete(foundWalk);
         Long foundWalkId = foundWalk.getWalkId();
         Long memberId = foundWalk.getMember().getMemberId();
@@ -223,7 +234,7 @@ public class WalkService {
             imageId,
             imageUrl,
             walk.getTotalDistance(),
-            walk.getTotalTime() != null ? formatDuration(walk.getTotalTime()) : null,
+            walk.getTotalTime() != null ? formatDurationToMinutes(walk.getTotalTime()) : null,
             walk.getPace() != null ? String.format("%.2f", walk.getPace()) : null,
             walk.getWalkTitle(),
             walk.getIsUploaded()
@@ -235,6 +246,11 @@ public class WalkService {
         long minutes = duration.toMinutesPart();
         long seconds = duration.toSecondsPart();
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+    }
+
+    private String formatDurationToMinutes(Duration duration) {
+        long totalMinutes = duration.toMinutes();
+        return String.valueOf(totalMinutes);
     }
 
     private LineString createLineString(List<List<Double>> pathPoints) {
