@@ -9,8 +9,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import lombok.Builder.Default;
-
 import java.time.Duration;
 
 @Entity

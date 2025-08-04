@@ -33,10 +33,9 @@ import java.util.Optional;
 public class TrailService {
     private final TrailRepository trailRepository;
     private final WalkRepository walkRepository;
-
     private final PathRepository pathRepository;
 
-    private final TrailWalkImageRepository trailWalkImageRepository;
+    private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory(new PrecisionModel(), 4326);
 
     @Transactional
     public TrailCreateResponse createTrail(TrailCreateRequest request) {
@@ -69,14 +68,14 @@ public class TrailService {
 
     private LineString createLineString(List<GeoPoint> pathPoints) {
         if (pathPoints == null || pathPoints.isEmpty()) {
-            return new GeometryFactory(new PrecisionModel(), 4326).createLineString();
+            return GEOMETRY_FACTORY.createLineString();
         }
 
         Coordinate[] coordinates = pathPoints.stream()
             .map(geoPoint -> new Coordinate(geoPoint.longitude(), geoPoint.latitude()))
             .toArray(Coordinate[]::new);
 
-        return new GeometryFactory(new PrecisionModel(), 4326).createLineString(coordinates);
+        return GEOMETRY_FACTORY.createLineString(coordinates);
     }
 
     private Point convertStartPointToGeoPoint(GeoPoint startPoint) {
