@@ -4,10 +4,7 @@ import jakarta.persistence.*;
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.path.entity.Path;
 import life.walkit.server.trail.entity.Trail;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import lombok.Builder.Default;
 
@@ -15,9 +12,11 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
+@Builder
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "walk")
 public class Walk {
 
@@ -109,27 +108,6 @@ public class Walk {
     }
 
     public void updateIsUploaded(boolean isUploaded) {
-        this.isUploaded = isUploaded;
-    }
-
-    @Builder
-    public Walk(
-        Member member,
-        Trail trail,
-        Path path,
-        String walkTitle,
-        Double totalDistance,
-        Duration totalTime,
-        Double pace,
-        Boolean isUploaded
-    ) {
-        this.member = member;
-        this.trail = trail;
-        this.path = path;
-        this.walkTitle = walkTitle;
-        this.totalDistance = totalDistance;
-        this.totalTime = totalTime;
-        this.pace = pace;
         this.isUploaded = isUploaded;
     }
 
