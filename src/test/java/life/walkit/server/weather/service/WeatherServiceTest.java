@@ -1,6 +1,6 @@
 package life.walkit.server.weather.service;
 
-import life.walkit.server.weather.dto.WeatherResponseDto;
+import life.walkit.server.weather.dto.WeatherForecastResponseDto;
 import life.walkit.server.weather.entity.AdminArea;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,6 @@ public class WeatherServiceTest {
 
     @Test
     void testWeatherFetch_경기도_고양시_일산서구_일산1동() throws Exception {
-        // given
         String nx = "60";
         String ny = "126";
         AdminArea adminArea = AdminArea.builder()
@@ -29,13 +28,16 @@ public class WeatherServiceTest {
                 .y(Integer.parseInt(ny))
                 .build();
 
-        // when
-        WeatherResponseDto dto = weatherService.fetchWeather(nx, ny, adminArea);
+        WeatherForecastResponseDto forecast = weatherService.fetchForecasts(adminArea);
 
-        // then
-        assertNotNull(dto);
-        assertEquals(adminArea.getSido() + " " + adminArea.getSigungu() + " " + adminArea.getEupmyeondong(), dto.getAdminAreaName());
-        assertTrue(dto.getTemperature() > -50); // 대기온도 sanity check
+        assertEquals("경기도 고양시 일산서구 일산1동", forecast.getAdminAreaName(), "행정구역 이름이 잘못되었습니다.");
+        assertTrue(forecast.getCurrent().getTemperature() > -50, "현재 기온 값이 비정상적입니다.");
+        assertNotNull(forecast.getAfter3hours(), "3시간 후 날씨 데이터가 null입니다.");
+        assertNotNull(forecast.getTomorrow(), "내일 날씨 데이터가 null입니다.");
+        assertNotNull(forecast.getDayAfterTomorrow(), "모레 날씨 데이터가 null입니다.");
+        assertNotNull(forecast.getThreeDaysLater(), "3일 후 날씨 데이터가 null입니다.");
     }
+
+
 
 }
