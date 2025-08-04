@@ -52,12 +52,8 @@ public class WalkService {
                 .member(member)
                 .trail(null)
                 .path(createEmptyPath())
-                .walkTitle(null)
-                .totalDistance(0.0)
-                .totalTime(Duration.ZERO)
-                // .pace(null) // pace(null) 제거
                 .build()
-        );
+        );;
 
         WalkingSession walkingSession = walkingSessionRepository.save(
             WalkingSession.builder()

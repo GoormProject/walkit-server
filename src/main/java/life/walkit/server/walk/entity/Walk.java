@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import lombok.Builder.Default;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,33 +47,41 @@ public class Walk {
     )
     private Path path;
 
-    @Column(name = "walk_title")
-    private String walkTitle;
+    @Column(
+        name = "walk_title",
+        nullable = false
+    )
+    @Default
+    private String walkTitle = "";
 
     @Column(
         name = "total_distance",
         nullable = false
     )
-    private Double totalDistance;
+    @Default
+    private Double totalDistance = 0.0;
 
     @Column(
         name = "total_time",
         nullable = false
     )
-    private Duration totalTime;
+    @Default
+    private Duration totalTime = Duration.ZERO;
 
     @Column(
         name = "pace",
         nullable = false
     )
-    private Double pace;
+    @Default
+    private Double pace = 0.0;
 
     @Column(
         name = "is_uploaded",
         columnDefinition = "BOOLEAN DEFAULT FALSE",
         nullable = false
     )
-    private Boolean isUploaded;
+    @Default
+    private Boolean isUploaded = false;
 
     @OneToMany(
         mappedBy = "walk",
@@ -110,7 +120,8 @@ public class Walk {
         String walkTitle,
         Double totalDistance,
         Duration totalTime,
-        Double pace
+        Double pace,
+        Boolean isUploaded
     ) {
         this.member = member;
         this.trail = trail;
@@ -118,8 +129,8 @@ public class Walk {
         this.walkTitle = walkTitle;
         this.totalDistance = totalDistance;
         this.totalTime = totalTime;
-        this.pace = pace != null ? pace : 0.0;
-        this.isUploaded = isUploaded != null ? isUploaded : false;
+        this.pace = pace;
+        this.isUploaded = isUploaded;
     }
 
 }
