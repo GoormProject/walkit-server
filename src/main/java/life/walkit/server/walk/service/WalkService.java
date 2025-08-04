@@ -172,13 +172,16 @@ public class WalkService {
             walkRequest.pace()
         );
 
-        trailWalkImageRepository.save(
-            TrailWalkImage.builder()
-                .trail(null)
-                .routeImage(walkRequest.routeUrl())
-                .walk(walk)
-                .build()
-        );
+        // routeUrl이 null이 아니고 255자를 초과하지 않을 때만 저장
+        if (walkRequest.routeUrl() != null && walkRequest.routeUrl().length() <= 255) {
+            trailWalkImageRepository.save(
+                TrailWalkImage.builder()
+                    .trail(null)
+                    .routeImage(walkRequest.routeUrl())
+                    .walk(walk)
+                    .build()
+            );
+        }
         Walk savedWalk = walkRepository.save(walk);
 
         return new WalkCreateResponse(savedWalk.getWalkId());
@@ -224,7 +227,7 @@ public class WalkService {
             imageId,
             imageUrl,
             walk.getTotalDistance(),
-            walk.getTotalTime() != null ? formatDuration(walk.getTotalTime()) : null,
+            walk.getTotalTime() != null ? formatDurationToMinutes(walk.getTotalTime()) : null,
             walk.getPace() != null ? String.format("%.2f", walk.getPace()) : null,
             walk.getWalkTitle(),
             walk.getIsUploaded()
@@ -236,6 +239,11 @@ public class WalkService {
         long minutes = duration.toMinutesPart();
         long seconds = duration.toSecondsPart();
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+    }
+
+    private String formatDurationToMinutes(Duration duration) {
+        long totalMinutes = duration.toMinutes();
+        return String.valueOf(totalMinutes);
     }
 
     private LineString createLineString(List<List<Double>> pathPoints) {
