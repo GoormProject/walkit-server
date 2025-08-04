@@ -3,6 +3,7 @@ package life.walkit.server.weather.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import life.walkit.server.weather.config.WeatherApiProperties;
 import life.walkit.server.weather.dto.WeatherDto;
 import life.walkit.server.weather.dto.WeatherForecastResponseDto;
 import life.walkit.server.weather.entity.AdminArea;
@@ -25,10 +26,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class WeatherService {
-    private static final String SERVICE_KEY = "Fg05Febh4v3dwcku1TPJILYtnkHHWqRzTatz%2F6EuAwp15c%2BKaQiDduo2nqMDw6Qballm5WN5TOV7AsGslFkdmw%3D%3D";
-    private static final String ULTRA_SRT_NCST_URL = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst";
-    private static final String ULTRA_SRT_FCST_URL = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst";
-    private static final String VILAGE_FCST_URL = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst";
+    private final WeatherApiProperties properties;
 
     private final WebClient webClient = WebClient.builder().build();
     private final AdminAreaRepository adminAreaRepository;
@@ -86,8 +84,8 @@ public class WeatherService {
         String baseDate = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String baseTime = now.format(DateTimeFormatter.ofPattern("HH00"));
 
-        StringBuilder urlBuilder = new StringBuilder(ULTRA_SRT_NCST_URL);
-        urlBuilder.append("?serviceKey=").append(SERVICE_KEY);
+        StringBuilder urlBuilder = new StringBuilder(properties.getUltraSrtNcstUrl());
+        urlBuilder.append("?serviceKey=").append(properties.getServiceKey());
         urlBuilder.append("&dataType=JSON");
         urlBuilder.append("&numOfRows=1000");
         urlBuilder.append("&pageNo=1");
@@ -108,8 +106,8 @@ public class WeatherService {
         String targetDate = LocalDateTime.now().plusHours(hourOffset).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String targetTime = LocalDateTime.now().plusHours(hourOffset).format(DateTimeFormatter.ofPattern("HH00"));
 
-        StringBuilder urlBuilder = new StringBuilder(ULTRA_SRT_FCST_URL);
-        urlBuilder.append("?serviceKey=").append(SERVICE_KEY);
+        StringBuilder urlBuilder = new StringBuilder(properties.getUltraSrtFcstUrl());
+        urlBuilder.append("?serviceKey=").append(properties.getServiceKey());
         urlBuilder.append("&dataType=JSON");
         urlBuilder.append("&numOfRows=1000");
         urlBuilder.append("&pageNo=1");
@@ -128,8 +126,8 @@ public class WeatherService {
         String baseTime = "0200";
         String targetDate = LocalDateTime.now().plusDays(dayOffset).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
-        StringBuilder urlBuilder = new StringBuilder(VILAGE_FCST_URL);
-        urlBuilder.append("?serviceKey=").append(SERVICE_KEY);
+        StringBuilder urlBuilder = new StringBuilder(properties.getVilageFcstUrl());
+        urlBuilder.append("?serviceKey=").append(properties.getServiceKey());
         urlBuilder.append("&dataType=JSON");
         urlBuilder.append("&numOfRows=1000");
         urlBuilder.append("&pageNo=1");
