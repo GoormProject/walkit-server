@@ -33,6 +33,9 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class WalkService {
 
+    private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory(new PrecisionModel(), 4326);
+    private static final Coordinate DEFAULT_COORDINATE = new Coordinate(0, 0);
+
     private final MemberRepository memberRepository;
     private final WalkRepository walkRepository;
     private final WalkingSessionRepository walkingSessionRepository;
@@ -48,24 +51,7 @@ public class WalkService {
             Walk.builder()
                 .member(member)
                 .trail(null)
-                .path(pathRepository.save(
-                    Path.builder()
-                        .path(
-                            new GeometryFactory(
-                                new PrecisionModel(),
-                                4326
-                            ).createLineString()
-                        )
-                        .point
-                            (
-                                new GeometryFactory
-                                    (
-                                        new PrecisionModel(),
-                                        4326
-                                    ).createPoint(
-                                    new Coordinate(0, 0))
-                            ).build()
-                ))
+                .path(createEmptyPath())
                 .walkTitle(null)
                 .totalDistance(null)
                 .totalTime(null)
@@ -82,6 +68,15 @@ public class WalkService {
         );
 
         return WalkEventResponse.from(walkingSession);
+    }
+
+    private Path createEmptyPath() {
+        return pathRepository.save(
+            Path.builder()
+                .path(GEOMETRY_FACTORY.createLineString())
+                .point(GEOMETRY_FACTORY.createPoint(DEFAULT_COORDINATE))
+                .build()
+        );
     }
 
     @Transactional
