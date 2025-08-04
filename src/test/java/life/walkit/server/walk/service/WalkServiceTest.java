@@ -220,17 +220,41 @@ public class WalkServiceTest {
             .build();
         trailRepository.save(trail);
 
-        Walk walkWithTrail = walkRepository.save(Walk.builder().member(member).trail(trail).walkTitle("일산호수공원 산책").isUploaded(false).build());
+        Walk walkWithTrail = walkRepository.save(Walk.builder()
+            .member(member)
+            .trail(trail)
+            .walkTitle("일산호수공원 산책")
+            .totalDistance(5.0)
+            .totalTime(Duration.ofHours(1))
+            .pace(5.0)
+            .isUploaded(false)
+            .build());
         walkingSessionRepository.save(WalkingSession.builder().walk(walkWithTrail).eventType(EventType.END).build());
         trailWalkImageRepository.save(TrailWalkImage.builder().walk(walkWithTrail).routeImage("imageUrl1").build());
 
         // 2. 자유로운 산책 기록 생성
-        Walk freeWalk = walkRepository.save(Walk.builder().member(member).trail(null).walkTitle("2025-07-20의 산책 기록").isUploaded(false).build());
+        Walk freeWalk = walkRepository.save(Walk.builder()
+            .member(member)
+            .trail(null)
+            .walkTitle("2025-07-20의 산책 기록")
+            .totalDistance(3.0)
+            .totalTime(Duration.ofMinutes(45))
+            .pace(4.0)
+            .isUploaded(false)
+            .build());
         walkingSessionRepository.save(WalkingSession.builder().walk(freeWalk).eventType(EventType.END).build());
         trailWalkImageRepository.save(TrailWalkImage.builder().walk(freeWalk).routeImage("imageUrl2").build());
 
         // 3. 내가 업로드한 산책 기록 생성
-        Walk uploadedWalk = walkRepository.save(Walk.builder().member(member).trail(null).walkTitle("내가 업로드한 산책기록").isUploaded(true).build());
+        Walk uploadedWalk = walkRepository.save(Walk.builder()
+            .member(member)
+            .trail(null)
+            .walkTitle("내가 업로드한 산책기록")
+            .totalDistance(2.5)
+            .totalTime(Duration.ofMinutes(30))
+            .pace(5.0)
+            .isUploaded(true)
+            .build());
         walkingSessionRepository.save(WalkingSession.builder().walk(uploadedWalk).eventType(EventType.END).build());
         trailWalkImageRepository.save(TrailWalkImage.builder().walk(uploadedWalk).routeImage("imageUrl3").build());
 
@@ -274,7 +298,13 @@ public class WalkServiceTest {
     @DisplayName("산책 기록 삭제 성공")
     void deleteWalk_success() {
         // given
-        Walk savedWalk = walkRepository.save(Walk.builder().member(member).isUploaded(false).build());
+        Walk savedWalk = walkRepository.save(Walk.builder()
+            .member(member)
+            .totalDistance(1.0)
+            .totalTime(Duration.ofMinutes(15))
+            .pace(4.0)
+            .isUploaded(false)
+            .build());
         Long walkId = savedWalk.getWalkId();
 
         // when
