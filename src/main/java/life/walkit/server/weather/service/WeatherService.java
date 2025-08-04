@@ -170,6 +170,7 @@ public class WeatherService {
                     .weather(WeatherCodeMapper.getWeatherDescription(map.getOrDefault("PTY", "0")))
                     .humidity(Integer.parseInt(map.getOrDefault("REH", "0")))
                     .windSpeed(Double.parseDouble(map.getOrDefault("WSD", "0")))
+                    .clouds(Integer.parseInt(map.getOrDefault("SKY", "-1")))
                     .build();
         });
     }

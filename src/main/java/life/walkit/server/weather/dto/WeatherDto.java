@@ -12,4 +12,5 @@ public class WeatherDto {
     private String weather;
     private int humidity;
     private double windSpeed;
+    private int clouds;
 }
