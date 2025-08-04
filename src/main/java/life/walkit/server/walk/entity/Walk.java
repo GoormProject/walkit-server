@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.Duration;
 
-@Builder
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -48,12 +47,14 @@ public class Walk {
     private String walkTitle;
 
     @Column(
-        name = "total_distance"
+        name = "total_distance",
+        nullable = false
     )
     private Double totalDistance;
 
     @Column(
-        name = "total_time"
+        name = "total_time",
+        nullable = false
     )
     private Duration totalTime;
 
@@ -61,8 +62,7 @@ public class Walk {
         name = "pace",
         nullable = false
     )
-    @Builder.Default
-    private Double pace = 0.0;
+    private Double pace;
 
     @Column(
         name = "is_uploaded",
@@ -85,4 +85,24 @@ public class Walk {
         this.pace = pace;
     }
 
+    @Builder
+    public Walk(
+        Member member,
+        Trail trail,
+        Path path,
+        String walkTitle,
+        Double totalDistance,
+        Duration totalTime,
+        Double pace,
+        Boolean isUploaded
+    ) {
+        this.member = member;
+        this.trail = trail;
+        this.path = path;
+        this.walkTitle = walkTitle;
+        this.totalDistance = totalDistance;
+        this.totalTime = totalTime;
+        this.pace = pace != null ? pace : 0.0;
+        this.isUploaded = isUploaded != null ? isUploaded : false;
+    }
 }
