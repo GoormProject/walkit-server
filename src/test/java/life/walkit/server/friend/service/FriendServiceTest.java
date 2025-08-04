@@ -1,7 +1,6 @@
 package life.walkit.server.friend.service;
 
-import static life.walkit.server.global.factory.GlobalTestFactory.createFriendRequest;
-import static life.walkit.server.global.factory.GlobalTestFactory.createMember;
+import static life.walkit.server.global.factory.GlobalTestFactory.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import life.walkit.server.friend.dto.FriendRequestResponseDTO;
@@ -17,6 +16,7 @@ import life.walkit.server.friend.repository.FriendRepository;
 import life.walkit.server.friend.repository.FriendRequestRepository;
 import life.walkit.server.global.util.GeoUtils;
 import life.walkit.server.member.entity.Member;
+import life.walkit.server.member.entity.enums.MemberStatus;
 import life.walkit.server.member.repository.MemberRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -250,6 +250,45 @@ public class FriendServiceTest {
         assertThat(friendRepository.findById(friendAtoB.getFriendId())).isEmpty();
         assertThat(friendRepository.findById(friendBtoA.getFriendId())).isEmpty();
     }
+
+    @Test
+    @Transactional
+    @DisplayName("상태별 친구 목록 조회 성공 - ONLINE, WALKING, OFFLINE")
+    void getFriendsByStatus_success() {
+        Member memberA = memberRepository.save(createMember("userA@test.com", "UserA"));
+        Member memberB = memberRepository.save(createMember("userB@test.com", "UserB"));
+        Member memberC = memberRepository.save(createMember("userC@test.com", "UserC"));
+
+        // 멤버 상태 설정
+        memberA.updateStatus(MemberStatus.ONLINE);  // 기준 멤버
+        memberB.updateStatus(MemberStatus.WALKING); // 친구1
+        memberC.updateStatus(MemberStatus.ONLINE);  // 친구2
+
+        memberRepository.save(memberA);
+        memberRepository.save(memberB);
+        memberRepository.save(memberC);
+
+        friendRepository.save(createFriend(memberA, memberB)); // 친구 추가 (A-B)
+        friendRepository.save(createFriend(memberA, memberC)); // 친구 추가 (A-C)
+
+        // ONLINE 상태 친구 조회
+        List<FriendResponseDTO> onlineFriends = friendService.getFriendsByStatus(memberA.getMemberId(), MemberStatus.ONLINE);
+        assertThat(onlineFriends).hasSize(1);
+        assertThat(onlineFriends.get(0).getNickname()).isEqualTo("UserC");
+        assertThat(onlineFriends.get(0).getMemberStatus()).isEqualTo(MemberStatus.ONLINE);
+
+        // WALKING 상태 친구 조회
+        List<FriendResponseDTO> walkingFriends = friendService.getFriendsByStatus(memberA.getMemberId(), MemberStatus.WALKING);
+        assertThat(walkingFriends).hasSize(1);
+        assertThat(walkingFriends.get(0).getNickname()).isEqualTo("UserB");
+        assertThat(walkingFriends.get(0).getMemberStatus()).isEqualTo(MemberStatus.WALKING);
+
+        // OFFLINE 상태 친구 조회
+        List<FriendResponseDTO> offlineFriends = friendService.getFriendsByStatus(memberA.getMemberId(), MemberStatus.OFFLINE);
+        assertThat(offlineFriends).isEmpty();
+    }
+
+
 
 
 
