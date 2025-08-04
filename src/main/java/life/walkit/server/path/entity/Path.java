@@ -20,14 +20,12 @@ public class Path {
 
     @Column(
         name = "path",
-        nullable = false,
         columnDefinition = "geometry(LineString, 4326)"
     )
     private LineString path;
 
     @Column(
         name = "start_point",
-        nullable = false,
         columnDefinition = "geometry(Point, 4326)"
     )
     private Point point;

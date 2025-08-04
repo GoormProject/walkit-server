@@ -5,6 +5,7 @@ import life.walkit.server.member.error.MemberException;
 import life.walkit.server.member.error.enums.MemberErrorCode;
 import life.walkit.server.member.repository.MemberRepository;
 import life.walkit.server.path.entity.Path;
+import life.walkit.server.path.repository.PathRepository;
 import life.walkit.server.trailwalkimage.entity.TrailWalkImage;
 import life.walkit.server.trailwalkimage.repository.TrailWalkImageRepository;
 import life.walkit.server.walk.dto.request.WalkRequest;
@@ -36,6 +37,7 @@ public class WalkService {
     private final WalkRepository walkRepository;
     private final WalkingSessionRepository walkingSessionRepository;
     private final TrailWalkImageRepository trailWalkImageRepository;
+    private final PathRepository pathRepository;
 
     @Transactional
     public WalkEventResponse startWalk(Long memberId) {
@@ -46,7 +48,24 @@ public class WalkService {
             Walk.builder()
                 .member(member)
                 .trail(null)
-                .path(null)
+                .path(pathRepository.save(
+                    Path.builder()
+                        .path(
+                            new GeometryFactory(
+                                new PrecisionModel(),
+                                4326
+                            ).createLineString()
+                        )
+                        .point
+                            (
+                                new GeometryFactory
+                                    (
+                                        new PrecisionModel(),
+                                        4326
+                                    ).createPoint(
+                                    new Coordinate(0, 0))
+                            ).build()
+                ))
                 .walkTitle(null)
                 .totalDistance(null)
                 .totalTime(null)
