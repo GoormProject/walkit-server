@@ -227,9 +227,8 @@ public class WalkServiceTest {
             .totalDistance(5.0)
             .totalTime(Duration.ofHours(1))
             .pace(5.0)
-            .isUploaded(false)
             .build());
-      
+
         walkingSessionRepository.save(WalkingSession.builder().walk(walkWithTrail).eventType(EventType.END).build());
         trailWalkImageRepository.save(TrailWalkImage.builder().walk(walkWithTrail).routeImage("imageUrl1").build());
 
@@ -241,9 +240,8 @@ public class WalkServiceTest {
             .totalDistance(3.0)
             .totalTime(Duration.ofMinutes(45))
             .pace(4.0)
-            .isUploaded(false)
             .build());
-      
+
         walkingSessionRepository.save(WalkingSession.builder().walk(freeWalk).eventType(EventType.END).build());
         trailWalkImageRepository.save(TrailWalkImage.builder().walk(freeWalk).routeImage("imageUrl2").build());
 
@@ -255,7 +253,6 @@ public class WalkServiceTest {
             .totalDistance(2.5)
             .totalTime(Duration.ofMinutes(30))
             .pace(5.0)
-            .isUploaded(true)
             .build());
         walkingSessionRepository.save(WalkingSession.builder().walk(uploadedWalk).eventType(EventType.END).build());
         trailWalkImageRepository.save(TrailWalkImage.builder().walk(uploadedWalk).routeImage("imageUrl3").build());
@@ -305,7 +302,6 @@ public class WalkServiceTest {
             .totalDistance(1.0)
             .totalTime(Duration.ofMinutes(15))
             .pace(4.0)
-            .isUploaded(false)
             .build());
         Long walkId = savedWalk.getWalkId();
 
