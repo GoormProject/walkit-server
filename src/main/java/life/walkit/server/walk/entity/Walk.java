@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -70,6 +72,13 @@ public class Walk {
         nullable = false
     )
     private Boolean isUploaded;
+
+    @OneToMany(
+        mappedBy = "walk",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private List<WalkingSession> walkingSessions = new ArrayList<>();
 
     public void updateWalkDetails(
         String walkTitle,

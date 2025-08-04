@@ -141,10 +141,11 @@ public class WalkService {
 
         WalkingSession latestSessionByWalk = findLatestSessionByWalk(walk);
 
+        // TODO: 프론트엔드에서 올바른 eventId 전송 시 활성화
         // 마지막 eventId가 일치하지 않을 경우 에러 생성
-        if (!Objects.equals(latestSessionByWalk.getEventId(), walkRequest.eventId())) {
-            throw new WalkException(WalkErrorCode.INVALID_WALK_SESSION);
-        }
+        // if (!Objects.equals(latestSessionByWalk.getEventId(), walkRequest.eventId())) {
+        //     throw new WalkException(WalkErrorCode.INVALID_WALK_SESSION);
+        // }
 
         // 중간 세션이 끝난 상태가 아닐시 끝낸다.
         if (latestSessionByWalk.getEventType() != EventType.END) {
