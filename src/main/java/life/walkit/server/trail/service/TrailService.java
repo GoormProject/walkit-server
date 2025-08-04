@@ -7,6 +7,7 @@ import life.walkit.server.trail.dto.request.GeoPoint;
 import life.walkit.server.trail.dto.request.TrailCreateRequest;
 import life.walkit.server.trail.dto.response.TrailCreateResponse;
 import life.walkit.server.trail.dto.response.TrailDetailResponse;
+import life.walkit.server.trail.dto.response.TrailListResponse;
 import life.walkit.server.trail.entity.Trail;
 import life.walkit.server.trail.error.enums.TrailErrorCode;
 import life.walkit.server.trail.error.enums.TrailException;
@@ -18,10 +19,14 @@ import life.walkit.server.walk.error.enums.WalkException;
 import life.walkit.server.walk.repository.WalkRepository;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -94,5 +99,22 @@ public class TrailService {
         double rating = 0.0; // 임시값
 
         return TrailDetailResponse.from(trail, imageUrl, reviewCount, rating);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<TrailListResponse> getTrailList(int page) {
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<Trail> trailsPage = trailRepository.findAll(pageable);
+
+        return trailsPage.map(trail -> {
+            // TODO: 이미지 S3연결 후 리펙토링 필요
+            String imageUrl = "example.com"; // 임시 이미지 URL
+
+            // TODO: 리뷰 기능 구현 후 실제 리뷰 수와 평점을 계산해야 함.
+            int reviewCount = 0; // 임시값
+            double rating = 0.0; // 임시값
+
+            return TrailListResponse.from(trail, Optional.empty(), reviewCount, rating); // Optional.empty()는 임시
+        });
     }
 }
