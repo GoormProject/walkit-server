@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import lombok.Builder.Default;
+
 import java.time.Duration;
 
 @Entity
@@ -98,8 +100,7 @@ public class Walk {
         String walkTitle,
         Double totalDistance,
         Duration totalTime,
-        Double pace,
-        Boolean isUploaded
+        Double pace
     ) {
         this.member = member;
         this.trail = trail;
@@ -108,7 +109,7 @@ public class Walk {
         this.totalDistance = totalDistance;
         this.totalTime = totalTime;
         this.pace = pace;
-        this.isUploaded = isUploaded;
+        this.isUploaded = false;
     }
 
 }

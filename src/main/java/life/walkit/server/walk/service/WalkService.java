@@ -51,7 +51,6 @@ public class WalkService {
                 .totalDistance(null)
                 .totalTime(null)
                 .pace(null)
-                .isUploaded(false)
                 .build()
         );
 

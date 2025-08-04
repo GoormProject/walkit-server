@@ -77,8 +77,7 @@ public class WalkRepositoryTest {
                 "강남 산책로",
                 totalDistance,
                 totalTime,
-                pace,
-                false // default value
+                pace
             )
         );
 
@@ -130,8 +129,7 @@ public class WalkRepositoryTest {
                 "수원광교 산책로입니다.",
                 totalDistanceA,
                 totalTimeA,
-                paceA,
-                false
+                paceA
             )
         );
         walkRepository.save(
@@ -142,8 +140,7 @@ public class WalkRepositoryTest {
                 "도원동 산책로입니다.",
                 totalDistanceB,
                 totalTimeB,
-                paceB,
-                false
+                paceB
             )
         );
 
@@ -184,8 +181,7 @@ public class WalkRepositoryTest {
                 "Test Walk Title",
                 totalDistance,
                 totalTime,
-                pace,
-                false
+                pace
             )
         );
 
@@ -228,8 +224,7 @@ public class WalkRepositoryTest {
                 "테스트 타이틀 A",
                 totalDistance,
                 totalTimeA,
-                paceA,
-                false
+                paceA
             )
         );
         walkRepository.save(
@@ -240,8 +235,7 @@ public class WalkRepositoryTest {
                 "테스트 타이틀 B",
                 totalDistance,
                 totalTimeB,
-                paceB,
-                false
+                paceB
             )
         );
 

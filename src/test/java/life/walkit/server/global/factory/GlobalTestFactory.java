@@ -80,8 +80,7 @@ public class GlobalTestFactory {
         String walkTitle,
         Double totalDistance,
         Duration totalTime,
-        Double pace,
-        Boolean isUploaded
+        Double pace
     ) {
 
         return Walk.builder()
@@ -92,7 +91,6 @@ public class GlobalTestFactory {
             .totalDistance(totalDistance)
             .totalTime(totalTime)
             .pace(pace)
-            .isUploaded(isUploaded)
             .build();
     }
 

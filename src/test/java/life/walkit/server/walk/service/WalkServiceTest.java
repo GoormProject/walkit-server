@@ -220,17 +220,17 @@ public class WalkServiceTest {
             .build();
         trailRepository.save(trail);
 
-        Walk walkWithTrail = walkRepository.save(Walk.builder().member(member).trail(trail).walkTitle("일산호수공원 산책").isUploaded(false).build());
+        Walk walkWithTrail = walkRepository.save(Walk.builder().member(member).trail(trail).walkTitle("일산호수공원 산책").build());
         walkingSessionRepository.save(WalkingSession.builder().walk(walkWithTrail).eventType(EventType.END).build());
         trailWalkImageRepository.save(TrailWalkImage.builder().walk(walkWithTrail).routeImage("imageUrl1").build());
 
         // 2. 자유로운 산책 기록 생성
-        Walk freeWalk = walkRepository.save(Walk.builder().member(member).trail(null).walkTitle("2025-07-20의 산책 기록").isUploaded(false).build());
+        Walk freeWalk = walkRepository.save(Walk.builder().member(member).trail(null).walkTitle("2025-07-20의 산책 기록").build());
         walkingSessionRepository.save(WalkingSession.builder().walk(freeWalk).eventType(EventType.END).build());
         trailWalkImageRepository.save(TrailWalkImage.builder().walk(freeWalk).routeImage("imageUrl2").build());
 
         // 3. 내가 업로드한 산책 기록 생성
-        Walk uploadedWalk = walkRepository.save(Walk.builder().member(member).trail(null).walkTitle("내가 업로드한 산책기록").isUploaded(true).build());
+        Walk uploadedWalk = walkRepository.save(Walk.builder().member(member).trail(null).walkTitle("내가 업로드한 산책기록").build());
         walkingSessionRepository.save(WalkingSession.builder().walk(uploadedWalk).eventType(EventType.END).build());
         trailWalkImageRepository.save(TrailWalkImage.builder().walk(uploadedWalk).routeImage("imageUrl3").build());
 
