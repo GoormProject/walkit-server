@@ -53,9 +53,9 @@ public class WalkService {
                 .trail(null)
                 .path(createEmptyPath())
                 .walkTitle(null)
-                .totalDistance(null)
-                .totalTime(null)
-                .pace(null)
+                .totalDistance(0.0)
+                .totalTime(Duration.ZERO)
+                // .pace(null) // pace(null) 제거
                 .isUploaded(false)
                 .build()
         );
