@@ -2,6 +2,8 @@ package life.walkit.server.trail.service;
 
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.repository.MemberRepository;
+import life.walkit.server.path.entity.Path;
+import life.walkit.server.path.repository.PathRepository;
 import life.walkit.server.trail.dto.request.GeoPoint;
 import life.walkit.server.trail.dto.request.TrailCreateRequest;
 import life.walkit.server.trail.dto.response.TrailCreateResponse;
@@ -12,6 +14,9 @@ import life.walkit.server.walk.repository.WalkRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +42,9 @@ public class TrailServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private PathRepository pathRepository;
+
     private Member member;
     private Walk walk;
 
@@ -46,7 +54,6 @@ public class TrailServiceTest {
         walk = walkRepository.save(
             Walk.builder()
                 .member(member)
-                .isUploaded(false)
                 .build()
         );
     }
@@ -97,5 +104,46 @@ public class TrailServiceTest {
         assertThat(updatedWalk.getTrail()).isNotNull();
         assertThat(updatedWalk.getTrail().getTrailId()).isEqualTo(foundTrail.getTrailId());
         assertThat(updatedWalk.getIsUploaded()).isTrue();
+    }
+
+    @Test
+    @DisplayName("산책로 상세 조회 성공")
+    void getTrailDetail_success() {
+        // given
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+        Coordinate[] coordinates = new Coordinate[]{
+            new Coordinate(127.0, 37.5),
+            new Coordinate(127.1, 37.6)
+        };
+        Path path = pathRepository.save(Path.builder()
+            .point(geometryFactory.createPoint(coordinates[0]))
+            .path(geometryFactory.createLineString(coordinates))
+            .build());
+
+        Trail trail = trailRepository.save(Trail.builder()
+            .member(member)
+            .path(path)
+            .title("테스트 산책로")
+            .description("상세 조회 테스트용입니다.")
+            .distance(5.5)
+            .location("서울시 테스트구")
+            .build());
+
+        // when
+        life.walkit.server.trail.dto.response.TrailDetailResponse response = trailService.getTrailDetail(trail.getTrailId());
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.title()).isEqualTo(trail.getTitle());
+        assertThat(response.description()).isEqualTo(trail.getDescription());
+        assertThat(response.location()).isEqualTo(trail.getLocation());
+        assertThat(response.length()).isEqualTo(trail.getDistance());
+        assertThat(response.reviewCount()).isEqualTo(0); // 임시값 검증
+        assertThat(response.rating()).isEqualTo(0.0); // 임시값 검증
+
+        // 좌표 데이터 검증
+        assertThat(response.startPoint()).containsExactly(coordinates[0].getX(), coordinates[0].getY());
+        assertThat(response.path().get(0)).containsExactly(coordinates[0].getX(), coordinates[0].getY());
+        assertThat(response.path().get(1)).containsExactly(coordinates[1].getX(), coordinates[1].getY());
     }
 }

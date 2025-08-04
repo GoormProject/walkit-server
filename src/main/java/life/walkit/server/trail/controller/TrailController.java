@@ -5,9 +5,12 @@ import life.walkit.server.global.response.BaseResponse;
 import life.walkit.server.trail.dto.enums.TrailResponse;
 import life.walkit.server.trail.dto.request.TrailCreateRequest;
 import life.walkit.server.trail.dto.response.TrailCreateResponse;
+import life.walkit.server.trail.dto.response.TrailDetailResponse;
 import life.walkit.server.trail.service.TrailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,5 +29,14 @@ public class TrailController {
             TrailResponse.TRAIL_CREATE_SUCCESS,
             trailService.createTrail(trailCreateRequest)
         );
+    }
+
+    @GetMapping("/{trailId}")
+    public ResponseEntity<BaseResponse<TrailDetailResponse>> getTrailDetail(@PathVariable Long trailId) {
+        
+        return BaseResponse.toResponseEntity(
+            TrailResponse.TRAIL_CREATE_SUCCESS,
+            trailService.getTrailDetail(trailId)
+        ); // 적절한 응답 코드로 변경 필요
     }
 }
