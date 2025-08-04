@@ -5,6 +5,7 @@ import life.walkit.server.member.error.MemberException;
 import life.walkit.server.member.error.enums.MemberErrorCode;
 import life.walkit.server.member.repository.MemberRepository;
 import life.walkit.server.path.entity.Path;
+import life.walkit.server.path.repository.PathRepository;
 import life.walkit.server.trailwalkimage.entity.TrailWalkImage;
 import life.walkit.server.trailwalkimage.repository.TrailWalkImageRepository;
 import life.walkit.server.walk.dto.request.WalkRequest;
@@ -32,10 +33,14 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class WalkService {
 
+    private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory(new PrecisionModel(), 4326);
+    private static final Coordinate DEFAULT_COORDINATE = new Coordinate(0, 0);
+
     private final MemberRepository memberRepository;
     private final WalkRepository walkRepository;
     private final WalkingSessionRepository walkingSessionRepository;
     private final TrailWalkImageRepository trailWalkImageRepository;
+    private final PathRepository pathRepository;
 
     @Transactional
     public WalkEventResponse startWalk(Long memberId) {
@@ -46,7 +51,7 @@ public class WalkService {
             Walk.builder()
                 .member(member)
                 .trail(null)
-                .path(null)
+                .path(createEmptyPath())
                 .walkTitle(null)
                 .totalDistance(null)
                 .totalTime(null)
@@ -63,6 +68,15 @@ public class WalkService {
         );
 
         return WalkEventResponse.from(walkingSession);
+    }
+
+    private Path createEmptyPath() {
+        return pathRepository.save(
+            Path.builder()
+                .path(GEOMETRY_FACTORY.createLineString())
+                .point(GEOMETRY_FACTORY.createPoint(DEFAULT_COORDINATE))
+                .build()
+        );
     }
 
     @Transactional
