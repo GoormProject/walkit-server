@@ -1,13 +1,8 @@
 package life.walkit.server.trail.controller;
 
-import jakarta.validation.Valid;
-import life.walkit.server.global.response.BaseResponse;
-import life.walkit.server.trail.dto.enums.TrailResponse;
-import life.walkit.server.trail.dto.request.TrailCreateRequest;
-import life.walkit.server.trail.dto.response.TrailCreateResponse;
-import life.walkit.server.trail.dto.response.TrailDetailResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import life.walkit.server.global.response.BaseResponse;
 import life.walkit.server.trail.dto.enums.TrailResponse;
 import life.walkit.server.trail.dto.request.TrailCreateRequest;
@@ -31,7 +26,10 @@ public class TrailController {
 
     private final TrailService trailService;
 
-    @Operation(summary = "산책로 생성", description = "새로운 산책로를 등록합니다.")
+    @Operation(
+        summary = "산책로 생성",
+        description = "새로운 산책로를 등록합니다."
+    )
     @PostMapping("/new")
     public ResponseEntity<BaseResponse<TrailCreateResponse>> createTrail(@Valid @RequestBody TrailCreateRequest trailCreateRequest) {
 
@@ -41,7 +39,10 @@ public class TrailController {
         );
     }
 
-    @Operation(summary = "산책로 상세 조회", description = "특정 산책로의 상세 정보를 조회합니다.")
+    @Operation(
+        summary = "산책로 상세 조회",
+        description = "특정 산책로의 상세 정보를 조회합니다."
+    )
     @GetMapping("/{trailId}")
     public ResponseEntity<BaseResponse<TrailDetailResponse>> getTrailDetail(@PathVariable Long trailId) {
 
@@ -51,10 +52,16 @@ public class TrailController {
         );
     }
 
-    @Operation(summary = "산책로 목록 조회", description = "페이징 처리된 산책로 목록을 조회합니다.")
+    @Operation(
+        summary = "산책로 목록 조회",
+        description = "페이징 처리된 산책로 목록을 조회합니다."
+    )
     @GetMapping
     public ResponseEntity<BaseResponse<Page<TrailListResponse>>> getTrailList(
-        @RequestParam(value = "page", defaultValue = "0") int page
+        @RequestParam(
+            value = "page",
+            defaultValue = "0"
+        ) int page
     ) {
         return BaseResponse.toResponseEntity(
             TrailResponse.GET_TRAIL_LIST_SUCCESS,
