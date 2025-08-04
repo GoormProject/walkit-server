@@ -55,7 +55,7 @@ public class WalkService {
                 .walkTitle(null)
                 .totalDistance(null)
                 .totalTime(null)
-                .pace(null)
+                // .pace(null) // pace(null) 제거
                 .isUploaded(false)
                 .build()
         );
