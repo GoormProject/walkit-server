@@ -18,15 +18,15 @@ public record WalkRequest(
     String walkTitle,
 
     @NotNull(message = "총 시간은 필수입니다.")
-    @Positive(message = "총 시간은 양수여야 합니다.")
+    @Min(value = 0, message = "총 시간은 0 이상이어야 합니다.")
     Integer totalTime,
 
     @NotNull(message = "총 거리는 필수입니다.")
-    @Positive(message = "총 거리는 양수여야 합니다.")
+    @Min(value = 0, message = "총 거리는 0 이상이어야 합니다.")
     Double totalDistance,
 
     @NotNull(message = "속도는 필수입니다.")
-    @Positive(message = "속도는 양수여야 합니다.")
+    @Min(value = 0, message = "속도는 0 이상이어야 합니다.")
     Double pace,
 
     @NotEmpty(message = "경로 데이터는 필수입니다.")

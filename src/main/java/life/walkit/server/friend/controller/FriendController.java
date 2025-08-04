@@ -9,6 +9,7 @@ import life.walkit.server.friend.enums.FriendRequestResponse;
 import life.walkit.server.friend.enums.FriendResponse;
 import life.walkit.server.friend.service.FriendService;
 import life.walkit.server.global.response.BaseResponse;
+import life.walkit.server.member.entity.enums.MemberStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -98,6 +99,19 @@ public class FriendController {
         friendService.deleteFriend(memberDetails.getMemberId(), friendMemberId);
         return BaseResponse.toResponseEntity(FriendResponse.DELETE_SUCCESS);
     }
+
+    @GetMapping("/status/{status}")
+    @Operation(summary = "상태별 친구 목록 조회", description = "특정 상태(예: ONLINE)의 친구 목록을 조회합니다.")
+    public ResponseEntity<BaseResponse<List<FriendResponseDTO>>> getFriendsByStatus(
+            @AuthenticationPrincipal CustomMemberDetails memberDetails,
+            @PathVariable MemberStatus status
+    ) {
+        return BaseResponse.toResponseEntity(
+                FriendResponse.LIST_SUCCESS,
+                friendService.getFriendsByStatus(memberDetails.getMemberId(), status)
+        );
+    }
+
 
 }
 

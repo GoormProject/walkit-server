@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 import lombok.Builder.Default;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -49,17 +51,20 @@ public class Walk {
     private String walkTitle;
 
     @Column(
-        name = "total_distance"
+        name = "total_distance",
+        nullable = false
     )
     private Double totalDistance;
 
     @Column(
-        name = "total_time"
+        name = "total_time",
+        nullable = false
     )
     private Duration totalTime;
 
     @Column(
-        name = "pace"
+        name = "pace",
+        nullable = false
     )
     private Double pace;
 
@@ -69,6 +74,13 @@ public class Walk {
         nullable = false
     )
     private Boolean isUploaded;
+
+    @OneToMany(
+        mappedBy = "walk",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private List<WalkingSession> walkingSessions = new ArrayList<>();
 
     public void updateWalkDetails(
         String walkTitle,
@@ -108,8 +120,8 @@ public class Walk {
         this.walkTitle = walkTitle;
         this.totalDistance = totalDistance;
         this.totalTime = totalTime;
-        this.pace = pace;
-        this.isUploaded = false;
+        this.pace = pace != null ? pace : 0.0;
+        this.isUploaded = isUploaded != null ? isUploaded : false;
     }
 
 }
