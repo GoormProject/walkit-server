@@ -2,7 +2,9 @@ package life.walkit.server.weather.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import life.walkit.server.global.response.BaseResponse;
+import life.walkit.server.member.dto.LocationDto;
 import life.walkit.server.weather.dto.ClothResponse;
 import life.walkit.server.weather.dto.WeatherForecastResponseDto;
 import life.walkit.server.weather.dto.enums.WeatherResponse;
@@ -21,22 +23,16 @@ public class WeatherController {
 
     @Operation(summary = "주변 날씨 조회", description = "내 주변의 날씨 예보를 조회합니다.")
     @GetMapping
-    public ResponseEntity<BaseResponse<WeatherForecastResponseDto>> getWeatherByCurrentLocation(
-            @RequestParam double latitude,
-            @RequestParam double longitude
-    ) {
-        AdminArea area = weatherService.findNearestAdminArea(latitude, longitude);
+    public ResponseEntity<BaseResponse<WeatherForecastResponseDto>> getWeatherByCurrentLocation(@Valid LocationDto location) {
+        AdminArea area = weatherService.findNearestAdminArea(location.getLat(), location.getLng());
         WeatherForecastResponseDto dto = weatherService.fetchForecasts(area);
         return BaseResponse.toResponseEntity(WeatherResponse.GET_NEAR_WEATHER, dto);
     }
 
     @Operation(summary = "맞춤 옷차림 조회", description = "내 주변에 추천하는 옷차림을 조회합니다.")
     @GetMapping("/clothing")
-    public ResponseEntity<BaseResponse<ClothResponse>> getClothRecommendations(
-            @RequestParam double latitude,
-            @RequestParam double longitude
-    ) {
-        AdminArea area = weatherService.findNearestAdminArea(latitude, longitude);
+    public ResponseEntity<BaseResponse<ClothResponse>> getClothRecommendations(@Valid LocationDto location) {
+        AdminArea area = weatherService.findNearestAdminArea(location.getLat(), location.getLng());
 
         return BaseResponse.toResponseEntity(
                 WeatherResponse.GET_CLOTH_RECOMMENDATION,

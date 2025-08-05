@@ -40,8 +40,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class WeatherService {
     private final WeatherApiProperties properties;
-
-    private final WebClient webClient = WebClient.builder().build();
+    private final WebClient webClient;
 
     private final ClothingService clothingService;
     private final AdminAreaRepository adminAreaRepository;
