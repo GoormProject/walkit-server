@@ -3,6 +3,7 @@ package life.walkit.server.weather.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import life.walkit.server.global.ratelimiter.ApiRateLimiter;
 import life.walkit.server.weather.config.WeatherApiProperties;
 import life.walkit.server.weather.dto.ClothResponse;
 import life.walkit.server.weather.dto.WeatherDto;
@@ -42,6 +43,7 @@ import java.util.Optional;
 public class WeatherService {
     private final WeatherApiProperties properties;
     private final WebClient webClient;
+    private final ApiRateLimiter rateLimiter;
 
     private final ClothingService clothingService;
     private final AdminAreaRepository adminAreaRepository;
@@ -64,16 +66,11 @@ public class WeatherService {
                 return buildResponseDto(area, savedWeather); // 1시간 이내 날씨는 사용
         }
 
-        Mono<WeatherDto> current = Mono.delay(Duration.ofMillis(0))
-                .then(parseWeatherData(fetchUltraSrtNcst(nx, ny), "obsrValue"));
-        Mono<WeatherDto> after3h = Mono.delay(Duration.ofMillis(10))
-                .then(parseWeatherData(fetchUltraSrtFcst(nx, ny, 3), "fcstValue"));
-        Mono<WeatherDto> tomorrow = Mono.delay(Duration.ofMillis(20))
-                .then(parseWeatherData(fetchVilageFcst(nx, ny, 1), "fcstValue"));
-        Mono<WeatherDto> dayAfterTomorrow = Mono.delay(Duration.ofMillis(30))
-                .then(parseWeatherData(fetchVilageFcst(nx, ny, 2), "fcstValue"));
-        Mono<WeatherDto> threeDaysLater = Mono.delay(Duration.ofMillis(40))
-                .then(parseWeatherData(fetchVilageFcst(nx, ny, 3), "fcstValue"));
+        Mono<WeatherDto> current = parseWeatherData(fetchUltraSrtNcst(nx, ny), "obsrValue");
+        Mono<WeatherDto> after3h = parseWeatherData(fetchUltraSrtFcst(nx, ny, 3), "fcstValue");
+        Mono<WeatherDto> tomorrow = parseWeatherData(fetchVilageFcst(nx, ny, 1), "fcstValue");
+        Mono<WeatherDto> dayAfterTomorrow = parseWeatherData(fetchVilageFcst(nx, ny, 2), "fcstValue");
+        Mono<WeatherDto> threeDaysLater = parseWeatherData(fetchVilageFcst(nx, ny, 3), "fcstValue");
 
         // 비동기 요청 → block() 으로 동기 전환
         Tuple5<WeatherDto, WeatherDto, WeatherDto, WeatherDto, WeatherDto> tuple =
@@ -82,6 +79,7 @@ public class WeatherService {
         // 오래된 날씨 삭제
         if (savedWeather != null) {
             weatherRepository.delete(savedWeather);
+            weatherRepository.flush(); // 즉시 delete 실행
         }
 
         // 새로운 날씨 저장
@@ -231,18 +229,28 @@ public class WeatherService {
 
     // HTTP GET 요청을 보내고, JSON 응답에서 .response.body.items.item 노드를 파싱
     public Mono<JsonNode> fetchJsonItems(String urlString) {
-        return webClient.get()
-                .uri(URI.create(urlString))
-                .retrieve()
-                .bodyToMono(String.class)
-                .flatMap(response -> {
-                    try {
-                        JsonNode root = objectMapper.readTree(response);
-                        JsonNode items = root.path("response").path("body").path("items").path("item");
-                        return Mono.just(items);
-                    } catch (Exception e) {
-                        return Mono.error(new WeatherException(WeatherErrorCode.WEATHER_JSON_PARSE_FAILED, e));
+        return Mono.defer(() -> {
+                    if (!rateLimiter.tryConsume()) {
+                        return Mono.error(new WeatherException(WeatherErrorCode.WEATHER_RATE_LIMIT_EXCEEDED));
                     }
-                });
+
+                    return webClient.get()
+                            .uri(URI.create(urlString))
+                            .retrieve()
+                            .bodyToMono(String.class)
+                            .flatMap(response -> {
+                                try {
+                                    JsonNode root = objectMapper.readTree(response);
+                                    JsonNode items = root.path("response").path("body").path("items").path("item");
+                                    return Mono.just(items);
+                                } catch (Exception e) {
+                                    return Mono.error(new WeatherException(WeatherErrorCode.WEATHER_JSON_PARSE_FAILED, e));
+                                }
+                            });
+                })
+                .retryWhen(reactor.util.retry.Retry.backoff(10, Duration.ofMillis(100))
+                        .filter(ex -> ex instanceof WeatherException &&
+                                ((WeatherException) ex).getErrorCode() == WeatherErrorCode.WEATHER_RATE_LIMIT_EXCEEDED)
+                );
     }
 }
