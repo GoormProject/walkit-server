@@ -232,6 +232,12 @@ public class FriendService {
         // 산책 중인 친구(WALKING 상태)의 위치만 필터링하여 반환
         return friends.stream()
                 .map(Friend::getPartner)
+                .map(partner -> {
+                    // 각 친구의 상태 갱신
+                    MemberStatus updatedStatus = memberService.refreshMemberStatus(partner.getMemberId());
+                    partner.updateStatus(updatedStatus);
+                    return partner;
+                })
                 .filter(partner -> partner.getStatus() == MemberStatus.WALKING)
                 .map(partner -> {
                     // 위치가 없는 경우 null-safe 처리
