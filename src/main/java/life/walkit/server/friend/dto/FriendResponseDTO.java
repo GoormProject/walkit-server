@@ -16,7 +16,7 @@ public class FriendResponseDTO {
     private String profile;
     private MemberStatus memberStatus;
 
-    public static FriendResponseDTO of(Member member, String statusText) {
+    public static FriendResponseDTO of(Member member) {
         return FriendResponseDTO.builder()
                 .friendId(member.getMemberId())
                 .nickname(member.getNickname())
