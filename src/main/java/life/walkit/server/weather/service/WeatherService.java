@@ -7,13 +7,16 @@ import life.walkit.server.weather.config.WeatherApiProperties;
 import life.walkit.server.weather.dto.WeatherDto;
 import life.walkit.server.weather.dto.WeatherForecastResponseDto;
 import life.walkit.server.weather.entity.AdminArea;
+import life.walkit.server.weather.entity.Weather;
 import life.walkit.server.weather.repository.AdminAreaRepository;
+import life.walkit.server.weather.repository.WeatherRepository;
 import life.walkit.server.weather.utils.WeatherCodeMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple5;
 
 import java.net.URI;
 import java.time.Duration;
@@ -21,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -31,15 +35,25 @@ public class WeatherService {
     private final WebClient webClient = WebClient.builder().build();
     private final AdminAreaRepository adminAreaRepository;
     private final ObjectMapper objectMapper;
+    private final WeatherRepository weatherRepository;
 
     public AdminArea findNearestAdminArea(double lat, double lon) {
         return adminAreaRepository.findNearestArea(lat, lon);
     }
 
-    public Mono<WeatherForecastResponseDto> fetchForecasts(AdminArea area) throws Exception {
+    public WeatherForecastResponseDto fetchForecasts(AdminArea area) throws Exception {
         String nx = String.valueOf(area.getX());
         String ny = String.valueOf(area.getY());
-        String locationName = area.getSido() + " " + area.getSigungu() + " " + area.getEupmyeondong();
+
+        // 저장된 날씨가 오래되지 않았다면 그대로 사용
+        Weather savedWeather = weatherRepository.findByAdminArea(area).orElse(null);
+        if (savedWeather != null) {
+            if (savedWeather.isStale(LocalDateTime.now()))
+                weatherRepository.delete(savedWeather); // 오래된 날씨는 삭제
+            else
+                return buildResponseDto(area, savedWeather); // 1시간 이내 날씨는 사용
+        }
+
 
         Mono<WeatherDto> current = Mono.delay(Duration.ofMillis(0))
                 .then(parseWeatherData(fetchUltraSrtNcst(nx, ny), "obsrValue"));
@@ -52,30 +66,37 @@ public class WeatherService {
         Mono<WeatherDto> threeDaysLater = Mono.delay(Duration.ofMillis(40))
                 .then(parseWeatherData(fetchVilageFcst(nx, ny, 3), "fcstValue"));
 
-        return Mono.zip(current, after3h, tomorrow, dayAfterTomorrow, threeDaysLater)
-                .map(tuple -> WeatherForecastResponseDto.builder()
-                        .adminAreaName(locationName)
-                        .current(tuple.getT1())
-                        .after3hours(tuple.getT2())
-                        .tomorrow(tuple.getT3())
-                        .dayAfterTomorrow(tuple.getT4())
-                        .threeDaysLater(tuple.getT5())
-                        .build());
+        // 비동기 요청 → block() 으로 동기 전환
+        Tuple5<WeatherDto, WeatherDto, WeatherDto, WeatherDto, WeatherDto> tuple =
+                Mono.zip(current, after3h, tomorrow, dayAfterTomorrow, threeDaysLater).block();
+
+        // 날씨 저장
+        Weather weather = Weather.builder()
+                .adminArea(area)
+                .current(tuple.getT1().toMap())
+                .forecast(tuple.getT2().toMap())
+                .tomorrow(tuple.getT3().toMap())
+                .dayAfterTomorrow(tuple.getT4().toMap())
+                .threeDaysLater(tuple.getT5().toMap())
+                .temperature(tuple.getT1().getTemperature())
+                .humidity(tuple.getT1().getHumidity())
+                .build();
+        weatherRepository.save(weather);
+
+        return buildResponseDto(area, weather);
     }
 
-    private Mono<WeatherDto> getWeatherDto(String nx, String ny, String type, int offset) throws Exception {
-        switch (type) {
-            case "current" -> {
-                return parseWeatherData(fetchUltraSrtNcst(nx, ny), "obsrValue");
-            }
-            case "after3h" -> {
-                return parseWeatherData(fetchUltraSrtFcst(nx, ny, offset), "fcstValue");
-            }
-            case "tomorrow" -> {
-                return parseWeatherData(fetchVilageFcst(nx, ny, offset), "fcstValue");
-            }
-            default -> throw new IllegalArgumentException("Unsupported type: " + type);
-        }
+    private WeatherForecastResponseDto buildResponseDto(AdminArea area, Weather weather) {
+        String locationName = area.getSido() + " " + area.getSigungu() + " " + area.getEupmyeondong();
+
+        return WeatherForecastResponseDto.builder()
+                .adminAreaName(locationName)
+                .current(WeatherDto.of(weather.getCurrent()))
+                .after3hours(WeatherDto.of(weather.getForecast()))
+                .tomorrow(WeatherDto.of(weather.getTomorrow()))
+                .dayAfterTomorrow(WeatherDto.of(weather.getDayAfterTomorrow()))
+                .threeDaysLater(WeatherDto.of(weather.getThreeDaysLater()))
+                .build();
     }
 
     // 초단기실황 API 호출 (현재날씨)
@@ -189,8 +210,4 @@ public class WeatherService {
                     }
                 });
     }
-
-
-
-
 }

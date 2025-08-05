@@ -10,10 +10,11 @@ public class WeatherTestFactory {
     public static Weather createWeather(AdminArea area) {
         return Weather.builder()
                 .adminArea(area)
-                .current(createCurrentWeatherMap())
-                .forecast(createJsonString("forecast", "맑음"))
-                .tomorrow(createJsonString("tomorrow", "구름 많음"))
-                .dayAfterTomorrow(createJsonString("dayAfterTomorrow", "비"))
+                .current(createCurrentWeatherMap("맑음"))
+                .forecast(createCurrentWeatherMap("흐림"))
+                .tomorrow(createCurrentWeatherMap("맑음"))
+                .dayAfterTomorrow(createCurrentWeatherMap("비"))
+                .threeDaysLater(createCurrentWeatherMap("비"))
                 .temperature(27.5)
                 .humidity(65.0)
                 .build();
@@ -26,25 +27,23 @@ public class WeatherTestFactory {
     ) {
         return Weather.builder()
                 .adminArea(area)
-                .current(createCurrentWeatherMap())
-                .forecast(createJsonString("forecast", "흐림"))
-                .tomorrow(createJsonString("tomorrow", "맑음"))
-                .dayAfterTomorrow(createJsonString("dayAfterTomorrow", "비"))
+                .current(createCurrentWeatherMap("맑음"))
+                .forecast(createCurrentWeatherMap("흐림"))
+                .tomorrow(createCurrentWeatherMap("맑음"))
+                .dayAfterTomorrow(createCurrentWeatherMap("비"))
+                .threeDaysLater(createCurrentWeatherMap("비"))
                 .temperature(temp)
                 .humidity(humidity)
                 .build();
     }
 
-    private static Map<String, Object> createCurrentWeatherMap() {
+    private static Map<String, Object> createCurrentWeatherMap(String weather) {
         Map<String, Object> map = new HashMap<>();
-        map.put("temp", 27.5);
+        map.put("temperature", 27.5);
+        map.put("weather", weather);
         map.put("humidity", 65);
         map.put("windSpeed", 3.4);
-        map.put("current", "맑음");
+        map.put("clouds", 1);
         return map;
-    }
-
-    private static String createJsonString(String key, String value) {
-        return String.format("{\"%s\": \"%s\"}", key, value);
     }
 }

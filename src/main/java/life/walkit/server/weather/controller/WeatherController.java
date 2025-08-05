@@ -19,7 +19,7 @@ public class WeatherController {
             @RequestParam double longitude
     ) throws Exception {
         AdminArea area = weatherService.findNearestAdminArea(latitude, longitude);
-        WeatherForecastResponseDto dto = weatherService.fetchForecasts(area).block();
+        WeatherForecastResponseDto dto = weatherService.fetchForecasts(area);
         return ResponseEntity.ok(dto);
     }
 
