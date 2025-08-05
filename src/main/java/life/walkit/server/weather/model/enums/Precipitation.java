@@ -16,6 +16,10 @@ public enum Precipitation {
     }
 
     public static Precipitation ofDescription(String description) {
+        if (description == null || description.isEmpty()) {
+            return NONE;
+        }
+
         switch (description) {
             case "맑음":
                 return NONE;

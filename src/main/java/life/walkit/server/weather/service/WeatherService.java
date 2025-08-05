@@ -21,6 +21,7 @@ import life.walkit.server.weather.utils.WeatherCodeMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple5;
@@ -51,19 +52,17 @@ public class WeatherService {
         return adminAreaRepository.findNearestArea(lat, lon);
     }
 
+    @Transactional
     public WeatherForecastResponseDto fetchForecasts(AdminArea area) {
         String nx = String.valueOf(area.getX());
         String ny = String.valueOf(area.getY());
 
-        // 저장된 날씨가 오래되지 않았다면 그대로 사용
-        Weather savedWeather = weatherRepository.findByAdminArea(area).orElse(null);
+        // 저장된 날씨가 오래되지 않았다면 그대로 사용 (락 걸고 조회)
+        Weather savedWeather = weatherRepository.findByAdminAreaWithLock(area).orElse(null);
         if (savedWeather != null) {
-            if (savedWeather.isStale(LocalDateTime.now()))
-                weatherRepository.delete(savedWeather); // 오래된 날씨는 삭제
-            else
+            if (!savedWeather.isStale(LocalDateTime.now()))
                 return buildResponseDto(area, savedWeather); // 1시간 이내 날씨는 사용
         }
-
 
         Mono<WeatherDto> current = Mono.delay(Duration.ofMillis(0))
                 .then(parseWeatherData(fetchUltraSrtNcst(nx, ny), "obsrValue"));
@@ -80,7 +79,12 @@ public class WeatherService {
         Tuple5<WeatherDto, WeatherDto, WeatherDto, WeatherDto, WeatherDto> tuple =
                 Mono.zip(current, after3h, tomorrow, dayAfterTomorrow, threeDaysLater).block();
 
-        // 날씨 저장
+        // 오래된 날씨 삭제
+        if (savedWeather != null) {
+            weatherRepository.delete(savedWeather);
+        }
+
+        // 새로운 날씨 저장
         Weather weather = Weather.builder()
                 .adminArea(area)
                 .current(tuple.getT1().toMap())
@@ -237,7 +241,7 @@ public class WeatherService {
                         JsonNode items = root.path("response").path("body").path("items").path("item");
                         return Mono.just(items);
                     } catch (Exception e) {
-                        return Mono.error(new WeatherException(WeatherErrorCode.WEATHER_JSON_PARSE_FAILED));
+                        return Mono.error(new WeatherException(WeatherErrorCode.WEATHER_JSON_PARSE_FAILED, e));
                     }
                 });
     }
