@@ -14,4 +14,19 @@ public enum Precipitation {
             return NONE;
         }
     }
+
+    public static Precipitation ofDescription(String description) {
+        switch (description) {
+            case "맑음":
+                return NONE;
+            case "비":
+            case "비/눈":
+            case "소나기":
+                return RAIN;
+            case "눈":
+                return SNOW;
+            default:
+                return NONE;
+        }
+    }
 }

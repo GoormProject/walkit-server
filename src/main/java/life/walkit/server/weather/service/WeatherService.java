@@ -4,10 +4,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import life.walkit.server.weather.config.WeatherApiProperties;
+import life.walkit.server.weather.dto.ClothResponse;
 import life.walkit.server.weather.dto.WeatherDto;
 import life.walkit.server.weather.dto.WeatherForecastResponseDto;
 import life.walkit.server.weather.entity.AdminArea;
 import life.walkit.server.weather.entity.Weather;
+import life.walkit.server.weather.error.WeatherException;
+import life.walkit.server.weather.error.enums.WeatherErrorCode;
+import life.walkit.server.weather.model.enums.Clouds;
+import life.walkit.server.weather.model.enums.Night;
+import life.walkit.server.weather.model.enums.Precipitation;
+import life.walkit.server.weather.model.enums.Wind;
 import life.walkit.server.weather.repository.AdminAreaRepository;
 import life.walkit.server.weather.repository.WeatherRepository;
 import life.walkit.server.weather.utils.WeatherCodeMapper;
@@ -21,8 +28,10 @@ import reactor.util.function.Tuple5;
 import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -33,15 +42,17 @@ public class WeatherService {
     private final WeatherApiProperties properties;
 
     private final WebClient webClient = WebClient.builder().build();
+
+    private final ClothingService clothingService;
     private final AdminAreaRepository adminAreaRepository;
-    private final ObjectMapper objectMapper;
     private final WeatherRepository weatherRepository;
+    private final ObjectMapper objectMapper;
 
     public AdminArea findNearestAdminArea(double lat, double lon) {
         return adminAreaRepository.findNearestArea(lat, lon);
     }
 
-    public WeatherForecastResponseDto fetchForecasts(AdminArea area) throws Exception {
+    public WeatherForecastResponseDto fetchForecasts(AdminArea area) {
         String nx = String.valueOf(area.getX());
         String ny = String.valueOf(area.getY());
 
@@ -86,6 +97,26 @@ public class WeatherService {
         return buildResponseDto(area, weather);
     }
 
+    public ClothResponse getClothRecommendations(AdminArea area) {
+
+        WeatherDto weather = weatherRepository.findByAdminArea(area)
+                .filter(value -> !value.isStale(LocalDateTime.now())) // 오래된 날씨는 무시
+                .map(value -> WeatherDto.of(value.getForecast()))
+                .orElse(fetchForecasts(area).getAfter3hours()); // 유효한 날씨가 없으면 새로 가져오기
+
+        List<String> recommendations = clothingService.getClothRecommendations(
+                Wind.of(weather.getWindSpeed()),
+                Clouds.of(weather.getClouds()),
+                Precipitation.ofDescription(weather.getWeather()),
+                Night.of(LocalTime.now()),
+                weather.getTemperature()
+        );
+
+        return ClothResponse.builder()
+                .recommendations(recommendations)
+                .build();
+    }
+
     private WeatherForecastResponseDto buildResponseDto(AdminArea area, Weather weather) {
         String locationName = area.getSido() + " " + area.getSigungu() + " " + area.getEupmyeondong();
         locationName = locationName.trim();
@@ -101,7 +132,7 @@ public class WeatherService {
     }
 
     // 초단기실황 API 호출 (현재날씨)
-    private Mono<JsonNode> fetchUltraSrtNcst(String nx, String ny) throws Exception {
+    private Mono<JsonNode> fetchUltraSrtNcst(String nx, String ny) {
         LocalDateTime now = LocalDateTime.now().minusHours(1);
         String baseDate = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String baseTime = now.format(DateTimeFormatter.ofPattern("HH00"));
@@ -120,7 +151,7 @@ public class WeatherService {
     }
 
     // 초단기예보 API 호출 (3시간 후 날씨)
-    private Mono<JsonNode> fetchUltraSrtFcst(String nx, String ny, int hourOffset) throws Exception {
+    private Mono<JsonNode> fetchUltraSrtFcst(String nx, String ny, int hourOffset) {
         LocalDateTime base = LocalDateTime.now().minusMinutes(30);
         String baseDate = base.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String baseTime = base.format(DateTimeFormatter.ofPattern("HH30"));
@@ -143,7 +174,7 @@ public class WeatherService {
     }
 
     // 단기예보 API 호출 (1일 후, 2일 후 날씨)
-    private Mono<JsonNode> fetchVilageFcst(String nx, String ny, int dayOffset) throws Exception {
+    private Mono<JsonNode> fetchVilageFcst(String nx, String ny, int dayOffset) {
         String baseDate = LocalDateTime.now().minusHours(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String baseTime = "0200";
         String targetDate = LocalDateTime.now().plusDays(dayOffset).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
@@ -207,7 +238,7 @@ public class WeatherService {
                         JsonNode items = root.path("response").path("body").path("items").path("item");
                         return Mono.just(items);
                     } catch (Exception e) {
-                        return Mono.error(new RuntimeException("JSON 파싱 실패", e));
+                        return Mono.error(new WeatherException(WeatherErrorCode.WEATHER_JSON_PARSE_FAILED));
                     }
                 });
     }

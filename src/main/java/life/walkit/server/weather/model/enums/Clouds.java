@@ -13,4 +13,14 @@ public enum Clouds {
             return CLEAR;
         }
     }
+
+    public static Clouds of(int clouds) {
+        if (clouds == 2) {
+            return PARTLY;
+        } else if (2 < clouds) {
+            return OVERCAST;
+        } else {
+            return CLEAR;
+        }
+    }
 }

@@ -30,7 +30,7 @@ public class ClothingService {
         }
     }
 
-    public List<String> getClothRecommendations(Wind wind, Clouds clouds, Precipitation precip, Night night, int temp) {
+    public List<String> getClothRecommendations(Wind wind, Clouds clouds, Precipitation precip, Night night, double temp) {
         List<String> recommendations = new ArrayList<>();
 
         for (String cloth : clothingRules.keySet()) {

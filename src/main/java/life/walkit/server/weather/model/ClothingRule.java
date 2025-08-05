@@ -16,10 +16,10 @@ public class ClothingRule {
     private Clouds clouds;          // 구름
     private Precipitation precip;   // 강수
     private Night night;            // 주야
-    private int min;                // 최저 온도(섭씨)
-    private int max;                // 최고 온도(섭씨) : 범위 안이면 해당 옷차림 표시
+    private double min;             // 최저 온도(섭씨)
+    private double max;             // 최고 온도(섭씨) : 범위 안이면 해당 옷차림 표시
 
-    public boolean matches(Wind wind, Clouds clouds, Precipitation precip, Night night, int temp) {
+    public boolean matches(Wind wind, Clouds clouds, Precipitation precip, Night night, double temp) {
         return Objects.equals(this.wind, wind) &&
                 Objects.equals(this.clouds, clouds) &&
                 Objects.equals(this.precip, precip) &&
