@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple5;
+import reactor.util.retry.Retry;
 
 import java.net.URI;
 import java.time.Duration;
@@ -238,6 +239,7 @@ public class WeatherService {
                             .uri(URI.create(urlString))
                             .retrieve()
                             .bodyToMono(String.class)
+                            .retryWhen(Retry.backoff(3, Duration.ofSeconds(2)))  // 최대 3회 재시도
                             .flatMap(response -> {
                                 try {
                                     JsonNode root = objectMapper.readTree(response);
