@@ -236,17 +236,9 @@ public class FriendService {
                     }
                     return false;
                 })
-                .map(partner -> FriendResponseDTO.builder()
-                        .friendId(partner.getMemberId())
-                        .nickname(partner.getNickname())
-                        .profile(Optional.ofNullable(partner.getProfileImage())
-                                .map(ProfileImage::getProfileImage)
-                                .orElse(""))
-                        .memberStatus(partner.getStatus())
-                        .build())
+                .map(FriendResponseDTO::of)
                 .toList();
     }
-
 }
 
 
