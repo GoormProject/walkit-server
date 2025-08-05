@@ -20,9 +20,6 @@ import life.walkit.server.member.error.enums.MemberErrorCode;
 import life.walkit.server.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -198,20 +195,6 @@ public class FriendService {
         friendRepository.deleteAll(List.of(friendRequestToRecipient, friendRecipientToRequest));
     }
 
-
-//    @Transactional(readOnly = true)
-//    public List<FriendResponseDTO> getFriendsByStatus(Long memberId, MemberStatus status) {
-//        Member member = memberRepository.findById(memberId)
-//                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
-//
-//        List<Friend> friends = friendRepository.findAllByMemberAndPartnerStatus(member, status);
-//
-//        return friends.stream()
-//                .map(Friend::getPartner)
-//                .map(FriendResponseDTO::of)
-//                .toList();
-//    }
-
     @Transactional(readOnly = true)
     public List<FriendResponseDTO> getFriendsByStatus(Long memberId, MemberStatus status) {
         Member member = memberRepository.findById(memberId)
@@ -237,6 +220,47 @@ public class FriendService {
                     return false;
                 })
                 .map(FriendResponseDTO::of)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<FriendLocationResponseDTO> getFriendLocations(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        List<Friend> friends = friendRepository.findAllByMember(member);
+
+        // 산책 중인 친구(WALKING 상태)의 위치만 필터링하여 반환
+        return friends.stream()
+                .map(Friend::getPartner)
+                .map(partner -> {
+                    // 각 친구의 상태 갱신
+                    MemberStatus updatedStatus = memberService.refreshMemberStatus(partner.getMemberId());
+                    partner.updateStatus(updatedStatus);
+                    return partner;
+                })
+                .filter(partner -> partner.getStatus() == MemberStatus.WALKING)
+                .map(partner -> {
+                    // Friend 엔티티의 ID를 찾기 위해 Friend 객체 참조 필요
+                    Friend friendEntity = friends.stream()
+                            .findFirst()
+                            .orElse(null);
+
+                    return FriendLocationResponseDTO.builder()
+                            .friendId(friendEntity != null ? friendEntity.getFriendId() : null)
+                            .memberId(partner.getMemberId())
+                            .nickname(partner.getNickname())
+                            .profile(Optional.ofNullable(partner.getProfileImage())
+                                    .map(ProfileImage::getProfileImage)
+                                    .orElse(""))
+                            .location(Optional.ofNullable(partner.getLocation())
+                                    .map(loc -> LocationDto.builder()
+                                            .lng(loc.getX())
+                                            .lat(loc.getY())
+                                            .build())
+                                    .orElse(null))
+                            .build();
+                })
                 .toList();
     }
 }
