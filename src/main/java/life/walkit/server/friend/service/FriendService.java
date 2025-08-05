@@ -3,6 +3,7 @@ package life.walkit.server.friend.service;
 import life.walkit.server.auth.repository.LastActiveRepository;
 import life.walkit.server.friend.dto.*;
 import life.walkit.server.friend.entity.Friend;
+import life.walkit.server.member.dto.LocationDto;
 import life.walkit.server.member.entity.ProfileImage;
 import life.walkit.server.member.entity.enums.MemberStatus;
 import life.walkit.server.member.service.MemberService;
@@ -240,20 +241,25 @@ public class FriendService {
                 })
                 .filter(partner -> partner.getStatus() == MemberStatus.WALKING)
                 .map(partner -> {
-                    // 위치가 없는 경우 null-safe 처리
-                    if (partner.getLocation() == null) {
-                        return FriendLocationResponseDTO.builder()
-                                .friendId(null)
-                                .memberId(partner.getMemberId())
-                                .nickname(partner.getNickname())
-                                .profile(Optional.ofNullable(partner.getProfileImage())
-                                        .map(ProfileImage::getProfileImage)
-                                        .orElse(""))
-                                .location(null)
-                                .build();
-                    }
+                    // Friend 엔티티의 ID를 찾기 위해 Friend 객체 참조 필요
+                    Friend friendEntity = friends.stream()
+                            .findFirst()
+                            .orElse(null);
 
-                    return FriendLocationResponseDTO.of(partner, partner.getMemberId());
+                    return FriendLocationResponseDTO.builder()
+                            .friendId(friendEntity != null ? friendEntity.getFriendId() : null)
+                            .memberId(partner.getMemberId())
+                            .nickname(partner.getNickname())
+                            .profile(Optional.ofNullable(partner.getProfileImage())
+                                    .map(ProfileImage::getProfileImage)
+                                    .orElse(""))
+                            .location(Optional.ofNullable(partner.getLocation())
+                                    .map(loc -> LocationDto.builder()
+                                            .lng(loc.getX())
+                                            .lat(loc.getY())
+                                            .build())
+                                    .orElse(null))
+                            .build();
                 })
                 .toList();
     }
