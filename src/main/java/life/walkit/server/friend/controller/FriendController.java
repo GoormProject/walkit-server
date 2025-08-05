@@ -82,12 +82,13 @@ public class FriendController {
 
     @GetMapping
     @Operation(summary = "친구 목록 조회", description = "현재 사용자의 친구 목록을 조회합니다.")
-    public ResponseEntity<BaseResponse<List<FriendResponseDTO>>> getFriends(
+    public ResponseEntity<BaseResponse<FriendListResponseDTO>> getFriends(
             @AuthenticationPrincipal CustomMemberDetails member
     ) {
         return BaseResponse.toResponseEntity(
                 FriendResponse.LIST_SUCCESS,
-                friendService.getFriends(member.getMemberId()));
+                friendService.getFriends(member.getMemberId())
+        );
     }
 
     @Operation(summary = "친구 삭제하기", description = "친구 관계를 삭제합니다.")

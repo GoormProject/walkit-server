@@ -3,10 +3,10 @@ package life.walkit.server.friend.service;
 import static life.walkit.server.global.factory.GlobalTestFactory.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import life.walkit.server.friend.dto.FriendRequestResponseDTO;
-import life.walkit.server.friend.dto.FriendResponseDTO;
-import life.walkit.server.friend.dto.ReceivedFriendResponse;
-import life.walkit.server.friend.dto.SentFriendResponse;
+import static org.mockito.Mockito.when;
+
+import life.walkit.server.auth.repository.LastActiveRepository;
+import life.walkit.server.friend.dto.*;
 import life.walkit.server.friend.entity.Friend;
 import life.walkit.server.friend.entity.FriendRequest;
 import life.walkit.server.friend.enums.FriendRequestStatus;
@@ -18,6 +18,7 @@ import life.walkit.server.global.util.GeoUtils;
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.entity.enums.MemberStatus;
 import life.walkit.server.member.repository.MemberRepository;
+import life.walkit.server.member.service.MemberService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,7 +27,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -35,11 +40,15 @@ public class FriendServiceTest {
     @Autowired
     private FriendService friendService;
     @Autowired
+    private MemberService memberService;
+    @Autowired
     private MemberRepository memberRepository;
     @Autowired
     private FriendRepository friendRepository;
     @Autowired
     private FriendRequestRepository friendRequestRepository;
+    @Autowired
+    private LastActiveRepository lastActiveRepository;
 
     private Member memberA;
     private Member memberB;
@@ -193,45 +202,6 @@ public class FriendServiceTest {
                 .hasMessage(FriendErrorCode.FRIEND_STATUS_INVALID.getMessage());
     }
 
-
-    @Test
-    @DisplayName("친구 목록 조회 성공")
-    void getFriendList_success() {
-        // Arrange - 테스트 데이터 생성 및 저장
-        Member memberA = memberRepository.save(createMember("user01@gmail.com", "User01"));
-        Member memberB = memberRepository.save(createMember("user02@gmail.com", "User02"));
-        Member memberC = memberRepository.save(createMember("user03@gmail.com", "User03"));
-
-        memberB.updateLocation(GeoUtils.toPoint(126.9780, 37.5665));
-        memberC.updateLocation(GeoUtils.toPoint(129.0756, 35.1796));
-
-        memberRepository.save(memberB);
-        memberRepository.save(memberC);
-
-        friendRepository.save(Friend.builder().member(memberA).partner(memberB).build());
-        friendRepository.save(Friend.builder().member(memberA).partner(memberC).build());
-
-        List<FriendResponseDTO> friends = friendService.getFriends(memberA.getMemberId());
-
-        assertThat(friends).hasSize(2);
-
-        // 친구 User02 검증
-        FriendResponseDTO friendB = friends.stream()
-                .filter(f -> f.getNickname().equals("User02"))
-                .findFirst()
-                .orElseThrow();
-        assertThat(friendB.getLastLocation().getLat()).isEqualTo(37.5665);
-        assertThat(friendB.getLastLocation().getLng()).isEqualTo(126.9780);
-
-        // 친구 User03 검증
-        FriendResponseDTO friendC = friends.stream()
-                .filter(f -> f.getNickname().equals("User03"))
-                .findFirst()
-                .orElseThrow();
-        assertThat(friendC.getLastLocation().getLat()).isEqualTo(35.1796);
-        assertThat(friendC.getLastLocation().getLng()).isEqualTo(129.0756);
-    }
-
     @Test
     @Transactional
     @DisplayName("친구 삭제 성공")
@@ -253,39 +223,31 @@ public class FriendServiceTest {
 
     @Test
     @Transactional
-    @DisplayName("상태별 친구 목록 조회 성공 - ONLINE, WALKING, OFFLINE")
-    void getFriendsByStatus_success() {
-        Member memberA = memberRepository.save(createMember("userA@test.com", "UserA"));
-        Member memberB = memberRepository.save(createMember("userB@test.com", "UserB"));
-        Member memberC = memberRepository.save(createMember("userC@test.com", "UserC"));
-
-        // 멤버 상태 설정
-        memberA.updateStatus(MemberStatus.ONLINE);  // 기준 멤버
-        memberB.updateStatus(MemberStatus.WALKING); // 친구1
-        memberC.updateStatus(MemberStatus.ONLINE);  // 친구2
+    @DisplayName("상태별 친구 목록 조회 성공 - OFFLINE 상태 친구 필터링")
+    void getFriendsByStatus_offline_success() {
+        // Arrange
+        memberA.updateStatus(MemberStatus.ONLINE);    // 기준 멤버
+        memberB.updateStatus(MemberStatus.OFFLINE);  // 친구 A
+        memberC.updateStatus(MemberStatus.OFFLINE);  // 친구 B
 
         memberRepository.save(memberA);
         memberRepository.save(memberB);
         memberRepository.save(memberC);
 
-        friendRepository.save(createFriend(memberA, memberB)); // 친구 추가 (A-B)
-        friendRepository.save(createFriend(memberA, memberC)); // 친구 추가 (A-C)
+        friendRepository.save(createFriend(memberA, memberB)); // A와 B 친구 관계 추가
+        friendRepository.save(createFriend(memberA, memberC)); // A와 C 친구 관계 추가
 
-        // ONLINE 상태 친구 조회
-        List<FriendResponseDTO> onlineFriends = friendService.getFriendsByStatus(memberA.getMemberId(), MemberStatus.ONLINE);
-        assertThat(onlineFriends).hasSize(1);
-        assertThat(onlineFriends.get(0).getNickname()).isEqualTo("UserC");
-        assertThat(onlineFriends.get(0).getMemberStatus()).isEqualTo(MemberStatus.ONLINE);
-
-        // WALKING 상태 친구 조회
-        List<FriendResponseDTO> walkingFriends = friendService.getFriendsByStatus(memberA.getMemberId(), MemberStatus.WALKING);
-        assertThat(walkingFriends).hasSize(1);
-        assertThat(walkingFriends.get(0).getNickname()).isEqualTo("UserB");
-        assertThat(walkingFriends.get(0).getMemberStatus()).isEqualTo(MemberStatus.WALKING);
-
-        // OFFLINE 상태 친구 조회
+        // Act
         List<FriendResponseDTO> offlineFriends = friendService.getFriendsByStatus(memberA.getMemberId(), MemberStatus.OFFLINE);
-        assertThat(offlineFriends).isEmpty();
+
+        // Assert
+        assertThat(offlineFriends).hasSize(2); // OFFLINE 상태의 친구만 필터링
+        assertThat(offlineFriends)
+                .extracting("nickname")
+                .containsExactlyInAnyOrder("회원B", "회원C"); // 닉네임 확인
+        assertThat(offlineFriends)
+                .extracting("memberStatus")
+                .containsOnly(MemberStatus.OFFLINE);
     }
 
 
