@@ -52,7 +52,7 @@ public class MemberController {
             @PathVariable Long memberId,
             @AuthenticationPrincipal CustomMemberDetails member,
             @Valid @RequestPart("data") ProfileRequest request,
-            @RequestPart("profileImage") MultipartFile profileImage
+            @RequestPart(name = "profileImage", required = false) MultipartFile profileImage
     ) {
 
         if (!memberId.equals(member.getMemberId())) {
