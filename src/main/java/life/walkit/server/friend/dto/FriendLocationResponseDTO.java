@@ -25,10 +25,12 @@ public class FriendLocationResponseDTO {
                 .profile(Optional.ofNullable(member.getProfileImage())
                         .map(ProfileImage::getProfileImage)
                         .orElse("")) // null-safe
-                .location(LocationDto.builder()
-                        .lng(member.getLocation().getX()) // 경도
-                        .lat(member.getLocation().getY()) // 위도
-                        .build())
+                .location(Optional.ofNullable(member.getLocation())
+                        .map(loc -> LocationDto.builder()
+                                .lng(loc.getX())
+                                .lat(loc.getY())
+                                .build())
+                         .orElse(null))
                 .build();
     }
 
