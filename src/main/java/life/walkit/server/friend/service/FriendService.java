@@ -163,14 +163,7 @@ public class FriendService {
             MemberStatus updatedStatus = memberService.refreshMemberStatus(partner.getMemberId()); // 친구 상태 갱신
             partner.updateStatus(updatedStatus); // 상태 갱신 후 현재 객체에도 반영
 
-            FriendResponseDTO friendDTO = FriendResponseDTO.builder()
-                    .friendId(partner.getMemberId())
-                    .nickname(partner.getNickname())
-                    .profile(Optional.ofNullable(partner.getProfileImage())
-                            .map(ProfileImage::getProfileImage)
-                            .orElse(""))
-                    .memberStatus(partner.getStatus())
-                    .build();
+            FriendResponseDTO friendDTO = FriendResponseDTO.of(partner);
 
             if (partner.getStatus() == MemberStatus.ONLINE || partner.getStatus() == MemberStatus.WALKING) {
                 onlineFriends.add(friendDTO);
@@ -228,10 +221,11 @@ public class FriendService {
 
         return friends.stream()
                 .map(Friend::getPartner)
-                .peek(partner -> {
-                    // 각 파트너의 상태 갱신
+                .map(partner -> {
+                   // 각 친구의 상태 갱신
                     MemberStatus updatedStatus = memberService.refreshMemberStatus(partner.getMemberId());
                     partner.updateStatus(updatedStatus);
+                    return partner;
                 })
                 .filter(partner -> {
                     // 상태별로 필터링: WALKING/ONLINE → ONLINE, OFFLINE → OFFLINE
