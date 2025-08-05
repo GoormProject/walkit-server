@@ -3,7 +3,6 @@ package life.walkit.server.friend.service;
 import life.walkit.server.auth.repository.LastActiveRepository;
 import life.walkit.server.friend.dto.*;
 import life.walkit.server.friend.entity.Friend;
-import life.walkit.server.member.dto.LocationDto;
 import life.walkit.server.member.entity.ProfileImage;
 import life.walkit.server.member.entity.enums.MemberStatus;
 import life.walkit.server.member.service.MemberService;
@@ -20,9 +19,6 @@ import life.walkit.server.member.error.enums.MemberErrorCode;
 import life.walkit.server.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -198,20 +194,6 @@ public class FriendService {
         friendRepository.deleteAll(List.of(friendRequestToRecipient, friendRecipientToRequest));
     }
 
-
-//    @Transactional(readOnly = true)
-//    public List<FriendResponseDTO> getFriendsByStatus(Long memberId, MemberStatus status) {
-//        Member member = memberRepository.findById(memberId)
-//                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
-//
-//        List<Friend> friends = friendRepository.findAllByMemberAndPartnerStatus(member, status);
-//
-//        return friends.stream()
-//                .map(Friend::getPartner)
-//                .map(FriendResponseDTO::of)
-//                .toList();
-//    }
-
     @Transactional(readOnly = true)
     public List<FriendResponseDTO> getFriendsByStatus(Long memberId, MemberStatus status) {
         Member member = memberRepository.findById(memberId)
@@ -237,6 +219,36 @@ public class FriendService {
                     return false;
                 })
                 .map(FriendResponseDTO::of)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<FriendLocationResponseDTO> getFriendLocations(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        List<Friend> friends = friendRepository.findAllByMember(member);
+
+        // 산책 중인 친구(WALKING 상태)의 위치만 필터링하여 반환
+        return friends.stream()
+                .map(Friend::getPartner)
+                .filter(partner -> partner.getStatus() == MemberStatus.WALKING)
+                .map(partner -> {
+                    // 위치가 없는 경우 null-safe 처리
+                    if (partner.getLocation() == null) {
+                        return FriendLocationResponseDTO.builder()
+                                .friendId(null)
+                                .memberId(partner.getMemberId())
+                                .nickname(partner.getNickname())
+                                .profile(Optional.ofNullable(partner.getProfileImage())
+                                        .map(ProfileImage::getProfileImage)
+                                        .orElse(""))
+                                .location(null)
+                                .build();
+                    }
+
+                    return FriendLocationResponseDTO.of(partner, partner.getMemberId());
+                })
                 .toList();
     }
 }

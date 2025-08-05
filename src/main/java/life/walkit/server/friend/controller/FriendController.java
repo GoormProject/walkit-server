@@ -113,6 +113,17 @@ public class FriendController {
         );
     }
 
+    @Operation(summary = "친구 위치 조회", description = "친구들의 위치 정보를 조회합니다.")
+    @GetMapping("/location")
+    public ResponseEntity<BaseResponse<List<FriendLocationResponseDTO>>> getFriendLocations(
+            @AuthenticationPrincipal CustomMemberDetails member
+    ) {
+        return BaseResponse.toResponseEntity(
+                FriendResponse.LOCATION_LIST_SUCCESS,
+                friendService.getFriendLocations(member.getMemberId())
+        );
+    }
+
 
 }
 
