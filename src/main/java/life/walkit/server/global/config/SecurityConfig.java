@@ -30,7 +30,8 @@ public class SecurityConfig {
             "/actuator/health",
             "/actuator/prometheus",
             "/api/auth/reissue",
-            "/login/**"
+            "/login/**",
+            "/api/weather/**"
     };
 
     private final AuthService authService;

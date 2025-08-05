@@ -1,6 +1,8 @@
 package life.walkit.server.weather.controller;
 
+import life.walkit.server.global.response.BaseResponse;
 import life.walkit.server.weather.dto.WeatherForecastResponseDto;
+import life.walkit.server.weather.dto.enums.WeatherResponse;
 import life.walkit.server.weather.entity.AdminArea;
 import life.walkit.server.weather.service.WeatherService;
 import lombok.RequiredArgsConstructor;
@@ -13,14 +15,14 @@ import org.springframework.web.bind.annotation.*;
 public class WeatherController {
     private final WeatherService weatherService;
 
-    @GetMapping("/location")
-    public ResponseEntity<WeatherForecastResponseDto> getWeatherByCurrentLocation(
+    @GetMapping()
+    public ResponseEntity<BaseResponse<WeatherForecastResponseDto>> getWeatherByCurrentLocation(
             @RequestParam double latitude,
             @RequestParam double longitude
     ) throws Exception {
         AdminArea area = weatherService.findNearestAdminArea(latitude, longitude);
         WeatherForecastResponseDto dto = weatherService.fetchForecasts(area);
-        return ResponseEntity.ok(dto);
+        return BaseResponse.toResponseEntity(WeatherResponse.GET_NEAR_WEATHER, dto);
     }
 
 

@@ -88,6 +88,7 @@ public class WeatherService {
 
     private WeatherForecastResponseDto buildResponseDto(AdminArea area, Weather weather) {
         String locationName = area.getSido() + " " + area.getSigungu() + " " + area.getEupmyeondong();
+        locationName = locationName.trim();
 
         return WeatherForecastResponseDto.builder()
                 .adminAreaName(locationName)

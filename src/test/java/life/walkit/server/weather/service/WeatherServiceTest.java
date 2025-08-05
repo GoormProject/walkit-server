@@ -5,6 +5,7 @@ import life.walkit.server.weather.entity.AdminArea;
 import life.walkit.server.weather.entity.Weather;
 import life.walkit.server.weather.repository.AdminAreaRepository;
 import life.walkit.server.weather.repository.WeatherRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,11 @@ public class WeatherServiceTest {
     private WeatherRepository weatherRepository;
     @Autowired
     private AdminAreaRepository adminAreaRepository;
+
+    @AfterEach
+    void tearDown() {
+        weatherRepository.deleteAllInBatch();
+    }
 
     @Test
     @DisplayName("[경기도_고양시_일산서구_일산1동]의 일기예보를 기상청 API로 조회합니다.")
@@ -66,6 +72,5 @@ public class WeatherServiceTest {
         // then - 저장된 데이터를 그대로 썼는지 확인
         assertEquals(first.getCurrent(), second.getCurrent(), "캐시된 데이터를 재사용해야 함");
     }
-
 
 }
