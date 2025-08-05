@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Entity
@@ -32,15 +33,19 @@ public class Weather extends BaseEntity {
 
     @Column(name = "forecast", columnDefinition = "jsonb", nullable = false)
     @JdbcTypeCode(SqlTypes.JSON)
-    private String forecast;
+    private Map<String, Object> forecast;
 
     @Column(name = "tomorrow", columnDefinition = "jsonb", nullable = false)
     @JdbcTypeCode(SqlTypes.JSON)
-    private String tomorrow;
+    private Map<String, Object> tomorrow;
 
     @Column(name = "dayAfterTomorrow", columnDefinition = "jsonb", nullable = false)
     @JdbcTypeCode(SqlTypes.JSON)
-    private String dayAfterTomorrow;
+    private Map<String, Object> dayAfterTomorrow;
+
+    @Column(name = "threeDaysLater", columnDefinition = "jsonb", nullable = false)
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, Object> threeDaysLater;
 
     @Column(name = "temperature", nullable = false)
     private double temperature;
@@ -49,14 +54,21 @@ public class Weather extends BaseEntity {
     private double humidity;
 
     @Builder
-    public Weather(AdminArea adminArea, Map<String, Object> current, String forecast, String tomorrow,
-                   String dayAfterTomorrow, double temperature, double humidity) {
+    public Weather(AdminArea adminArea, Map<String, Object> current, Map<String, Object> forecast,
+                   Map<String, Object> tomorrow, Map<String, Object> dayAfterTomorrow,
+                   Map<String, Object> threeDaysLater, double temperature, double humidity) {
         this.adminArea = adminArea;
         this.current = current;
         this.forecast = forecast;
         this.tomorrow = tomorrow;
         this.dayAfterTomorrow = dayAfterTomorrow;
+        this.threeDaysLater = threeDaysLater;
         this.temperature = temperature;
         this.humidity = humidity;
+    }
+    
+    public boolean isStale(LocalDateTime now) {
+        // 마지막 수정으로 부터 1시간 경과했는지 확인
+        return getModifiedAt() == null || getModifiedAt().isBefore(now.minusHours(1));
     }
 }

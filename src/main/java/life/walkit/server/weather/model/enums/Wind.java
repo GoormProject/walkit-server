@@ -13,4 +13,14 @@ public enum Wind {
             return CALM;
         }
     }
+
+    public static Wind of(double windSpeed) {
+        if (windSpeed < 4.0) {
+            return CALM;
+        } else if (windSpeed < 9.0) {
+            return MODERATE;
+        } else {
+            return STRONG;
+        }
+    }
 }

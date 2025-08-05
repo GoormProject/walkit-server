@@ -70,6 +70,6 @@ class WeatherRepositoryTest {
         assertThat(found).isPresent()
                 .hasValueSatisfying(weather -> {
                     assertThat(weather.getAdminArea().getEupmyeondong()).isEqualTo(area.getEupmyeondong());
-                    assertThat(weather.getCurrent()).containsEntry("current", "맑음");});
+                    assertThat(weather.getCurrent()).containsEntry("weather", "맑음");});
     }
 }
