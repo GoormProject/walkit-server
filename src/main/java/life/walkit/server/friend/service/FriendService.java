@@ -1,9 +1,12 @@
 package life.walkit.server.friend.service;
 
+import life.walkit.server.auth.repository.LastActiveRepository;
 import life.walkit.server.friend.dto.*;
 import life.walkit.server.friend.entity.Friend;
 import life.walkit.server.member.dto.LocationDto;
+import life.walkit.server.member.entity.ProfileImage;
 import life.walkit.server.member.entity.enums.MemberStatus;
+import life.walkit.server.member.service.MemberService;
 import org.springframework.transaction.annotation.Transactional;
 import life.walkit.server.friend.enums.FriendRequestStatus;
 import life.walkit.server.friend.error.FriendErrorCode;
@@ -17,6 +20,10 @@ import life.walkit.server.member.error.enums.MemberErrorCode;
 import life.walkit.server.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +34,8 @@ public class FriendService {
     private final FriendRequestRepository friendRequestRepository;
     private final FriendRepository friendRepository;
     private final MemberRepository memberRepository;
+    private final LastActiveRepository lastActiveRepository;
+    private final MemberService memberService;
 
     public FriendRequestResponseDTO sendFriendRequest(Long senderId, String targetNickname) {
         Member sender = memberRepository.findById(senderId)
@@ -136,16 +145,51 @@ public class FriendService {
     }
 
     @Transactional(readOnly = true)
-    public List<FriendResponseDTO> getFriends(Long memberId) {
+    public FriendListResponseDTO getFriends(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         List<Friend> friends = friendRepository.findAllByMember(member);
 
-        return friends.stream()
-                .map(friend -> FriendResponseDTO.of(friend.getPartner())) // Partner를 DTO로 변환
-                .toList();
+        int onlineCount = 0;
+        int offlineCount = 0;
+
+        List<FriendResponseDTO> onlineFriends = new ArrayList<>();
+        List<FriendResponseDTO> offlineFriends = new ArrayList<>();
+
+        // 친구의 상태를 갱신하고 FriendResponseDTO를 생성
+        for (Friend friend : friends) {
+            Member partner = friend.getPartner();
+            MemberStatus updatedStatus = memberService.refreshMemberStatus(partner.getMemberId()); // 친구 상태 갱신
+            partner.updateStatus(updatedStatus); // 상태 갱신 후 현재 객체에도 반영
+
+            FriendResponseDTO friendDTO = FriendResponseDTO.builder()
+                    .friendId(partner.getMemberId())
+                    .nickname(partner.getNickname())
+                    .profile(Optional.ofNullable(partner.getProfileImage())
+                            .map(ProfileImage::getProfileImage)
+                            .orElse(""))
+                    .memberStatus(partner.getStatus())
+                    .build();
+
+            if (partner.getStatus() == MemberStatus.ONLINE || partner.getStatus() == MemberStatus.WALKING) {
+                onlineFriends.add(friendDTO);
+                onlineCount++;
+            } else {
+                offlineFriends.add(friendDTO);
+                offlineCount++;
+            }
+        }
+
+        return FriendListResponseDTO.builder()
+                .total(onlineCount + offlineCount)
+                .online(onlineCount)
+                .offline(offlineCount)
+                .onlineFriends(onlineFriends)
+                .offlineFriends(offlineFriends)
+                .build();
     }
+
 
     public void deleteFriend(Long requesterId, Long recipientId) {
         Member requester = memberRepository.findById(requesterId)
@@ -162,16 +206,50 @@ public class FriendService {
     }
 
 
+//    @Transactional(readOnly = true)
+//    public List<FriendResponseDTO> getFriendsByStatus(Long memberId, MemberStatus status) {
+//        Member member = memberRepository.findById(memberId)
+//                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+//
+//        List<Friend> friends = friendRepository.findAllByMemberAndPartnerStatus(member, status);
+//
+//        return friends.stream()
+//                .map(Friend::getPartner)
+//                .map(FriendResponseDTO::of)
+//                .toList();
+//    }
+
     @Transactional(readOnly = true)
     public List<FriendResponseDTO> getFriendsByStatus(Long memberId, MemberStatus status) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        List<Friend> friends = friendRepository.findAllByMemberAndPartnerStatus(member, status);
+        List<Friend> friends = friendRepository.findAllByMember(member);
 
         return friends.stream()
                 .map(Friend::getPartner)
-                .map(FriendResponseDTO::of)
+                .peek(partner -> {
+                    // 각 파트너의 상태 갱신
+                    MemberStatus updatedStatus = memberService.refreshMemberStatus(partner.getMemberId());
+                    partner.updateStatus(updatedStatus);
+                })
+                .filter(partner -> {
+                    // 상태별로 필터링: WALKING/ONLINE → ONLINE, OFFLINE → OFFLINE
+                    if (status == MemberStatus.ONLINE) {
+                        return partner.getStatus() == MemberStatus.ONLINE || partner.getStatus() == MemberStatus.WALKING;
+                    } else if (status == MemberStatus.OFFLINE) {
+                        return partner.getStatus() == MemberStatus.OFFLINE;
+                    }
+                    return false;
+                })
+                .map(partner -> FriendResponseDTO.builder()
+                        .friendId(partner.getMemberId())
+                        .nickname(partner.getNickname())
+                        .profile(Optional.ofNullable(partner.getProfileImage())
+                                .map(ProfileImage::getProfileImage)
+                                .orElse(""))
+                        .memberStatus(partner.getStatus())
+                        .build())
                 .toList();
     }
 
