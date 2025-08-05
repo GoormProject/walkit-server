@@ -77,8 +77,7 @@ public class TrailImageRepositoryTest {
                 "테스트 타이틀",
                 totalDistance,
                 totalTime,
-                pace,
-                false
+                pace
             )
         );
 

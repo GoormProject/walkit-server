@@ -227,34 +227,37 @@ public class WalkServiceTest {
             .totalDistance(5.0)
             .totalTime(Duration.ofHours(1))
             .pace(5.0)
-            .isUploaded(false)
             .build());
+
         walkingSessionRepository.save(WalkingSession.builder().walk(walkWithTrail).eventType(EventType.END).build());
         trailWalkImageRepository.save(TrailWalkImage.builder().walk(walkWithTrail).routeImage("imageUrl1").build());
 
         // 2. 자유로운 산책 기록 생성
-        Walk freeWalk = walkRepository.save(Walk.builder()
-            .member(member)
-            .trail(null)
-            .walkTitle("2025-07-20의 산책 기록")
-            .totalDistance(3.0)
-            .totalTime(Duration.ofMinutes(45))
-            .pace(4.0)
-            .isUploaded(false)
-            .build());
+        Walk freeWalk = walkRepository.save(
+            Walk.builder()
+                .member(member)
+                .trail(null)
+                .walkTitle("2025-07-20의 산책 기록")
+                .totalDistance(3.0)
+                .totalTime(Duration.ofMinutes(45))
+                .pace(4.0)
+                .build()
+        );
+
         walkingSessionRepository.save(WalkingSession.builder().walk(freeWalk).eventType(EventType.END).build());
         trailWalkImageRepository.save(TrailWalkImage.builder().walk(freeWalk).routeImage("imageUrl2").build());
 
         // 3. 내가 업로드한 산책 기록 생성
-        Walk uploadedWalk = walkRepository.save(Walk.builder()
-            .member(member)
-            .trail(null)
-            .walkTitle("내가 업로드한 산책기록")
-            .totalDistance(2.5)
-            .totalTime(Duration.ofMinutes(30))
-            .pace(5.0)
-            .isUploaded(true)
-            .build());
+        Walk uploadedWalk = walkRepository.save(
+            Walk.builder()
+                .member(member)
+                .trail(null)
+                .walkTitle("내가 업로드한 산책기록")
+                .totalDistance(2.5)
+                .totalTime(Duration.ofMinutes(30))
+                .pace(5.0)
+                .build()
+        );
         walkingSessionRepository.save(WalkingSession.builder().walk(uploadedWalk).eventType(EventType.END).build());
         trailWalkImageRepository.save(TrailWalkImage.builder().walk(uploadedWalk).routeImage("imageUrl3").build());
 
@@ -264,20 +267,26 @@ public class WalkServiceTest {
         // then
         assertThat(walkList).hasSize(3);
 
-        WalkListResponse response1 = walkList.stream().filter(w -> w.walkId().equals(walkWithTrail.getWalkId())).findFirst().get();
+        WalkListResponse response1 = walkList.stream().filter(
+            w -> w.walkId().equals(walkWithTrail.getWalkId())
+        ).findFirst().get();
         assertThat(response1.trailId()).isEqualTo(trail.getTrailId());
         assertThat(response1.title()).isEqualTo(trail.getTitle());
         assertThat(response1.isUploaded()).isFalse();
 
-        WalkListResponse response2 = walkList.stream().filter(w -> w.walkId().equals(freeWalk.getWalkId())).findFirst().get();
+        WalkListResponse response2 = walkList.stream().filter(
+            w -> w.walkId().equals(freeWalk.getWalkId())
+        ).findFirst().get();
         assertThat(response2.trailId()).isNull();
         assertThat(response2.title()).isEqualTo(freeWalk.getWalkTitle());
         assertThat(response2.isUploaded()).isFalse();
 
-        WalkListResponse response3 = walkList.stream().filter(w -> w.walkId().equals(uploadedWalk.getWalkId())).findFirst().get();
+        WalkListResponse response3 = walkList.stream().filter(
+            w -> w.walkId().equals(uploadedWalk.getWalkId())
+        ).findFirst().get();
         assertThat(response3.trailId()).isNull();
         assertThat(response3.title()).isEqualTo(uploadedWalk.getWalkTitle());
-        assertThat(response3.isUploaded()).isTrue();
+        assertThat(response3.isUploaded()).isFalse();
     }
 
     @Test
@@ -303,7 +312,6 @@ public class WalkServiceTest {
             .totalDistance(1.0)
             .totalTime(Duration.ofMinutes(15))
             .pace(4.0)
-            .isUploaded(false)
             .build());
         Long walkId = savedWalk.getWalkId();
 
