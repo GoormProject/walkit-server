@@ -1,0 +1,114 @@
+package life.walkit.server.walk.entity;
+
+import jakarta.persistence.*;
+import life.walkit.server.member.entity.Member;
+import life.walkit.server.path.entity.Path;
+import life.walkit.server.trail.entity.Trail;
+import lombok.*;
+
+import lombok.Builder.Default;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+
+@Builder
+@Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "walk")
+public class Walk {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "walk_id")
+    private Long walkId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "member_id",
+        nullable = false
+    )
+    private Member member;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "trail_id")
+    private Trail trail;
+
+    @OneToOne(
+        fetch = FetchType.LAZY,
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    @JoinColumn(
+        name = "path_id"
+    )
+    private Path path;
+
+    @Column(
+        name = "walk_title",
+        nullable = false
+    )
+    @Default
+    private String walkTitle = "";
+
+    @Column(
+        name = "total_distance",
+        nullable = false
+    )
+    @Default
+    private Double totalDistance = 0.0;
+
+    @Column(
+        name = "total_time",
+        nullable = false
+    )
+    @Default
+    private Duration totalTime = Duration.ZERO;
+
+    @Column(
+        name = "pace",
+        nullable = false
+    )
+    @Default
+    private Double pace = 0.0;
+
+    @Column(
+        name = "is_uploaded",
+        columnDefinition = "BOOLEAN DEFAULT FALSE",
+        nullable = false
+    )
+    @Default
+    private Boolean isUploaded = false;
+
+    @OneToMany(
+        mappedBy = "walk",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private List<WalkingSession> walkingSessions = new ArrayList<>();
+
+    public void updateWalkDetails(
+        String walkTitle,
+        Path path,
+        Double totalDistance,
+        Duration totalTime,
+        Double pace
+    ) {
+        this.walkTitle = walkTitle;
+        this.path = path;
+        this.totalDistance = totalDistance;
+        this.totalTime = totalTime;
+        this.pace = pace;
+    }
+
+    public void updateTrail(Trail trail) {
+        this.trail = trail;
+    }
+
+    public void updateIsUploaded(boolean isUploaded) {
+        this.isUploaded = isUploaded;
+    }
+
+}

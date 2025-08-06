@@ -1,0 +1,260 @@
+package life.walkit.server.friend.service;
+
+import static life.walkit.server.global.factory.GlobalTestFactory.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
+
+import life.walkit.server.auth.repository.LastActiveRepository;
+import life.walkit.server.friend.dto.*;
+import life.walkit.server.friend.entity.Friend;
+import life.walkit.server.friend.entity.FriendRequest;
+import life.walkit.server.friend.enums.FriendRequestStatus;
+import life.walkit.server.friend.error.FriendErrorCode;
+import life.walkit.server.friend.error.FriendException;
+import life.walkit.server.friend.repository.FriendRepository;
+import life.walkit.server.friend.repository.FriendRequestRepository;
+import life.walkit.server.global.util.GeoUtils;
+import life.walkit.server.member.entity.Member;
+import life.walkit.server.member.entity.enums.MemberStatus;
+import life.walkit.server.member.repository.MemberRepository;
+import life.walkit.server.member.service.MemberService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+
+@SpringBootTest
+@ActiveProfiles("test")
+public class FriendServiceTest {
+
+    @Autowired
+    private FriendService friendService;
+    @Autowired
+    private MemberService memberService;
+    @Autowired
+    private MemberRepository memberRepository;
+    @Autowired
+    private FriendRepository friendRepository;
+    @Autowired
+    private FriendRequestRepository friendRequestRepository;
+    @Autowired
+    private LastActiveRepository lastActiveRepository;
+
+    private Member memberA;
+    private Member memberB;
+    private Member memberC;
+
+    @BeforeEach
+    void setUp() {
+        memberA = memberRepository.save(createMember("a@email.com", "회원A"));
+        memberB = memberRepository.save(createMember("b@email.com", "회원B"));
+        memberC = memberRepository.save(createMember("c@email.com", "회원C"));
+    }
+
+    @AfterEach
+    void tearDown() {
+        friendRequestRepository.deleteAll();
+        friendRepository.deleteAll();
+        memberRepository.deleteAll();
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("친구 요청 성공")
+    void sendFriendRequest_success() {
+        FriendRequestResponseDTO response = friendService.sendFriendRequest(memberA.getMemberId(), memberB.getNickname());
+
+        assertThat(response.status()).isEqualTo(FriendRequestStatus.PENDING);
+        assertThat(response.senderNickname()).isEqualTo("회원A");
+        assertThat(response.receiverNickname()).isEqualTo("회원B");
+
+        List<FriendRequest> savedRequests = friendRequestRepository.findByReceiverAndStatus(memberB, FriendRequestStatus.PENDING);
+        assertThat(savedRequests).hasSize(1);
+        FriendRequest savedRequest = savedRequests.get(0);
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("내가 보낸 친구 요청 목록 조회 성공")
+    void getSentFriendRequests_success() {
+        Member receiver1 = memberRepository.save(createMember("receiver1@email.com", "수신자1"));
+        Member receiver2 = memberRepository.save(createMember("receiver2@email.com", "수신자2"));
+
+        friendRequestRepository.save(createFriendRequest(memberA, receiver1));
+        friendRequestRepository.save(createFriendRequest(memberA, receiver2));
+
+        List<SentFriendResponse> responses = friendService.getSentFriendRequests(memberA.getMemberId());
+
+        assertThat(responses).hasSize(2);
+        assertThat(responses).extracting("receiverNickname")
+                .containsExactlyInAnyOrder("수신자1", "수신자2");
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("내가 받은 친구 요청 목록 조회 성공")
+    void getReceivedFriendRequests_success() {
+        friendRequestRepository.save(createFriendRequest(memberB, memberA)); // B -> A
+        friendRequestRepository.save(createFriendRequest(memberC, memberA)); // C -> A
+
+        List<ReceivedFriendResponse> responses = friendService.getReceivedFriendRequests(memberA.getMemberId());
+
+        assertThat(responses).hasSize(2);
+        assertThat(responses).extracting("senderNickname")
+                .containsExactlyInAnyOrder("회원B", "회원C");
+
+        assertThat(responses).extracting("requestStatus")
+                .containsOnly(FriendRequestStatus.PENDING);
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("내가 받은 친구 요청 목록 조회 - 요청이 없는 경우")
+    void getReceivedFriendRequests_empty_success() {
+        List<ReceivedFriendResponse> responses = friendService.getReceivedFriendRequests(memberA.getMemberId());
+        assertThat(responses).isEmpty();
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("친구 요청 승인 성공")
+    void approveFriendRequest_success() {
+        FriendRequest friendRequest = friendRequestRepository.save(createFriendRequest(memberB, memberA));
+
+        friendService.approveFriendRequest(friendRequest.getFriendRequestId(), memberA.getMemberId());
+
+        assertThat(friendRequest.getStatus()).isEqualTo(FriendRequestStatus.APPROVED);
+
+        assertThat(friendRepository.existsByMemberAndPartner(memberA, memberB)).isTrue();
+        assertThat(friendRepository.existsByMemberAndPartner(memberB, memberA)).isTrue();
+    }
+
+    @Test
+    @DisplayName("친구 요청 승인 실패 - 요청이 존재하지 않음")
+    void approveFriendRequest_fail_requestNotFound() {
+        Long invalidRequestId = 999L;
+
+        assertThatThrownBy(() -> friendService.approveFriendRequest(invalidRequestId, memberA.getMemberId()))
+                .isInstanceOf(FriendException.class)
+                .hasMessage(FriendErrorCode.FRIEND_REQUEST_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    @DisplayName("친구 요청 승인 실패 - 승인자가 요청의 수신자가 아님")
+    void approveFriendRequest_fail_unauthorizedApprover() {
+        FriendRequest friendRequest = friendRequestRepository.save(createFriendRequest(memberB, memberA));
+
+        assertThatThrownBy(() -> friendService.approveFriendRequest(friendRequest.getFriendRequestId(), memberB.getMemberId()))
+                .isInstanceOf(FriendException.class)
+                .hasMessage(FriendErrorCode.UNAUTHORIZED_APPROVER.getMessage());
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("친구 요청 거절 성공")
+    void rejectFriendRequest_success() {
+        FriendRequest friendRequest = friendRequestRepository.save(createFriendRequest(memberB, memberA)); // B -> A
+
+        friendService.rejectFriendRequest(friendRequest.getFriendRequestId(), memberA.getMemberId());
+
+        assertThat(friendRequestRepository.findById(friendRequest.getFriendRequestId())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("친구 요청 거절 실패 - 요청이 존재하지 않음")
+    void rejectFriendRequest_fail_requestNotFound() {
+        Long invalidRequestId = 999L;
+
+        assertThatThrownBy(() -> friendService.rejectFriendRequest(invalidRequestId, memberA.getMemberId()))
+                .isInstanceOf(FriendException.class)
+                .hasMessage(FriendErrorCode.FRIEND_REQUEST_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    @DisplayName("친구 요청 거절 실패 - 거절자가 요청의 수신자가 아님")
+    void rejectFriendRequest_fail_unauthorizedRejecter() {
+        FriendRequest friendRequest = friendRequestRepository.save(createFriendRequest(memberB, memberA));
+
+        assertThatThrownBy(() -> friendService.rejectFriendRequest(friendRequest.getFriendRequestId(), memberB.getMemberId()))
+                .isInstanceOf(FriendException.class)
+                .hasMessage(FriendErrorCode.UNAUTHORIZED_APPROVER.getMessage());
+    }
+
+    @Test
+    @DisplayName("친구 요청 거절 실패 - 이미 승인된 요청")
+    void rejectFriendRequest_fail_alreadyApproved() {
+        FriendRequest friendRequest = friendRequestRepository.save(createFriendRequest(memberB, memberA));
+        friendRequest.approve();
+        friendRequestRepository.save(friendRequest);
+
+        assertThatThrownBy(() -> friendService.rejectFriendRequest(friendRequest.getFriendRequestId(), memberA.getMemberId()))
+                .isInstanceOf(FriendException.class)
+                .hasMessage(FriendErrorCode.FRIEND_STATUS_INVALID.getMessage());
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("친구 삭제 성공")
+    void deleteFriend_success() {
+        Friend friendAtoB = friendRepository.save(Friend.builder()
+                .member(memberA)
+                .partner(memberB)
+                .build());
+        Friend friendBtoA = friendRepository.save(Friend.builder()
+                .member(memberB)
+                .partner(memberA)
+                .build());
+
+        friendService.deleteFriend(memberA.getMemberId(), memberB.getMemberId());
+
+        assertThat(friendRepository.findById(friendAtoB.getFriendId())).isEmpty();
+        assertThat(friendRepository.findById(friendBtoA.getFriendId())).isEmpty();
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("상태별 친구 목록 조회 성공 - OFFLINE 상태 친구 필터링")
+    void getFriendsByStatus_offline_success() {
+        // Arrange
+        memberA.updateStatus(MemberStatus.ONLINE);    // 기준 멤버
+        memberB.updateStatus(MemberStatus.OFFLINE);  // 친구 A
+        memberC.updateStatus(MemberStatus.OFFLINE);  // 친구 B
+
+        memberRepository.save(memberA);
+        memberRepository.save(memberB);
+        memberRepository.save(memberC);
+
+        friendRepository.save(createFriend(memberA, memberB)); // A와 B 친구 관계 추가
+        friendRepository.save(createFriend(memberA, memberC)); // A와 C 친구 관계 추가
+
+        // Act
+        List<FriendResponseDTO> offlineFriends = friendService.getFriendsByStatus(memberA.getMemberId(), MemberStatus.OFFLINE);
+
+        // Assert
+        assertThat(offlineFriends).hasSize(2); // OFFLINE 상태의 친구만 필터링
+        assertThat(offlineFriends)
+                .extracting("nickname")
+                .containsExactlyInAnyOrder("회원B", "회원C"); // 닉네임 확인
+        assertThat(offlineFriends)
+                .extracting("memberStatus")
+                .containsOnly(MemberStatus.OFFLINE);
+    }
+
+
+
+
+
+
+
+
+}

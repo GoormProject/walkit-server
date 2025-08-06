@@ -34,9 +34,10 @@ dependencies {
      */
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-//    implementation 'org.springframework.boot:spring-boot-starter-security'
-//    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-hateoas'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
     /**
      * DB 관련 의존성
@@ -56,7 +57,8 @@ dependencies {
      * - Docker
      * - Validation
      * - Jwt (jjwt)
-     *  - api, impl, jackson
+     * - Databind
+     * - API Rate Limiter
      */
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -66,6 +68,8 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.19.2'
+    implementation 'com.bucket4j:bucket4j-core:8.10.1'
 
     /**
      * Test 관련 의존성
@@ -83,6 +87,12 @@ dependencies {
      */
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    /**
+     * AWS 관련 의존성
+     * - Amazon S3
+     */
+    implementation 'software.amazon.awssdk:s3:2.31.69'
 }
 
 tasks.named('test') {
