@@ -42,7 +42,7 @@ public class ReviewController {
     }
 
     @Operation(summary = "산책로 리뷰 수정", description = "작성한 리뷰를 수정합니다.")
-    @PostMapping("/reviews/{reviewId}")
+    @PutMapping("/reviews/{reviewId}")
     public ResponseEntity<BaseResponse<ReviewResponse>> updateReview(
             @PathVariable Long reviewId,
             @AuthenticationPrincipal CustomMemberDetails member,
@@ -55,7 +55,14 @@ public class ReviewController {
         );
     }
 
+    @Operation(summary = "산책로 리뷰 삭제", description = "작성한 리뷰를 삭제합니다.")
+    @DeleteMapping("/reviews/{reviewId}")
+    public ResponseEntity<BaseResponse<Void>> deleteReview(
+            @PathVariable Long reviewId,
+            @AuthenticationPrincipal CustomMemberDetails member
+    ) {
 
-
-
+        reviewService.deleteReview(reviewId, member.getMemberId());
+        return BaseResponse.toResponseEntity(TrailReviewResponse.DELETE_REVIEW_SUCCESS);
+    }
 }
