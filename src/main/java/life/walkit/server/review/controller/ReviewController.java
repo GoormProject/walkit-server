@@ -26,7 +26,7 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @Operation(summary = "산책로 리뷰 조회", description = "산책로의 리뷰 목록을 조회합니다.")
-    @GetMapping("/reviews/{trailId}/new")
+    @GetMapping("/{trailId}/reviews")
     public ResponseEntity<BaseResponse<ReviewListResponse>> getReviews(
             @PathVariable Long trailId,
             @AuthenticationPrincipal CustomMemberDetails member

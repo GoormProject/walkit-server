@@ -20,7 +20,7 @@ public record ReviewResponse(
                 .reviewId(review.getReviewId())
                 .content(review.getContent())
                 .rating(review.getRating())
-                .trailId(review.getTrail().getTrailId())
+                .trailId(review.getTrail() != null ? review.getTrail().getTrailId() : null)
                 .createdAt(review.getCreatedAt())
                 .build();
     }
