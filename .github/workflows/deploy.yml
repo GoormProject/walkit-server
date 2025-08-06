@@ -20,10 +20,10 @@ jobs:
 
       - name: application.yml 파일 만들기
         run: |
-          echo "${{ secrets.APP_DEPLOY_YML }}" > src/main/resources/application.yml /
-          echo "${{ secrets.APP_JWT_YML }}" > src/main/resources/application-jwt.yml /
-          echo "${{ secrets.APP_OAUTH_YML }}" > src/main/resources/application-oauth.yml /
-          echo "${{ secrets.APP_TEST_YML }}" > src/test/resources/application-test.yml /
+          echo "${{ secrets.APP_DEPLOY_YML }}" > src/main/resources/application.yml
+          echo "${{ secrets.APP_JWT_YML }}" > src/main/resources/application-jwt.yml
+          echo "${{ secrets.APP_OAUTH_YML }}" > src/main/resources/application-oauth.yml
+          echo "${{ secrets.APP_TEST_YML }}" > src/test/resources/application-test.yml
 
 
       - name: 테스트 및 빌드하기
