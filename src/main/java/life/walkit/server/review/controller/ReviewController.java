@@ -31,7 +31,7 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @Operation(summary = "산책로 리뷰 등록", description = "새로운 리뷰를 작성합니다.")
-    @PostMapping("/new")
+    @PostMapping("/reviews/new")
     public ResponseEntity<BaseResponse<ReviewResponse>> createReview(
             @AuthenticationPrincipal CustomMemberDetails member,
             @Valid @RequestBody ReviewRequest reviewRequest
@@ -42,6 +42,8 @@ public class ReviewController {
                 reviewService.createReview(member.getMemberId(), reviewRequest)
         );
     }
+
+
 
 
 
