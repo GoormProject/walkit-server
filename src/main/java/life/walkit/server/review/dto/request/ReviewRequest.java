@@ -1,4 +1,4 @@
-package life.walkit.server.review.dto;
+package life.walkit.server.review.dto.request;
 
 import jakarta.validation.constraints.*;
 import life.walkit.server.member.entity.Member;
