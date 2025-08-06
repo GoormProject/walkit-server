@@ -69,4 +69,4 @@ jobs:
           --application-name walkit-server \
           --deployment-config-name CodeDeployDefault.AllAtOnce \
           --deployment-group-name Production \
-          --s3-location bucket=walkit-server,bundleType=tgz,key=$GITHUB_SHA.tar.gz \
+          --s3-location bucket=walk-server,bundleType=tgz,key=$GITHUB_SHA.tar.gz \
