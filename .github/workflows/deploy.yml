@@ -53,8 +53,7 @@ jobs:
       - name: start-server.sh 생성 (from Secrets)
         run: |
           mkdir -p scripts
-          sed "s|##DOCKER_IMAGE##|${{ steps.login-ecr.outputs.registry }}/walkit-server:latest|g" \
-            <<< "${{ secrets.START_SERVER_SCRIPT_TEMPLATE }}" > ./scripts/start-server.sh
+          echo "${{ secrets.START_SERVER_SCRIPT_TEMPLATE }}" > ./scripts/start-server.sh
           chmod +x ./scripts/start-server.sh
 
       - name: 압축하기
