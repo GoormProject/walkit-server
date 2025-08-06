@@ -1,6 +1,5 @@
 package life.walkit.server.review.dto;
 
-import jakarta.validation.constraints.*;
 import life.walkit.server.review.entity.Review;
 import lombok.Builder;
 

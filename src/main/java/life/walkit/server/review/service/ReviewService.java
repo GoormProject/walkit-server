@@ -4,6 +4,7 @@ import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.error.MemberException;
 import life.walkit.server.member.error.enums.MemberErrorCode;
 import life.walkit.server.member.repository.MemberRepository;
+import life.walkit.server.review.dto.ReviewListResponse;
 import life.walkit.server.review.dto.request.ReviewRequest;
 import life.walkit.server.review.dto.ReviewResponse;
 import life.walkit.server.review.dto.request.ReviewUpdateRequest;
@@ -17,10 +18,13 @@ import life.walkit.server.trail.error.enums.TrailException;
 import life.walkit.server.trail.repository.TrailRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -69,5 +73,17 @@ public class ReviewService {
         }
 
         reviewRepository.delete(review);
+    }
+
+    public ReviewListResponse getReviews(Long trailId, @Nullable Long memberId) {
+
+        List<Review> reviews = reviewRepository.findByTrail_TrailIdOrderByCreatedAtDesc(trailId);
+        Review myReview = Optional.ofNullable(memberId)
+                .flatMap(m -> reviews.stream()
+                        .filter(review -> review.getMember().getMemberId().equals(memberId))
+                        .findAny())
+                .orElse(null);
+
+        return ReviewListResponse.of(trailId, myReview, reviews);
     }
 }
