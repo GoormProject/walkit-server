@@ -267,3 +267,6 @@ yarn-error.log*
 
 ### VS Code ###
 .vscode/
+
+### Shell ###
+scripts/start-server.sh
