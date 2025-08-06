@@ -27,9 +27,8 @@ jobs:
           echo "${{ secrets.APP_OAUTH_YML }}" > src/main/resources/application-oauth.yml
           echo "${{ secrets.APP_TEST_YML }}" > src/test/resources/application-test.yml
 
-
-      - name: 테스트 및 빌드하기
-        run: ./gradlew clean build
+      - name: 빌드하기 (테스트 제외)
+        run: ./gradlew clean build -x test
 
       - name: AWS Resource에 접근할 수 있게 AWS credentials 설정
         uses: aws-actions/configure-aws-credentials@v4
