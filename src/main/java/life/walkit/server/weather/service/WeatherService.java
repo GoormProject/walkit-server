@@ -99,6 +99,7 @@ public class WeatherService {
         return buildResponseDto(area, weather);
     }
 
+    @Transactional
     public ClothResponse getClothRecommendations(AdminArea area) {
 
         WeatherDto weather = weatherRepository.findByAdminArea(area)
