@@ -11,10 +11,10 @@ public record TrailListResponse(
     String location,
     Double length,
     String routeImageUrl,
-    Integer reviewCount,
+    Long reviewCount,
     Double rating
 ) {
-    public static TrailListResponse from(Trail trail, Optional<TrailWalkImage> trailWalkImageOpt, int reviewCount, double rating) {
+    public static TrailListResponse from(Trail trail, Optional<TrailWalkImage> trailWalkImageOpt, long reviewCount, double rating) {
         String imageUrl = trailWalkImageOpt.map(TrailWalkImage::getRouteImage).orElse(null);
 
         return new TrailListResponse(

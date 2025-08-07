@@ -3,6 +3,8 @@ package life.walkit.server.trail.service;
 import life.walkit.server.global.util.GeoUtils;
 import life.walkit.server.path.entity.Path;
 import life.walkit.server.path.repository.PathRepository;
+import life.walkit.server.review.dto.ReviewStats;
+import life.walkit.server.review.repository.ReviewRepository;
 import life.walkit.server.trail.dto.request.GeoPoint;
 import life.walkit.server.trail.dto.request.TrailCreateRequest;
 import life.walkit.server.trail.dto.response.TrailCreateResponse;
@@ -34,6 +36,7 @@ public class TrailService {
     private final TrailRepository trailRepository;
     private final WalkRepository walkRepository;
     private final PathRepository pathRepository;
+    private final ReviewRepository reviewRepository;
 
     private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory(new PrecisionModel(), 4326);
 
@@ -93,11 +96,10 @@ public class TrailService {
         // TODO: 이미지 S3연결 후 리펙토링 필요
         String imageUrl = "example.com";
 
-        // TODO: 리뷰 기능 구현 후 실제 리뷰 수와 평점을 계산해야 함.
-        int reviewCount = 0; // 임시값
-        double rating = 0.0; // 임시값
+        ReviewStats review = reviewRepository.findReviewStatsByTrailId(trailId)
+                .orElse(new ReviewStats(trailId, 0.0, 0L));
 
-        return TrailDetailResponse.from(trail, imageUrl, reviewCount, rating);
+        return TrailDetailResponse.from(trail, imageUrl, review.count(), review.rating());
     }
 
     @Transactional(readOnly = true)
@@ -109,11 +111,10 @@ public class TrailService {
             // TODO: 이미지 S3연결 후 리펙토링 필요
             String imageUrl = "example.com"; // 임시 이미지 URL
 
-            // TODO: 리뷰 기능 구현 후 실제 리뷰 수와 평점을 계산해야 함.
-            int reviewCount = 0; // 임시값
-            double rating = 0.0; // 임시값
+            ReviewStats review = reviewRepository.findReviewStatsByTrailId(trail.getTrailId())
+                    .orElse(new ReviewStats(trail.getTrailId(), 0.0, 0L));
 
-            return TrailListResponse.from(trail, Optional.empty(), reviewCount, rating); // Optional.empty()는 임시
+            return TrailListResponse.from(trail, Optional.empty(), review.count(), review.rating()); // Optional.empty()는 임시
         });
     }
 }
