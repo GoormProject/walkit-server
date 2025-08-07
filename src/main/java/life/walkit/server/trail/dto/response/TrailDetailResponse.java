@@ -13,12 +13,12 @@ public record TrailDetailResponse(
     String location,
     Double length,
     String routeImageUrl,
-    Integer reviewCount,
+    Long reviewCount,
     Double rating,
     List<Double> startPoint,
     List<List<Double>> path
 ) {
-    public static TrailDetailResponse from(Trail trail, String routeImageUrl, int reviewCount, double rating) {
+    public static TrailDetailResponse from(Trail trail, String routeImageUrl, long reviewCount, double rating) {
         Coordinate startCoordinate = trail.getPath().getPoint().getCoordinate();
         List<Double> startPoint = List.of(startCoordinate.getX(), startCoordinate.getY());
 

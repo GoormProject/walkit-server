@@ -15,7 +15,13 @@ import org.hibernate.annotations.Check;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "review")
+@Table(
+        name = "review",
+        indexes = @Index(
+                name = "idx_review_trail_id",
+                columnList = "trail_id"
+        )
+)
 public class Review extends BaseEntity {
 
     @Id
