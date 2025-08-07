@@ -1,6 +1,5 @@
 package life.walkit.server.friend.service;
 
-import life.walkit.server.auth.repository.LastActiveRepository;
 import life.walkit.server.friend.dto.*;
 import life.walkit.server.friend.entity.Friend;
 import life.walkit.server.member.dto.LocationDto;
@@ -31,7 +30,6 @@ public class FriendService {
     private final FriendRequestRepository friendRequestRepository;
     private final FriendRepository friendRepository;
     private final MemberRepository memberRepository;
-    private final LastActiveRepository lastActiveRepository;
     private final MemberService memberService;
 
     public FriendRequestResponseDTO sendFriendRequest(Long senderId, String targetNickname) {
@@ -89,7 +87,10 @@ public class FriendService {
         List<FriendRequest> requests = friendRequestRepository.findByReceiverAndStatus(receiver, FriendRequestStatus.PENDING);
 
         return requests.stream()
-                .map(request -> ReceivedFriendResponse.of(request.getSender(), request.getStatus()))
+                .map(request -> ReceivedFriendResponse.of(
+                        request.getFriendRequestId(),
+                        request.getSender(),
+                        request.getStatus()))
                 .toList();
     }
 
