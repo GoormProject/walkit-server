@@ -10,13 +10,14 @@ import lombok.Getter;
 @Getter
 @Builder
 public class ReceivedFriendResponse {
-
+    private Long friendRequestId;
     private String senderNickname;
     private String profile;
     private FriendRequestStatus requestStatus;
 
-    public static ReceivedFriendResponse of(Member sender, FriendRequestStatus requestStatus) {
+    public static ReceivedFriendResponse of(Long friendRequestId, Member sender, FriendRequestStatus requestStatus) {
         return ReceivedFriendResponse.builder()
+                .friendRequestId(friendRequestId)
                 .senderNickname(sender.getNickname())
                 .profile(Optional.ofNullable(sender.getProfileImage())
                         .map(ProfileImage::getProfileImage)
