@@ -3,9 +3,6 @@ package life.walkit.server.friend.service;
 import static life.walkit.server.global.factory.GlobalTestFactory.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
-
-import life.walkit.server.auth.repository.LastActiveRepository;
 import life.walkit.server.friend.dto.*;
 import life.walkit.server.friend.entity.Friend;
 import life.walkit.server.friend.entity.FriendRequest;
@@ -14,11 +11,9 @@ import life.walkit.server.friend.error.FriendErrorCode;
 import life.walkit.server.friend.error.FriendException;
 import life.walkit.server.friend.repository.FriendRepository;
 import life.walkit.server.friend.repository.FriendRequestRepository;
-import life.walkit.server.global.util.GeoUtils;
 import life.walkit.server.member.entity.Member;
 import life.walkit.server.member.entity.enums.MemberStatus;
 import life.walkit.server.member.repository.MemberRepository;
-import life.walkit.server.member.service.MemberService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,11 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -40,15 +31,11 @@ public class FriendServiceTest {
     @Autowired
     private FriendService friendService;
     @Autowired
-    private MemberService memberService;
-    @Autowired
     private MemberRepository memberRepository;
     @Autowired
     private FriendRepository friendRepository;
     @Autowired
     private FriendRequestRepository friendRequestRepository;
-    @Autowired
-    private LastActiveRepository lastActiveRepository;
 
     private Member memberA;
     private Member memberB;
