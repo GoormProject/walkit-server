@@ -29,6 +29,13 @@
 - 🔐 구글/카카오 OAuth2 로그인
 - ☁️ AWS 배포
 <br/>
+
+## 시스템 구성도
+
+<img width="1588" height="893" alt="시스템 구조도 (AWS)" src="https://github.com/user-attachments/assets/499a8251-3a31-4b24-835a-17f40b5dc9f4" />
+
+
+<br/>
 <br/>
 
 # 기술 스택
